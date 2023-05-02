@@ -206,12 +206,12 @@ void Locus::control_by_robot_status(){
 	{
 		if(parameterinfo->complan.walking_state == 1)
 		{
-			Points.pitch_offset = sensor.pitch_pid_[0]*0.1*sin(PI/2*walkinggait.t_/walkinggait.TT_);
+			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2*walkinggait.t_/walkinggait.TT_);
 			// Points.roll_offset = sensor.roll_pid_[0]*0.1*sin(PI/2*walkinggait.t_/walkinggait.TT_);
 		}
 		else
 		{
-			Points.pitch_offset = sensor.pitch_pid_[0]*0.1*sin(PI/2);
+			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2);
 			// Points.roll_offset  = sensor.pitch_pid_[0]*0.1*sin(PI/2);
 		}
 		Points.Thta[0] = base_L;
@@ -223,12 +223,12 @@ void Locus::control_by_robot_status(){
 	{
 		if(parameterinfo->complan.walking_state == 1)
 		{
-			Points.pitch_offset = sensor.pitch_pid_[0]*0.1*sin(PI/2*walkinggait.t_/walkinggait.TT_);
+			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2*walkinggait.t_/walkinggait.TT_);
 			// Points.roll_offset = sensor.roll_pid_[0]*0.1*sin(PI/2*walkinggait.t_/walkinggait.TT_);
 		}
 		else
 		{
-			Points.pitch_offset = sensor.pitch_pid_[0]*0.1*sin(PI/2);
+			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2);
 			// Points.roll_offset  = sensor.pitch_pid_[0]*0.1*sin(PI/2);
 		}
 		Points.Thta[0] = base_L;
@@ -239,12 +239,14 @@ void Locus::control_by_robot_status(){
 
 	if(!parameterinfo->LCBalanceOn)
 	{
-		Points.Thta[0] = base_L;
-		Points.Thta[4] = base_R;
+		// Points.Thta[0] = base_L;
+		// Points.Thta[4] = base_R;
 	}
+	Points.Thta[0] = base_L;
+	Points.Thta[4] = base_R;
 	if(parameterinfo->X<0)
 	{
-		Points.back_offset = 2*PI/180;
+		Points.back_offset = 1.2*PI/180;
 		Points.Thta[8] = base_Waist;
 		Points.waist_offset = 0;
 	}
@@ -633,7 +635,7 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
 
 	if(parameterinfo->LCBalanceOn)
 	{
-		// balance.control_after_ik_calculation();
+		balance.control_after_ik_calculation();
 		// balance.saveData();
 	}
 	// if(kickinggait.kicking_process_flag_)
@@ -642,20 +644,7 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
 	// 	kickinggait.ankleBalanceControl();
 	// 	kickinggait.hipPitchControl();
 	// }
-	if(parameterinfo->walking_mode == 2 || parameterinfo->complan.walking_state == 3)
-	{
-		Points.Thta[11] -=Points.pitch_offset;
-		// Points.Thta[13] +=Points.pitch_offset/2;
-		Points.Thta[17] -=Points.pitch_offset;
-		// Points.Thta[19] +=Points.pitch_offset/2;
-	}
-	else
-	{
-		Points.Thta[11] -=Points.back_offset;
-		Points.Thta[13] -=Points.back_offset/2;
-		Points.Thta[17] -=Points.back_offset;
-		Points.Thta[19] -=Points.back_offset/2;
-	}
+	
 
 	if(old_walking_stop == false && parameterinfo->complan.walking_stop == true)
 	{

@@ -322,7 +322,7 @@ public:
 	void setSupportFoot();
 	void resetControlValue();
 	void endPointControl();
-	void LCEndPointControl();
+	void InitEndPointControl();
 	float calculateCOMPosbyLIPM(float pos_adj, float vel);
 
 	double control_cycle_sec_;
