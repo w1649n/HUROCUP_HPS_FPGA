@@ -79,18 +79,6 @@ int main()
 		walkinggait.timer_dt_ = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
 
 		balance.get_sensor_value();
-
-		if (balance.two_feet_grounded_ && sensor.fall_Down_Flag_)
-		{
-			sensor.stop_Walk_Flag_ = true;
-
-		}
-		else
-		{
-			sensor.stop_Walk_Flag_ = false;
-			
-		}
-
 		/*zmp測試*/
 		// if (zmp_first_time)
 		// {
@@ -195,9 +183,6 @@ int main()
 			IK.calculate_inverse_kinematic(walkinggait.motion_delay_); //計算逆運動學
 			locus.do_motion();
 
-
-
-			
 			walkinggait.LIPM_flag_ = false;
 			walkinggait.if_finish_ = false;
 			walkinggait.locus_flag_ = false;
@@ -214,40 +199,6 @@ int main()
 			read_feedback = false;
 		}
 		/*-------------*/
-		/*舊版上下板平衡控制*/ 
-		// if(parameterinfo->LCFinishFlag  && parameterinfo->LCBalanceOn)
-		// {
-		// 	i++;
-		// 	if(i>290)
-		// 	{
-		// 		parameterinfo->LCFinishFlag = false;
-		// 		parameterinfo->LCBalanceFlag = false;
-		// 		balance.saveData();
-		// 		//IK.saveData();
-		// 		i = 0;
-		// 		IK.initial_inverse_kinematic();
-		// 		walkinggait.final_step();
-		// 		locus.get_first_stand();
-		// 		IK.calculate_inverse_kinematic_forstand(30);
-		// 		locus.do_motion();
-		// 	}
-		// 	else if(i>200)
-		// 	{
-		// 		parameterinfo->LCBalanceFlag = true;
-		// 	}
-		// 	if(i>90)
-		// 	{
-		// 		balance.setSupportFoot();
-		// 		balance.balance_control();
-		// 		locus.get_cpg_with_offset();
-		// 		IK.calculate_inverse_kinematic(10);
-		// 		locus.do_motion();
-		// 	}
-		// }
-		// else
-		// {
-		// 	parameterinfo->LCFinishFlag = false;
-		// }
 	}
 	// clean up our memory mapping and exit
 	init.Clear_Memory_Mapping();

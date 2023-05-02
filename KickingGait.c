@@ -1,5 +1,5 @@
 #include "include/KickingGait.h"
-#include "include/data_txt.h"
+// #include "include/data_txt.h"
 using namespace kickgait_space;
 extern struct Points_Struct Points;
 extern SensorDataProcess sensor;
@@ -63,11 +63,11 @@ void KickingGait::initialize()
     for(int i = 0; i < 3; i++)balance.init_imu_value[i].pos = sensor.rpy_[i];
     if(balance.init_imu_value[(int)imu::roll].pos == 0 && balance.init_imu_value[(int)imu::pitch].pos == 0 && balance.init_imu_value[(int)imu::yaw].pos == 0)
         return; //initialize failed, try again;
-    for(int i = 0; i < sizeof(ideal_p_arry)/sizeof(ideal_p_arry[0]); i++)
-    { 
-        ideal_p_arry_roll[i] = ideal_p_arry[i];// + balance.init_imu_value[(int)imu::roll].pos;
-        ideal_p_arry_pitch[i] = ideal_p_arry[i];// + balance.init_imu_value[(int)imu::pitch].pos;
-    }
+    // for(int i = 0; i < sizeof(ideal_p_arry)/sizeof(ideal_p_arry[0]); i++)
+    // { 
+    //     ideal_p_arry_roll[i] = ideal_p_arry[i];// + balance.init_imu_value[(int)imu::roll].pos;
+    //     ideal_p_arry_pitch[i] = ideal_p_arry[i];// + balance.init_imu_value[(int)imu::pitch].pos;
+    // }
     
     // T = 3600, 停止T = 1200, 收腳T = 1200
     // if(T_cnt == nullptr)T_cnt = new double[6]{1/12.0, 1/12.0, 1/12.0, 4/12.0, 4/12.0, 1/12.0};
@@ -118,7 +118,7 @@ void KickingGait::initialize()
     std::vector<float> temp;
     if(map_kickgait.empty())
     {
-        map_kickgait["smaple_times_count"] = temp;
+        map_kickgait["sample_times_count"] = temp;
         map_kickgait["smaple_times"] = temp;
         map_kickgait["R_Px"] = temp;
         map_kickgait["R_Py"] = temp;
@@ -137,7 +137,7 @@ void KickingGait::initialize()
     if(map_roll.empty())
     {
         map_roll["init_roll_pos"] = temp;
-        map_roll["smaple_times_count"] = temp;
+        map_roll["sample_times_count"] = temp;
         map_roll["pres_roll_pos"] = temp;
         map_roll["passfilter_pres_roll_pos"] = temp;
         map_roll["ideal_roll_vel"] = temp;
@@ -150,7 +150,7 @@ void KickingGait::initialize()
     if(map_pitch.empty())
     {
         map_pitch["init_pitch_pos"] = temp;
-        map_pitch["smaple_times_count"] = temp;
+        map_pitch["sample_times_count"] = temp;
         map_pitch["pres_pitch_pos"] = temp;
         map_pitch["passfilter_pres_pitch_pos"] = temp;
         map_pitch["ideal_pitch_vel"] = temp;
@@ -383,85 +383,85 @@ void KickingGait::rightKickBall()
     // float kick_foot_ankle_upper_pitch = parameterinfo->parameters.Kick_Foot_Ankle_Upper_Pitch;
     // float support_foot_ankle_upper_pitch = parameterinfo->parameters.Support_Foot_Ankle_Upper_Pitch;
     // float Y_Swing = parameterinfo->parameters.Y_Swing_Range;
-    // int smaple_times_count = parameterinfo->complan.sample_point_;
-    // int smaple_point = T_ms/30;
-    // if(smaple_times_count < (int)(smaple_point*T_cnt_sum[0]))
+    // int sample_times_count = parameterinfo->complan.sample_point_;
+    // int sample_point = T_ms/30;
+    // if(sample_times_count < (int)(sample_point*T_cnt_sum[0]))
     // {
     //     float omega = 2*PI/(T*T_cnt[0]);
-    //     float t = smaple_times_count*0.03;
+    //     float t = sample_times_count*0.03;
     //     R_P.set(0, Y_Swing*(omega*t-sin(omega*t))/(2*PI), 0);
     //     L_P = R_P;
     //     this->supfoot_hip_pitch = 0;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = 0;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[0]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[0]));
     // }
-    // else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[1]))
+    // else if (sample_times_count < (int)(sample_point*T_cnt_sum[1]))
     // {
     //     float omega = 2*PI/(T*T_cnt[1]);
-    //     float t = ((smaple_times_count+1)-smaple_point*T_cnt_sum[0])*0.03;
-    //     float u = (smaple_times_count - smaple_point*T_cnt_sum[0])*(1.0/(smaple_point*T_cnt[1]));
+    //     float t = ((sample_times_count+1)-sample_point*T_cnt_sum[0])*0.03;
+    //     float u = (sample_times_count - sample_point*T_cnt_sum[0])*(1.0/(sample_point*T_cnt[1]));
     //     R_P = B_spline.C(u, vB_spline_param[0]);
     //     L_P.set(0, Y_Swing, 0);
     //     this->supfoot_hip_pitch = support_foot_hip_upper_pitch*(omega*t-sin(omega*t))/(2*PI)/180.0*PI;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = 0;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[1]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[1]));
     // }
-    // else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[2]))
+    // else if (sample_times_count < (int)(sample_point*T_cnt_sum[2]))
     // {
     //     float omega = 2*PI/(T*T_cnt[2]);
-    //     float t1 = (smaple_point*T_cnt_sum[2]-(smaple_times_count+1))*0.03;
-    //     float t2 = ((smaple_times_count+1)-smaple_point*T_cnt_sum[1])*0.03;
-    //     float u = (smaple_times_count - smaple_point*T_cnt_sum[1])*(1.0/(smaple_point*T_cnt[2]));
+    //     float t1 = (sample_point*T_cnt_sum[2]-(sample_times_count+1))*0.03;
+    //     float t2 = ((sample_times_count+1)-sample_point*T_cnt_sum[1])*0.03;
+    //     float u = (sample_times_count - sample_point*T_cnt_sum[1])*(1.0/(sample_point*T_cnt[2]));
     //     R_P = B_spline.C(u, vB_spline_param[1]);
     //     L_P.set(0, Y_Swing, 0);
     //     // this->supfoot_hip_pitch = (support_foot_hip_upper_pitch*(omega*t1-sin(omega*t1))/(2*PI) + (-support_foot_hip_upper_pitch/2.0)*(omega*t2-sin(omega*t2))/(2*PI))/180.0*PI;
     //     this->supfoot_hip_pitch = support_foot_hip_upper_pitch*(omega*t1-sin(omega*t1))/(2*PI)/180.0*PI;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = 0;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[2]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[2]));
     // }
-    // else if(smaple_times_count < (int)(smaple_point*T_cnt_sum[3]))
+    // else if(sample_times_count < (int)(sample_point*T_cnt_sum[3]))
     // {
     //     R_P = B_spline.C(1, vB_spline_param[1]);
     //     L_P.set(0, Y_Swing, 0);
     //     this->supfoot_hip_pitch = 0;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = 0;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[3]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[3]));
     // }
-    // else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[4]))
+    // else if (sample_times_count < (int)(sample_point*T_cnt_sum[4]))
     // {
-    //     float u = (smaple_times_count - smaple_point*T_cnt_sum[3])*(1.0/(smaple_point*T_cnt[4]));
+    //     float u = (sample_times_count - sample_point*T_cnt_sum[3])*(1.0/(sample_point*T_cnt[4]));
     //     R_P = B_spline.C(u, vB_spline_param[2]);
     //     L_P.set(0, Y_Swing, 0);
     //     float omega2 = 2*PI/(T*T_cnt[4]);
-    //     float t2 = ((smaple_times_count+1)-smaple_point*T_cnt_sum[3])*0.03;
+    //     float t2 = ((sample_times_count+1)-sample_point*T_cnt_sum[3])*0.03;
     //     this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch*(omega2*t2-sin(omega2*t2))/(2*PI)/180.0*PI;
     //     this->supfoot_hip_roll = 0;
-    //     if(smaple_times_count < (int)(smaple_point*(T_cnt_sum[3]+T_cnt[4]/2.0)))
+    //     if(sample_times_count < (int)(sample_point*(T_cnt_sum[3]+T_cnt[4]/2.0)))
     //     {
     //         float omega1 = 2*PI/(T*T_cnt[4]/2.0);
-    //         float t1 = (smaple_point*(T_cnt_sum[3]+T_cnt[4]/2.0)-(smaple_times_count+1))*0.03;
+    //         float t1 = (sample_point*(T_cnt_sum[3]+T_cnt[4]/2.0)-(sample_times_count+1))*0.03;
     //         this->supfoot_hip_pitch = 0;
     //     }
     //     else
     //     {
     //         this->supfoot_hip_pitch = 0;
     //     }
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[4]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[4]));
     // }
-    // else if (smaple_times_count <= smaple_point)
+    // else if (sample_times_count <= sample_point)
     // {
     //     float omega = 2*PI/(T*T_cnt[5]);
-    //     float t = (smaple_point-smaple_times_count)*0.03;
+    //     float t = (sample_point-sample_times_count)*0.03;
     //     R_P.set(0, Y_Swing*(omega*t-sin(omega*t))/(2*PI), 0);
     //     L_P = R_P;
     //     this->supfoot_hip_pitch = 0;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch*(omega*t-sin(omega*t))/(2*PI)/180.0*PI;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[5]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[5]));
     // }
     // else
     // { 
@@ -474,18 +474,18 @@ void KickingGait::rightKickBall()
     // } 
 
     // Point3DParam tmep_EP_total;
-    // if(smaple_times_count < (int)smaple_point*T_cnt_sum[0])//DSP
+    // if(sample_times_count < (int)sample_point*T_cnt_sum[0])//DSP
     // {
         
     // }
-    // else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[4]))
+    // else if (sample_times_count < (int)(sample_point*T_cnt_sum[4]))
     // {
     //     // tmep_EP_total = endPointBalanceControl();
     //     // L_P.x -= tmep_EP_total.x;
     //     // L_P.y -= tmep_EP_total.y;
     //     // R_P.y -= tmep_EP_total.y;
     // }
-    // else if (smaple_times_count <= smaple_point)//DSP
+    // else if (sample_times_count <= sample_point)//DSP
     // {
         
     // }
@@ -499,7 +499,7 @@ void KickingGait::rightKickBall()
     // parameterinfo->points.IK_Point_LZ       = parameterinfo->parameters.COM_Height - L_P.z;
     // parameterinfo->points.IK_Point_LThta    = 0;
 
-    // map_kickgait.find("smaple_times_count")->second.push_back(smaple_times_count);
+    // map_kickgait.find("sample_times_count")->second.push_back(sample_times_count);
     // map_kickgait.find("R_Px")->second.push_back(R_P.x);
     // map_kickgait.find("R_Py")->second.push_back(R_P.y);
     // map_kickgait.find("R_Pz")->second.push_back(R_P.z);
@@ -519,105 +519,105 @@ void KickingGait::rightKickBall()
     // float kick_foot_ankle_upper_pitch = parameterinfo->parameters.Kick_Foot_Ankle_Upper_Pitch;
     // float support_foot_ankle_upper_pitch = parameterinfo->parameters.Support_Foot_Ankle_Upper_Pitch;
     // float Y_Swing = parameterinfo->parameters.Y_Swing_Range;
-    // int smaple_times_count = parameterinfo->complan.sample_point_;
-    // int smaple_point = T_ms/30;
-    // if(smaple_times_count < (int)(smaple_point*T_cnt_sum[0]))
+    // int sample_times_count = parameterinfo->complan.sample_point_;
+    // int sample_point = T_ms/30;
+    // if(sample_times_count < (int)(sample_point*T_cnt_sum[0]))
     // {
     //     float omega = 2*PI/(T*T_cnt[0]);
-    //     float t = smaple_times_count*0.03;
+    //     float t = sample_times_count*0.03;
     //     R_P.set(0, Y_Swing*(omega*t-sin(omega*t))/(2*PI), 0);
     //     L_P = R_P;
     //     this->supfoot_hip_pitch = 0;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = 0;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[0]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[0]));
     // }
-    // else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[1]))
+    // else if (sample_times_count < (int)(sample_point*T_cnt_sum[1]))
     // {
     //     float omega = 2*PI/(T*T_cnt[1]);
-    //     float t = ((smaple_times_count+1)-smaple_point*T_cnt_sum[0])*0.03;
-    //     float u = (smaple_times_count - smaple_point*T_cnt_sum[0])*(1.0/(smaple_point*T_cnt[1]));
+    //     float t = ((sample_times_count+1)-sample_point*T_cnt_sum[0])*0.03;
+    //     float u = (sample_times_count - sample_point*T_cnt_sum[0])*(1.0/(sample_point*T_cnt[1]));
     //     R_P = B_spline.C(u, vB_spline_param[0]);
     //     L_P.set(0, Y_Swing, 0);
     //     this->supfoot_hip_pitch = support_foot_hip_upper_pitch*(omega*t-sin(omega*t))/(2*PI)/180.0*PI;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = 0;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[1]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[1]));
     // }
-    // else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[2]))
+    // else if (sample_times_count < (int)(sample_point*T_cnt_sum[2]))
     // {
     //     float omega = 2*PI/(T*T_cnt[2]);
-    //     float t1 = (smaple_point*T_cnt_sum[2]-(smaple_times_count+1))*0.03;
-    //     float t2 = ((smaple_times_count+1)-smaple_point*T_cnt_sum[1])*0.03;
-    //     float u = (smaple_times_count - smaple_point*T_cnt_sum[1])*(1.0/(smaple_point*T_cnt[2]));
+    //     float t1 = (sample_point*T_cnt_sum[2]-(sample_times_count+1))*0.03;
+    //     float t2 = ((sample_times_count+1)-sample_point*T_cnt_sum[1])*0.03;
+    //     float u = (sample_times_count - sample_point*T_cnt_sum[1])*(1.0/(sample_point*T_cnt[2]));
     //     R_P = B_spline.C(u, vB_spline_param[1]);
     //     L_P.set(0, Y_Swing, 0);
     //     // this->supfoot_hip_pitch = (support_foot_hip_upper_pitch*(omega*t1-sin(omega*t1))/(2*PI) + (-support_foot_hip_upper_pitch/2.0)*(omega*t2-sin(omega*t2))/(2*PI))/180.0*PI;
     //     this->supfoot_hip_pitch = support_foot_hip_upper_pitch*(omega*t1-sin(omega*t1))/(2*PI)/180.0*PI;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = 0;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[2]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[2]));
     // }
-    // else if(smaple_times_count < (int)(smaple_point*T_cnt_sum[3]))
+    // else if(sample_times_count < (int)(sample_point*T_cnt_sum[3]))
     // {
     //     R_P = B_spline.C(1, vB_spline_param[1]);
     //     L_P.set(0, Y_Swing, 0);
     //     this->supfoot_hip_pitch = 0;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = 0;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[3]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[3]));
     // }
-    // else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[4]))
+    // else if (sample_times_count < (int)(sample_point*T_cnt_sum[4]))
     // {
-    //     float u = (smaple_times_count - smaple_point*T_cnt_sum[3])*(1.0/(smaple_point*T_cnt[4]));
+    //     float u = (sample_times_count - sample_point*T_cnt_sum[3])*(1.0/(sample_point*T_cnt[4]));
     //     R_P = B_spline.C(u, vB_spline_param[2]);
     //     L_P.set(0, Y_Swing, 0);
     //     float omega2 = 2*PI/(T*T_cnt[4]);
-    //     float t2 = ((smaple_times_count+1)-smaple_point*T_cnt_sum[3])*0.03;
+    //     float t2 = ((sample_times_count+1)-sample_point*T_cnt_sum[3])*0.03;
     //     this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch*(omega2*t2-sin(omega2*t2))/(2*PI)/180.0*PI;
     //     this->supfoot_hip_roll = 0;
-    //     if(smaple_times_count < (int)(smaple_point*(T_cnt_sum[3]+T_cnt[4]/2.0)))
+    //     if(sample_times_count < (int)(sample_point*(T_cnt_sum[3]+T_cnt[4]/2.0)))
     //     {
     //         float omega1 = 2*PI/(T*T_cnt[4]/2.0);
-    //         float t1 = (smaple_point*(T_cnt_sum[3]+T_cnt[4]/2.0)-(smaple_times_count+1))*0.03;
+    //         float t1 = (sample_point*(T_cnt_sum[3]+T_cnt[4]/2.0)-(sample_times_count+1))*0.03;
     //         this->supfoot_hip_pitch = 0;
     //     }
     //     else
     //     {
     //         this->supfoot_hip_pitch = 0;
     //     }
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[4]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[4]));
     // }
-    // else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[5]))
+    // else if (sample_times_count < (int)(sample_point*T_cnt_sum[5]))
     // {
     //     R_P = B_spline.C(1, vB_spline_param[2]);
     //     L_P.set(0, Y_Swing, 0);
     //     this->supfoot_hip_pitch = 0;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[5]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[5]));
     // }
-    // else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[6]))
+    // else if (sample_times_count < (int)(sample_point*T_cnt_sum[6]))
     // {
     //     float omega = 2*PI/(T*T_cnt[6]);
-    //     float t = (smaple_point*T_cnt_sum[6]-(smaple_times_count+1))*0.03;
+    //     float t = (sample_point*T_cnt_sum[6]-(sample_times_count+1))*0.03;
     //     R_P.set(0, Y_Swing, (parameterinfo->parameters.Kick_Point_Z/2.0)*(omega*t-sin(omega*t))/(2*PI));
     //     L_P.set(0, Y_Swing, 0);
     //     this->supfoot_hip_pitch = 0;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[6]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[6]));
     // }
-    // else if (smaple_times_count <= smaple_point)
+    // else if (sample_times_count <= sample_point)
     // {
     //     float omega = 2*PI/(T*T_cnt[7]);
-    //     float t = (smaple_point-smaple_times_count)*0.03;
+    //     float t = (sample_point-sample_times_count)*0.03;
     //     R_P.set(0, Y_Swing*(omega*t-sin(omega*t))/(2*PI), 0);
     //     L_P = R_P;
     //     this->supfoot_hip_pitch = 0;
     //     this->supfoot_hip_roll = 0;
     //     this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch*(omega*t-sin(omega*t))/(2*PI)/180.0*PI;
-    //     map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[7]));
+    //     map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[7]));
     // }
     // else
     // { 
@@ -631,18 +631,18 @@ void KickingGait::rightKickBall()
 
     // Point3DParam tmep_EP_total;
     // tmep_EP_total.initialize();
-    // if(smaple_times_count < (int)smaple_point*T_cnt_sum[0])//DSP
+    // if(sample_times_count < (int)sample_point*T_cnt_sum[0])//DSP
     // {
         
     // }
-    // else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[4]))
+    // else if (sample_times_count < (int)(sample_point*T_cnt_sum[4]))
     // {
     //     // tmep_EP_total = endPointBalanceControl();
     //     // L_P.x -= tmep_EP_total.x;
     //     // L_P.y -= tmep_EP_total.y;
     //     // R_P.y -= tmep_EP_total.y;
     // }
-    // else if (smaple_times_count <= smaple_point)//DSP
+    // else if (sample_times_count <= sample_point)//DSP
     // {
         
     // }
@@ -656,7 +656,7 @@ void KickingGait::rightKickBall()
     // parameterinfo->points.IK_Point_LZ       = parameterinfo->parameters.COM_Height - L_P.z;
     // parameterinfo->points.IK_Point_LThta    = 0;
 
-    // map_kickgait.find("smaple_times_count")->second.push_back(smaple_times_count);
+    // map_kickgait.find("sample_times_count")->second.push_back(sample_times_count);
     // map_kickgait.find("R_Px")->second.push_back(R_P.x);
     // map_kickgait.find("R_Py")->second.push_back(R_P.y);
     // map_kickgait.find("R_Pz")->second.push_back(R_P.z);
@@ -677,109 +677,109 @@ void KickingGait::rightKickBall()
     float kick_foot_ankle_upper_pitch = parameterinfo->parameters.Kick_Foot_Ankle_Upper_Pitch;
     float support_foot_ankle_upper_pitch = parameterinfo->parameters.Support_Foot_Ankle_Upper_Pitch;
     float Y_Swing = parameterinfo->parameters.Y_Swing_Range;
-    int smaple_times_count = parameterinfo->complan.sample_point_;
-    int smaple_point = T_ms/30;
-    if(smaple_times_count < (int)(smaple_point*T_cnt_sum[0]))
+    int sample_times_count = parameterinfo->complan.sample_point_;
+    int sample_point = T_ms/30;
+    if(sample_times_count < (int)(sample_point*T_cnt_sum[0]))
     {
         float omega = 2*PI/(T*T_cnt[0]);
-        float t = smaple_times_count*0.03;
+        float t = sample_times_count*0.03;
         R_P.set(0, Y_Swing*(omega*t-sin(omega*t))/(2*PI), 0);
         L_P = R_P;
         this->supfoot_hip_pitch = 0;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = 0;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[0]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[0]));
     }
-    else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[1]))
+    else if (sample_times_count < (int)(sample_point*T_cnt_sum[1]))
     {
         float omega = 2*PI/(T*T_cnt[1]);
-        float t = ((smaple_times_count+1)-smaple_point*T_cnt_sum[0])*0.03;
-        float u = (smaple_times_count - smaple_point*T_cnt_sum[0])*(1.0/(smaple_point*T_cnt[1]));
+        float t = ((sample_times_count+1)-sample_point*T_cnt_sum[0])*0.03;
+        float u = (sample_times_count - sample_point*T_cnt_sum[0])*(1.0/(sample_point*T_cnt[1]));
         R_P = B_spline.C(u, vB_spline_param[0]);
         L_P.set(0, Y_Swing, 0);
         this->supfoot_hip_pitch = support_foot_hip_upper_pitch*(omega*t-sin(omega*t))/(2*PI)/180.0*PI;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = 0;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[1]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[1]));
     }
-    else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[2]))
+    else if (sample_times_count < (int)(sample_point*T_cnt_sum[2]))
     {
         R_P = B_spline.C(1, vB_spline_param[0]);
         L_P.set(0, Y_Swing, 0);
         this->supfoot_hip_pitch = support_foot_hip_upper_pitch/180.0*PI;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = 0;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[2]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[2]));
     }
-    else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[3]))
+    else if (sample_times_count < (int)(sample_point*T_cnt_sum[3]))
     {
         float omega = 2*PI/(T*T_cnt[3]);
-        float t1 = (smaple_point*T_cnt_sum[3]-(smaple_times_count+1))*0.03;
-        float t2 = ((smaple_times_count+1)-smaple_point*T_cnt_sum[2])*0.03;
-        float u = (smaple_times_count - smaple_point*T_cnt_sum[2])*(1.0/(smaple_point*T_cnt[3]));
-        if(smaple_times_count == 30)u = 0;
+        float t1 = (sample_point*T_cnt_sum[3]-(sample_times_count+1))*0.03;
+        float t2 = ((sample_times_count+1)-sample_point*T_cnt_sum[2])*0.03;
+        float u = (sample_times_count - sample_point*T_cnt_sum[2])*(1.0/(sample_point*T_cnt[3]));
+        if(sample_times_count == 30)u = 0;
         R_P = B_spline.C(u, vB_spline_param[1]);
         L_P.set(0, Y_Swing, 0);
         // this->supfoot_hip_pitch = (support_foot_hip_upper_pitch*(omega*t1-sin(omega*t1))/(2*PI) + (-support_foot_hip_upper_pitch/2.0)*(omega*t2-sin(omega*t2))/(2*PI))/180.0*PI;
         this->supfoot_hip_pitch = support_foot_hip_upper_pitch*(omega*t1-sin(omega*t1))/(2*PI)/180.0*PI;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = 0;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[3]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[3]));
     }
-    else if(smaple_times_count < (int)(smaple_point*T_cnt_sum[4]))
+    else if(sample_times_count < (int)(sample_point*T_cnt_sum[4]))
     {
         R_P = B_spline.C(1, vB_spline_param[1]);
         L_P.set(0, Y_Swing, 0);
         this->supfoot_hip_pitch = 0;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = 0;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[4]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[4]));
     }
-    else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[5]))
+    else if (sample_times_count < (int)(sample_point*T_cnt_sum[5]))
     {
-        float u = (smaple_times_count - smaple_point*T_cnt_sum[4])*(1.0/(smaple_point*T_cnt[5]));
+        float u = (sample_times_count - sample_point*T_cnt_sum[4])*(1.0/(sample_point*T_cnt[5]));
         R_P = B_spline.C(u, vB_spline_param[2]);
         L_P.set(0, Y_Swing, 0);
         float omega2 = 2*PI/(T*T_cnt[5]);
-        float t2 = ((smaple_times_count+1)-smaple_point*T_cnt_sum[4])*0.03;
+        float t2 = ((sample_times_count+1)-sample_point*T_cnt_sum[4])*0.03;
         this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch*(omega2*t2-sin(omega2*t2))/(2*PI)/180.0*PI;
         this->supfoot_hip_roll = 0;
-        if(smaple_times_count < (int)(smaple_point*(T_cnt_sum[4]+T_cnt[5]/2.0)))
+        if(sample_times_count < (int)(sample_point*(T_cnt_sum[4]+T_cnt[5]/2.0)))
         {
             float omega1 = 2*PI/(T*T_cnt[5]/2.0);
-            float t1 = (smaple_point*(T_cnt_sum[4]+T_cnt[5]/2.0)-(smaple_times_count+1))*0.03;
+            float t1 = (sample_point*(T_cnt_sum[4]+T_cnt[5]/2.0)-(sample_times_count+1))*0.03;
             this->supfoot_hip_pitch = 0;
         }
         else
         {
             this->supfoot_hip_pitch = 0;
         }
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[5]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[5]));
     }
-    else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[6]))
+    else if (sample_times_count < (int)(sample_point*T_cnt_sum[6]))
     {
         R_P = B_spline.C(1, vB_spline_param[2]);
         L_P.set(0, Y_Swing, 0);
         this->supfoot_hip_pitch = 0;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[6]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[6]));
     }
-    else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[7]))
+    else if (sample_times_count < (int)(sample_point*T_cnt_sum[7]))
     {
         float omega = 2*PI/(T*T_cnt[7]);
-        float t = ((smaple_times_count+1)-smaple_point*T_cnt_sum[6])*0.03;
+        float t = ((sample_times_count+1)-sample_point*T_cnt_sum[6])*0.03;
         R_P.set(0, Y_Swing, parameterinfo->parameters.Kick_Point_Z/2.0 - (parameterinfo->parameters.Kick_Point_Z/2.0-1)*(omega*t-sin(omega*t))/(2*PI));
         L_P.set(0, Y_Swing, 0);
         this->supfoot_hip_pitch = 0;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[7]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[7]));
     }
-    else if (smaple_times_count <= smaple_point)
+    else if (sample_times_count <= sample_point)
     {
         float omega = 2*PI/(T*T_cnt[8]);
-        float t = (smaple_point-smaple_times_count)*0.03;
+        float t = (sample_point-sample_times_count)*0.03;
         // R_P.set(0, Y_Swing*(omega*t-sin(omega*t))/(2*PI), 1.0*(omega*t-sin(omega*t))/(2*PI));
         // L_P.set(0, R_P.y, 0);
         R_P.set(0, Y_Swing*(omega*t-sin(omega*t))/(2*PI), 0);
@@ -787,7 +787,7 @@ void KickingGait::rightKickBall()
         this->supfoot_hip_pitch = 0;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch*(omega*t-sin(omega*t))/(2*PI)/180.0*PI;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[8]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[8]));
     }
     else
     { 
@@ -801,22 +801,22 @@ void KickingGait::rightKickBall()
 
     Point3DParam tmep_EP_total;
     tmep_EP_total.initialize();
-    if(smaple_times_count < (int)smaple_point*T_cnt_sum[0])//DSP
+    if(sample_times_count < (int)sample_point*T_cnt_sum[0])//DSP
     {
         
     }
-    else if(smaple_times_count < (int)smaple_point*T_cnt_sum[1])
+    else if(sample_times_count < (int)sample_point*T_cnt_sum[1])
     {
         
     }
-    else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[7]))
+    else if (sample_times_count < (int)(sample_point*T_cnt_sum[7]))
     {
         // tmep_EP_total = endPointBalanceControl();
         // L_P.x -= tmep_EP_total.x;
         // L_P.y -= tmep_EP_total.y;
         // R_P.y -= tmep_EP_total.y;
     }
-    else if (smaple_times_count <= smaple_point)//DSP
+    else if (sample_times_count <= sample_point)//DSP
     {
         
     }
@@ -830,7 +830,7 @@ void KickingGait::rightKickBall()
     parameterinfo->points.IK_Point_LZ       = parameterinfo->parameters.COM_Height - L_P.z;
     parameterinfo->points.IK_Point_LThta    = 0;
 
-    map_kickgait.find("smaple_times_count")->second.push_back(smaple_times_count);
+    map_kickgait.find("sample_times_count")->second.push_back(sample_times_count);
     map_kickgait.find("R_Px")->second.push_back(R_P.x);
     map_kickgait.find("R_Py")->second.push_back(R_P.y);
     map_kickgait.find("R_Pz")->second.push_back(R_P.z);
@@ -853,86 +853,86 @@ void KickingGait::leftKickBall()
     float kick_foot_ankle_upper_pitch = parameterinfo->parameters.Kick_Foot_Ankle_Upper_Pitch;
     float support_foot_ankle_upper_pitch = parameterinfo->parameters.Support_Foot_Ankle_Upper_Pitch;
     float Y_Swing = parameterinfo->parameters.Y_Swing_Range;
-    int smaple_times_count = parameterinfo->complan.sample_point_;
-    int smaple_point = T_ms/30;
+    int sample_times_count = parameterinfo->complan.sample_point_;
+    int sample_point = T_ms/30;
 
-    if(smaple_times_count < (int)(smaple_point*T_cnt_sum[0]))
+    if(sample_times_count < (int)(sample_point*T_cnt_sum[0]))
     {
         float omega = 2*PI/(T*T_cnt[0]);
-        float t = smaple_times_count*0.03;
+        float t = sample_times_count*0.03;
         L_P.set(0, Y_Swing*(omega*t-sin(omega*t))/(2*PI), 0);
         R_P = L_P;
         this->supfoot_hip_pitch = 0;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = 0;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[0]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[0]));
     }
-    else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[1]))
+    else if (sample_times_count < (int)(sample_point*T_cnt_sum[1]))
     {
         float omega = 2*PI/(T*T_cnt[1]);
-        float t = ((smaple_times_count+1)-smaple_point*T_cnt_sum[0])*0.03;
-        float u = (smaple_times_count - smaple_point*T_cnt_sum[0])*(1.0/(smaple_point*T_cnt[1]));
+        float t = ((sample_times_count+1)-sample_point*T_cnt_sum[0])*0.03;
+        float u = (sample_times_count - sample_point*T_cnt_sum[0])*(1.0/(sample_point*T_cnt[1]));
         L_P = B_spline.C(u, vB_spline_param[0]);
         R_P.set(0, Y_Swing, 0);
         this->supfoot_hip_pitch = support_foot_hip_upper_pitch*(omega*t-sin(omega*t))/(2*PI)/180.0*PI;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = 0;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[1]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[1]));
     }
-    else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[2]))
+    else if (sample_times_count < (int)(sample_point*T_cnt_sum[2]))
     {
         float omega = 2*PI/(T*T_cnt[2]);
-        float t1 = (smaple_point*T_cnt_sum[2]-(smaple_times_count+1))*0.03;
-        float t2 = ((smaple_times_count+1)-smaple_point*T_cnt_sum[1])*0.03;
-        float u = (smaple_times_count - smaple_point*T_cnt_sum[1])*(1.0/(smaple_point*T_cnt[2]));
+        float t1 = (sample_point*T_cnt_sum[2]-(sample_times_count+1))*0.03;
+        float t2 = ((sample_times_count+1)-sample_point*T_cnt_sum[1])*0.03;
+        float u = (sample_times_count - sample_point*T_cnt_sum[1])*(1.0/(sample_point*T_cnt[2]));
         L_P = B_spline.C(u, vB_spline_param[1]);
         R_P.set(0, Y_Swing, 0);
         // this->supfoot_hip_pitch = (support_foot_hip_upper_pitch*(omega*t1-sin(omega*t1))/(2*PI) + (-support_foot_hip_upper_pitch/2.0)*(omega*t2-sin(omega*t2))/(2*PI))/180.0*PI;
         this->supfoot_hip_pitch = support_foot_hip_upper_pitch*(omega*t1-sin(omega*t1))/(2*PI)/180.0*PI;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = 0;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[2]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[2]));
     }
-    else if(smaple_times_count < (int)(smaple_point*T_cnt_sum[3]))
+    else if(sample_times_count < (int)(sample_point*T_cnt_sum[3]))
     {
         L_P = B_spline.C(1, vB_spline_param[1]);
         R_P.set(0, Y_Swing, 0);
         this->supfoot_hip_pitch = 0;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = 0;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[3]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[3]));
     }
-    else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[4]))
+    else if (sample_times_count < (int)(sample_point*T_cnt_sum[4]))
     {
-        float u = (smaple_times_count - smaple_point*T_cnt_sum[3])*(1.0/(smaple_point*T_cnt[4]));
+        float u = (sample_times_count - sample_point*T_cnt_sum[3])*(1.0/(sample_point*T_cnt[4]));
         L_P = B_spline.C(u, vB_spline_param[2]);
         R_P.set(0, Y_Swing, 0);
         float omega2 = 2*PI/(T*T_cnt[4]);
-        float t2 = ((smaple_times_count+1)-smaple_point*T_cnt_sum[3])*0.03;
+        float t2 = ((sample_times_count+1)-sample_point*T_cnt_sum[3])*0.03;
         this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch*(omega2*t2-sin(omega2*t2))/(2*PI)/180.0*PI;
         this->supfoot_hip_roll = 0;
-        if(smaple_times_count < (int)(smaple_point*(T_cnt_sum[3]+T_cnt[4]/2.0)))
+        if(sample_times_count < (int)(sample_point*(T_cnt_sum[3]+T_cnt[4]/2.0)))
         {
             float omega1 = 2*PI/(T*T_cnt[4]/2.0);
-            float t1 = (smaple_point*(T_cnt_sum[3]+T_cnt[4]/2.0)-(smaple_times_count+1))*0.03;
+            float t1 = (sample_point*(T_cnt_sum[3]+T_cnt[4]/2.0)-(sample_times_count+1))*0.03;
             this->supfoot_hip_pitch = 0;
         }
         else
         {
             this->supfoot_hip_pitch = 0;
         }
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[4]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[4]));
     }
-    else if (smaple_times_count <= smaple_point)
+    else if (sample_times_count <= sample_point)
     {
         float omega = 2*PI/(T*T_cnt[5]);
-        float t = (smaple_point-smaple_times_count)*0.03;
+        float t = (sample_point-sample_times_count)*0.03;
         L_P.set(0, Y_Swing*(omega*t-sin(omega*t))/(2*PI), 0);
         R_P = L_P;
         this->supfoot_hip_pitch = 0;
         this->supfoot_hip_roll = 0;
         this->kick_foot_ankle_pitch = kick_foot_ankle_upper_pitch*(omega*t-sin(omega*t))/(2*PI)/180.0*PI;
-        map_kickgait.find("smaple_times")->second.push_back((int)(smaple_point*T_cnt_sum[5]));
+        map_kickgait.find("smaple_times")->second.push_back((int)(sample_point*T_cnt_sum[5]));
     }
     else
     { 
@@ -946,18 +946,18 @@ void KickingGait::leftKickBall()
 
     Point3DParam tmep_EP_total;
     tmep_EP_total.initialize();
-    if(smaple_times_count < (int)smaple_point*T_cnt_sum[0])//DSP
+    if(sample_times_count < (int)sample_point*T_cnt_sum[0])//DSP
     {
         
     }
-    else if (smaple_times_count < (int)(smaple_point*T_cnt_sum[4]))
+    else if (sample_times_count < (int)(sample_point*T_cnt_sum[4]))
     {
         tmep_EP_total = endPointBalanceControl();
         R_P.x -= tmep_EP_total.x;
         R_P.y -= tmep_EP_total.y;
         L_P.y -= tmep_EP_total.y;
     }
-    else if (smaple_times_count <= smaple_point)//DSP
+    else if (sample_times_count <= sample_point)//DSP
     {
         
     }
@@ -971,7 +971,7 @@ void KickingGait::leftKickBall()
     parameterinfo->points.IK_Point_LZ       = parameterinfo->parameters.COM_Height - L_P.z;
     parameterinfo->points.IK_Point_LThta    = 0;
 
-    map_kickgait.find("smaple_times_count")->second.push_back(smaple_times_count);
+    map_kickgait.find("sample_times_count")->second.push_back(sample_times_count);
     map_kickgait.find("R_Px")->second.push_back(R_P.x);
     map_kickgait.find("R_Py")->second.push_back(R_P.y);
     map_kickgait.find("R_Pz")->second.push_back(R_P.z);
@@ -1020,8 +1020,8 @@ void KickingGait::ankleBalanceControl()
 
     float T_ms = parameterinfo->parameters.Period_T - 600;
     float T = T_ms/1000.0;
-    int smaple_point = T_ms/30;
-    int smaple_times_count = parameterinfo->complan.sample_point_;
+    int sample_point = T_ms/30;
+    int sample_times_count = parameterinfo->complan.sample_point_;
     // balance.pres_ZMP.left.set(left_ZMP_X, left_ZMP_Y);
     // balance.pres_ZMP.right.set(right_ZMP_X, right_ZMP_Y);
     // balance.pres_ZMP.feet.set((left_ZMP_X + right_ZMP_X)/2.0, (left_ZMP_Y + right_ZMP_Y)/2.0);
@@ -1052,13 +1052,13 @@ void KickingGait::ankleBalanceControl()
     double control_theta_y = 0;
     // if(parameterinfo->walking_mode == 9)
     
-    if(smaple_times_count < (int)smaple_point*T_cnt_sum[0])//DSP
+    if(sample_times_count < (int)sample_point*T_cnt_sum[0])//DSP
     {
         // map_ZMP.find("control_once_ankle_pitch")->second.push_back(0);
         // map_ZMP.find("control_total_ankle_pitch")->second.push_back(0);
         // map_ZMP.find("control_ankle_pitch_theta")->second.push_back(0);
     }
-    else if(smaple_times_count < (int)(smaple_point*T_cnt_sum[7]))//SSP
+    else if(sample_times_count < (int)(sample_point*T_cnt_sum[7]))//SSP
     { 
         // ZMP_x = balance.passfilter_pres_ZMP.left.x/100.0;
         // ZMP_y = balance.passfilter_pres_ZMP.left.y/100.0;
@@ -1088,7 +1088,7 @@ void KickingGait::ankleBalanceControl()
             balance.prev_ankle_roll = balance.pres_ankle_roll;
             balance.pres_ankle_roll.pos = control_theta_y;
             balance.pres_ankle_roll.vel = (balance.pres_ankle_roll.pos - balance.prev_ankle_roll.pos)/0.12;
-            balance.ideal_ankle_roll.vel = getIdealV(balance.pres_ZMP.left_pos.y, ideal_ZMP_py_arry, ideal_ZMP_vy_arry);
+            // balance.ideal_ankle_roll.vel = getIdealV(balance.pres_ZMP.left_pos.y, ideal_ZMP_py_arry, ideal_ZMP_vy_arry);
             
             balance.PIDsupfoot_EPy.setControlGoal(balance.ideal_ankle_roll.vel);
             balance.supfoot_EPy_value.control_value_once = balance.PIDsupfoot_EPy.calculateExpValue(balance.pres_ankle_roll.vel)*0.12;
@@ -1096,7 +1096,7 @@ void KickingGait::ankleBalanceControl()
             balance.prev_ankle_pitch = balance.pres_ankle_pitch;
             balance.pres_ankle_pitch.pos = control_theta;
             balance.pres_ankle_pitch.vel = (balance.pres_ankle_pitch.pos - balance.prev_ankle_pitch.pos)/0.12;
-            balance.ideal_ankle_pitch.vel = getIdealV(balance.pres_ZMP.left_pos.x, ideal_ZMP_px_arry, ideal_ZMP_vx_arry);
+            // balance.ideal_ankle_pitch.vel = getIdealV(balance.pres_ZMP.left_pos.x, ideal_ZMP_px_arry, ideal_ZMP_vx_arry);
             
             balance.PIDsupfoot_EPx.setControlGoal(balance.ideal_ankle_pitch.vel);
             balance.supfoot_EPx_value.control_value_once = balance.PIDsupfoot_EPx.calculateExpValue(balance.pres_ankle_pitch.vel)*0.12;
@@ -1210,12 +1210,12 @@ void KickingGait::ankleBalanceControl()
        
         // if(1)
         // {
-        //     // if (smaple_times_count == (int)(smaple_point*T_cnt_sum[1]))
+        //     // if (sample_times_count == (int)(sample_point*T_cnt_sum[1]))
         //     // {
         //     //     force_delay_flag_ = true;
         //     //     force_stop_sample_point_flag_ = true;
         //     // }
-        //     if (smaple_times_count == (int)(smaple_point*T_cnt_sum[2]))
+        //     if (sample_times_count == (int)(sample_point*T_cnt_sum[2]))
         //     {
         //         force_delay_flag_ = true;
         //         force_stop_sample_point_flag_ = true;
@@ -1227,10 +1227,10 @@ void KickingGait::ankleBalanceControl()
         //     force_stop_sample_point_flag_ = false;
         // }
     }
-    else if (smaple_times_count <= smaple_point)//DSP
+    else if (sample_times_count <= sample_point)//DSP
     {
         // float omega = 2*PI/(T*T_cnt[8]);
-        // float t = (smaple_point-smaple_times_count)*0.03;
+        // float t = (sample_point-sample_times_count)*0.03;
         // float control_roll_temp = balance.supfoot_EPy_value.control_value_total*(omega*t-sin(omega*t))/(2*PI);
         // float control_pitch_temp = balance.supfoot_EPx_value.control_value_total*(omega*t-sin(omega*t))/(2*PI);
         // this->supfoot_ankle_pitch = -control_pitch_temp/180.0*PI;
@@ -1244,7 +1244,7 @@ void KickingGait::ankleBalanceControl()
     else
     {
         float omega = 2*PI/(0.6);
-        float t = (smaple_point+20-smaple_times_count)*0.03;
+        float t = (sample_point+20-sample_times_count)*0.03;
         float control_roll_temp = balance.supfoot_EPy_value.control_value_total*(omega*t-sin(omega*t))/(2*PI);
         float control_pitch_temp = balance.supfoot_EPx_value.control_value_total*(omega*t-sin(omega*t))/(2*PI);
         this->supfoot_ankle_pitch = -control_pitch_temp/180.0*PI;
@@ -1262,23 +1262,23 @@ void KickingGait::hipPostureControl()
     for(int i = 0; i < 3; i++)balance.pres_imu_value[i].pos = sensor.rpy_[i] - balance.init_imu_value[i].pos;
     float T_ms = parameterinfo->parameters.Period_T - 600;
     float T = T_ms/1000.0;
-    int smaple_point = T_ms/30;
-    int smaple_times_count = parameterinfo->complan.sample_point_;
+    int sample_point = T_ms/30;
+    int sample_times_count = parameterinfo->complan.sample_point_;
 
     //----------- pitch ---------------------
-    balance.ideal_imu_value[(int)imu::pitch].vel = getIdealV(balance.pres_imu_value[(int)imu::pitch].pos, ideal_p_arry_pitch, ideal_v_arry);
+    // balance.ideal_imu_value[(int)imu::pitch].vel = getIdealV(balance.pres_imu_value[(int)imu::pitch].pos, ideal_p_arry_pitch, ideal_v_arry);
     balance.pres_imu_value[(int)imu::pitch].vel = (balance.pres_imu_value[(int)imu::pitch].pos-balance.prev_imu_value[(int)imu::pitch].pos)/(0.03);
     balance.passfilter_pres_imu_value[(int)imu::pitch].pos = balance.butterfilter_imu[(int)imu::pitch].pos.getValue(balance.pres_imu_value[(int)imu::pitch].pos);
     balance.passfilter_pres_imu_value[(int)imu::pitch].vel = balance.butterfilter_imu[(int)imu::pitch].vel.getValue(balance.pres_imu_value[(int)imu::pitch].vel);
     balance.passfilter_prev_imu_value[(int)imu::pitch] = balance.passfilter_pres_imu_value[(int)imu::pitch];
     //----------- roll ----------------------
-    balance.ideal_imu_value[(int)imu::roll].vel = getIdealV(balance.pres_imu_value[(int)imu::roll].pos, ideal_p_arry_roll, ideal_v_arry);
+    // balance.ideal_imu_value[(int)imu::roll].vel = getIdealV(balance.pres_imu_value[(int)imu::roll].pos, ideal_p_arry_roll, ideal_v_arry);
     balance.pres_imu_value[(int)imu::roll].vel = (balance.pres_imu_value[(int)imu::roll].pos-balance.prev_imu_value[(int)imu::roll].pos)/(0.03);
     balance.passfilter_pres_imu_value[(int)imu::roll].pos = balance.butterfilter_imu[(int)imu::roll].pos.getValue(balance.pres_imu_value[(int)imu::roll].pos);
     balance.passfilter_pres_imu_value[(int)imu::roll].vel = balance.butterfilter_imu[(int)imu::roll].vel.getValue(balance.pres_imu_value[(int)imu::roll].vel);
     balance.passfilter_prev_imu_value[(int)imu::roll] = balance.passfilter_pres_imu_value[(int)imu::roll];
 
-    if(smaple_times_count == 1)
+    if(sample_times_count == 1)
     {
         balance.pres_imu_value[(int)imu::pitch].vel = 0;
         balance.passfilter_pres_imu_value[(int)imu::pitch].vel = 0;
@@ -1286,42 +1286,42 @@ void KickingGait::hipPostureControl()
         balance.passfilter_pres_imu_value[(int)imu::roll].vel = 0;
     }
 
-    if(smaple_times_count < (int)smaple_point*T_cnt_sum[0])//DSP
+    if(sample_times_count < (int)sample_point*T_cnt_sum[0])//DSP
     {
         map_roll.find("control_once_roll")->second.push_back(0);
         map_roll.find("control_total_roll")->second.push_back(0);
         map_pitch.find("control_once_pitch")->second.push_back(0);
         map_pitch.find("control_total_pitch")->second.push_back(0);
     }
-    else if(smaple_times_count < (int)(smaple_point*T_cnt_sum[1]))//SSP
+    else if(sample_times_count < (int)(sample_point*T_cnt_sum[1]))//SSP
     {
         map_roll.find("control_once_roll")->second.push_back(0);
         map_roll.find("control_total_roll")->second.push_back(0);
         map_pitch.find("control_once_pitch")->second.push_back(0);
         map_pitch.find("control_total_pitch")->second.push_back(0);
     }
-    else if(smaple_times_count < (int)(smaple_point*T_cnt_sum[2]))//SSP
+    else if(sample_times_count < (int)(sample_point*T_cnt_sum[2]))//SSP
     {
         map_roll.find("control_once_roll")->second.push_back(0);
         map_roll.find("control_total_roll")->second.push_back(0);
         map_pitch.find("control_once_pitch")->second.push_back(0);
         map_pitch.find("control_total_pitch")->second.push_back(0);
     }
-    else if(smaple_times_count < (int)(smaple_point*T_cnt_sum[3]))//SSP
+    else if(sample_times_count < (int)(sample_point*T_cnt_sum[3]))//SSP
     {
         map_roll.find("control_once_roll")->second.push_back(0);
         map_roll.find("control_total_roll")->second.push_back(0);
         map_pitch.find("control_once_pitch")->second.push_back(0);
         map_pitch.find("control_total_pitch")->second.push_back(0);
     }
-    else if(smaple_times_count < (int)(smaple_point*T_cnt_sum[4]))//SSP
+    else if(sample_times_count < (int)(sample_point*T_cnt_sum[4]))//SSP
     {
         map_roll.find("control_once_roll")->second.push_back(0);
         map_roll.find("control_total_roll")->second.push_back(0);
         map_pitch.find("control_once_pitch")->second.push_back(0);
         map_pitch.find("control_total_pitch")->second.push_back(0);
     }
-    else if(smaple_times_count < (int)(smaple_point*T_cnt_sum[7]))//SSP //5
+    else if(sample_times_count < (int)(sample_point*T_cnt_sum[7]))//SSP //5
     { 
         //----------- pitch ----------------------
         balance.PIDsupfoot_hip_pitch.setControlGoal(balance.ideal_imu_value[(int)imu::pitch].vel);
@@ -1340,10 +1340,10 @@ void KickingGait::hipPostureControl()
         map_roll.find("control_once_roll")->second.push_back(balance.supfoot_hip_roll_value.control_value_once);
         map_roll.find("control_total_roll")->second.push_back(balance.supfoot_hip_roll_value.control_value_total);
     }
-    else if (smaple_times_count <= smaple_point)//DSP
+    else if (sample_times_count <= sample_point)//DSP
     {
         float omega = 2*PI/(T*T_cnt[8]);
-        float t = (smaple_point-smaple_times_count)*0.03;
+        float t = (sample_point-sample_times_count)*0.03;
         float control_roll_temp = balance.supfoot_hip_roll_value.control_value_total*(omega*t-sin(omega*t))/(2*PI);
         float control_pitch_temp = balance.supfoot_hip_pitch_value.control_value_total*(omega*t-sin(omega*t))/(2*PI);
         this->supfoot_hip_roll += control_roll_temp/180.0*PI;
@@ -1361,14 +1361,14 @@ void KickingGait::hipPostureControl()
         map_pitch.find("control_total_pitch")->second.push_back(0);
     }
 
-    map_roll.find("smaple_times_count")->second.push_back(smaple_times_count);
+    map_roll.find("sample_times_count")->second.push_back(sample_times_count);
     map_roll.find("pres_roll_pos")->second.push_back(balance.pres_imu_value[(int)imu::roll].pos);
     map_roll.find("passfilter_pres_roll_pos")->second.push_back(balance.passfilter_pres_imu_value[(int)imu::roll].pos);
     map_roll.find("ideal_roll_vel")->second.push_back(balance.ideal_imu_value[(int)imu::roll].vel);
     map_roll.find("pres_roll_vel")->second.push_back(balance.pres_imu_value[(int)imu::roll].vel);
     map_roll.find("passfilter_pres_roll_vel")->second.push_back(balance.passfilter_pres_imu_value[(int)imu::roll].vel);
 
-    map_pitch.find("smaple_times_count")->second.push_back(smaple_times_count);
+    map_pitch.find("sample_times_count")->second.push_back(sample_times_count);
     map_pitch.find("pres_pitch_pos")->second.push_back(balance.pres_imu_value[(int)imu::pitch].pos);
     map_pitch.find("passfilter_pres_pitch_pos")->second.push_back(balance.passfilter_pres_imu_value[(int)imu::pitch].pos);
     map_pitch.find("ideal_pitch_vel")->second.push_back(balance.ideal_imu_value[(int)imu::pitch].vel);
@@ -1399,8 +1399,8 @@ Point3DParam KickingGait::endPointBalanceControl()
             balance.pres_ZMP.left_vel.y = (balance.pres_ZMP.left_pos.y - balance.prev_ZMP.left_pos.y)/0.12;
             balance.pres_ZMP.left_acc.x = (balance.pres_ZMP.left_vel.x - balance.prev_ZMP.left_vel.x)/0.12;
             balance.pres_ZMP.left_acc.y = (balance.pres_ZMP.left_vel.y - balance.prev_ZMP.left_vel.y)/0.12;
-            balance.ideal_ZMP.left_vel.x = getIdealV(balance.pres_ZMP.left_pos.x, ideal_ZMP_px_arry, ideal_ZMP_vx_arry);
-            balance.ideal_ZMP.left_vel.y = getIdealV(balance.pres_ZMP.left_pos.y, ideal_ZMP_py_arry, ideal_ZMP_vy_arry);
+            // balance.ideal_ZMP.left_vel.x = getIdealV(balance.pres_ZMP.left_pos.x, ideal_ZMP_px_arry, ideal_ZMP_vx_arry);
+            // balance.ideal_ZMP.left_vel.y = getIdealV(balance.pres_ZMP.left_pos.y, ideal_ZMP_py_arry, ideal_ZMP_vy_arry);
             
             // balance.ideal_ZMP.left_acc.x = getIdealV(balance.pres_ZMP.left_pos.x, ideal_origen_ZMP_acc_px_arry, ideal_origen_ZMP_acc_x_arry);
             
@@ -1473,8 +1473,8 @@ Point3DParam KickingGait::endPointBalanceControl()
         {
             balance.pres_ZMP.right_vel.x = (balance.pres_ZMP.right_pos.x - balance.prev_ZMP.right_pos.x)/0.12;
             balance.pres_ZMP.right_vel.y = (balance.pres_ZMP.right_pos.y - balance.prev_ZMP.right_pos.y)/0.12;
-            balance.ideal_ZMP.right_vel.x = getIdealV(balance.pres_ZMP.right_pos.x, ideal_ZMP_px_arry, ideal_ZMP_vx_arry);
-            balance.ideal_ZMP.right_vel.y = getIdealV(balance.pres_ZMP.right_pos.y, ideal_ZMP_py_arry, ideal_ZMP_vy_arry);
+            // balance.ideal_ZMP.right_vel.x = getIdealV(balance.pres_ZMP.right_pos.x, ideal_ZMP_px_arry, ideal_ZMP_vx_arry);
+            // balance.ideal_ZMP.right_vel.y = getIdealV(balance.pres_ZMP.right_pos.y, ideal_ZMP_py_arry, ideal_ZMP_vy_arry);
 
             balance.passfilter_pres_ZMP.right_pos.x = balance.butterfilter_ZMPsupfoot.pos_x.getValue(balance.pres_ZMP.right_pos.x);
             balance.passfilter_pres_ZMP.right_pos.y = balance.butterfilter_ZMPsupfoot.pos_y.getValue(balance.pres_ZMP.right_pos.y);

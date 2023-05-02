@@ -163,10 +163,10 @@ void Walkinggait::update_parameter()
             parameterinfo->parameters.BASE_LIFT_Z = tmp_arr[arr_index++];
             arr_index++;
             parameterinfo->LCBalanceOn = tmp_arr[arr_index++];
-            parameterinfo->parameters.Sample_Time = parameterinfo->parameters.Period_T/30;
+            parameterinfo->parameters.Sample_Time = parameterinfo->parameters.Period_T/15;
             if(parameterinfo->parameters.Sample_Time == 0)
             {
-                motion_delay_ = 30;
+                motion_delay_ = 15;
             }
             else
             {
@@ -379,7 +379,7 @@ void Walkinggait::pushData()
         map_walk.find("sensor.roll")->second.push_back(sensor.rpy_[0]);
         map_walk.find("sensor.pitch")->second.push_back(sensor.rpy_[1]);
         map_walk.find("sensor.yaw")->second.push_back(sensor.rpy_[2]);
-        // map_walk.find("cnt")->second.push_back(cnt);   
+        map_walk.find("foot")->second.push_back(balance.sup_foot_);   
         // map_walk.find("theta")->second.push_back(theta_);
         // map_walk.find("var_theta_")->second.push_back(var_theta_); 
         map_walk.find("Cpz")->second.push_back(pz_);
@@ -476,7 +476,7 @@ void WalkingGaitByLIPM::initialize()
         // map_walk["t_"] = temp;
         map_walk["time_point_"] = temp;
         // map_walk["case"] = temp;
-        // map_walk["cnt"] = temp;
+        map_walk["foot"] = temp;
         map_walk["sensor.roll"] = temp;
 		map_walk["sensor.pitch"] = temp;
 		map_walk["sensor.yaw"] = temp;
@@ -1041,10 +1041,10 @@ void WalkingGaitByLIPM::process()
     // //px_ = px_ + 0.5 * ( px_ - com_x);
     // /* --- */
     // }
-    //py_u = py_;
-    // px_u = px_;    
-    py_u = py_ + 0.6 * ( py_ - com_y);
-    px_u = px_ - 0.1 * ( px_ - com_x);
+    py_u = py_;
+    px_u = px_;    
+    // py_u = py_ + 0.6 * ( py_ - com_y);
+    // px_u = px_ - 0.1 * ( px_ - com_x);
 
 
     coordinate_transformation();
@@ -1714,6 +1714,50 @@ double WalkingGaitByLIPM::wFootPositionRepeat(const double start, const double l
         return 2*length*(omega*new_t-sin(omega*new_t))/(2*PI)+start;
     else
         return 2*length+start;
+}
+double WalkingGaitByLIPM::wFootPositionZUP(const double height, const double t, const double T, const double T_DSP, const int step, const int board_step, const double board_height)
+{
+    double new_T = T*(1-T_DSP);
+    double new_t = t-T*T_DSP/2;
+    double omega = 2*PI/new_T;
+
+    if(step)
+    {
+        if(t <= T*T_DSP/2 && board_step == 3)
+        {
+            return board_height;
+        }
+        else if(t > T*T_DSP/2 && t <= T/2)
+        {
+            if(board_step == 3)
+                return 0.5*(height-board_height)*(1-cos(omega*new_t))+board_height;
+            else
+                return 0.5*height*(1-cos(omega*new_t));
+        }
+        else if(t > T/2 && t <= T*(1-(T_DSP/2)))
+        {
+            if(board_step == 1)
+                return 0.5*(height-board_height)*(1-cos(omega*new_t))+board_height;
+            else
+                return 0.5*height*(1-cos(omega*new_t));
+        }
+        else if(t > T*(1-(T_DSP/2)) && board_step == 1)
+        {
+            return board_height;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else if(board_step == 2) 
+    {
+        return board_height;
+    }
+    else
+    {
+        return 0;
+    }
 }
 double WalkingGaitByLIPM::wFootPositionZ(const double height, const double t, const double T, const double T_DSP)
 {

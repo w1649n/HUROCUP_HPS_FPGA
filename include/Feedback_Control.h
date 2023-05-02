@@ -372,6 +372,7 @@ public:
 	bool roll_over_limit_;
 	bool pitch_over_limit_;
 	int landing_foot_;
+	int DSP,SSP;
 	double cog_roll_offset_;
 	double cog_pitch_offset_;
 	double foot_cog_x_;
