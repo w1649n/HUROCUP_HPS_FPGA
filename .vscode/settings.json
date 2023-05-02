@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "*.m": "matlab",
+        "initial.h": "c",
+        "core": "c",
+        "hand_kinetic_base.h": "c",
+        "sensor.h": "c",
+        "feedback_motor.h": "c",
+        "main.h": "c",
+        "eigen": "cpp",
+        "inverse_kinematic.h": "c",
+        "zmpprocess.h": "c",
+        "datamodule.h": "c",
+        "pid_controller.h": "c",
+        "rmotor.h": "c"
+    }
+}
