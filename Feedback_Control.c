@@ -397,11 +397,9 @@ void BalanceControl::get_sensor_value()
 void BalanceControl::setSupportFoot()
 {
 	pre_sup_foot_ = sup_foot_;
-	DSP = (parameterinfo->parameters.Period_T*parameterinfo->parameters.OSC_LockRange)/2;
-	SSP = (1-(parameterinfo->parameters.Period_T*parameterinfo->parameters.OSC_LockRange));
-	if(parameterinfo->complan.time_point_> DSP && parameterinfo->complan.time_point_< (DSP+SSP))
+	if(walkinggait.time_point_% parameterinfo->parameters.Period_T > parameterinfo->parameters.DSP && walkinggait.time_point_% parameterinfo->parameters.Period_T < (parameterinfo->parameters.DSP + parameterinfo->parameters.SSP))
 	{
-		if(walkinggait.now_step_%2 == 0){sup_foot_ = rightfoot;}
+		if(parameterinfo->parameters.foot_flag){sup_foot_ = rightfoot;}
 		else{sup_foot_ = leftfoot;}
 	}
 	else{sup_foot_ = doublefeet;resetControlValue();}

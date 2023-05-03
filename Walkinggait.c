@@ -337,7 +337,7 @@ void Walkinggait::pushData()
             cnt = 0;
             IK.saveData();
             // feedbackmotor.saveData();
-            // saveData();
+            saveData();
             // balance.saveData();
         }  
     }        
@@ -353,10 +353,10 @@ void Walkinggait::pushData()
 
         map_walk.find("l_foot_x")->second.push_back(end_point_lx_);
         map_walk.find("r_foot_x")->second.push_back(end_point_rx_);
-        // map_walk.find("l_foot_y")->second.push_back(end_point_ly_);
-        // map_walk.find("r_foot_y")->second.push_back(end_point_ry_);
-        // map_walk.find("l_foot_z")->second.push_back(end_point_lz_);
-        // map_walk.find("r_foot_z")->second.push_back(end_point_rz_);
+        map_walk.find("l_foot_y")->second.push_back(end_point_ly_);
+        map_walk.find("r_foot_y")->second.push_back(end_point_ry_);
+        map_walk.find("l_foot_z")->second.push_back(end_point_lz_);
+        map_walk.find("r_foot_z")->second.push_back(end_point_rz_);
 
         // map_walk.find("l_foot_x")->second.push_back(lpx_);
         // map_walk.find("r_foot_x")->second.push_back(rpx_);
@@ -376,14 +376,14 @@ void Walkinggait::pushData()
         // map_walk.find("t_")->second.push_back(t_);
         map_walk.find("time_point_")->second.push_back(time_point_);
         // map_walk.find("case")->second.push_back(Step_Count_);
-        map_walk.find("sensor.roll")->second.push_back(sensor.rpy_[0]);
-        map_walk.find("sensor.pitch")->second.push_back(sensor.rpy_[1]);
-        map_walk.find("sensor.yaw")->second.push_back(sensor.rpy_[2]);
+        // map_walk.find("sensor.roll")->second.push_back(sensor.rpy_[0]);
+        // map_walk.find("sensor.pitch")->second.push_back(sensor.rpy_[1]);
+        // map_walk.find("sensor.yaw")->second.push_back(sensor.rpy_[2]);
         map_walk.find("foot")->second.push_back(balance.sup_foot_);   
         // map_walk.find("theta")->second.push_back(theta_);
         // map_walk.find("var_theta_")->second.push_back(var_theta_); 
-        map_walk.find("Cpz")->second.push_back(pz_);
-        map_walk.find("Cpx")->second.push_back(px_);          
+        map_walk.find("Cpz")->second.push_back(parameterinfo->parameters.DSP);
+        map_walk.find("Cpx")->second.push_back(parameterinfo->parameters.SSP);          
     }
 }
 
@@ -477,9 +477,9 @@ void WalkingGaitByLIPM::initialize()
         map_walk["time_point_"] = temp;
         // map_walk["case"] = temp;
         map_walk["foot"] = temp;
-        map_walk["sensor.roll"] = temp;
-		map_walk["sensor.pitch"] = temp;
-		map_walk["sensor.yaw"] = temp;
+        // map_walk["sensor.roll"] = temp;
+		// map_walk["sensor.pitch"] = temp;
+		// map_walk["sensor.yaw"] = temp;
         
         // map_walk["theta"] = temp;
         // map_walk["var_theta_"] = temp;
@@ -494,7 +494,8 @@ void WalkingGaitByLIPM::readWalkParameter()
     lift_height_ = parameterinfo->parameters.BASE_Default_Z;
     board_hight = parameterinfo->parameters.BASE_LIFT_Z;
     com_y_swing = parameterinfo->parameters.X_Swing_Range;
-
+    parameterinfo->parameters.DSP = (parameterinfo->parameters.Period_T*parameterinfo->parameters.OSC_LockRange)/2000;
+    parameterinfo->parameters.SSP = (parameterinfo->parameters.Period_T-(parameterinfo->parameters.Period_T*parameterinfo->parameters.OSC_LockRange))/1000;
     if(parameterinfo->parameters.X_Swing_COM >3)
     {
         rightfoot_shift_z = 3;
@@ -679,10 +680,12 @@ void WalkingGaitByLIPM::process()
     {
         if((now_step_ % 2) == 1 && now_step_ > 1)
         {
+            parameterinfo->parameters.foot_flag = false;
             left_step_++;
         }
         else if((now_step_ % 2) == 0 && now_step_ > 1)
         {
+            parameterinfo->parameters.foot_flag = true;
             right_step_++;
         }
 
