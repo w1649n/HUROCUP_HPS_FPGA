@@ -426,6 +426,7 @@ public:
 
 	BalanceParam CoM_EPx_value;
 	PID_Controller PIDCoM_x;
+	PID_Controller PIDCoM_z;
 
 	ZMPParam pres_ZMP;
     ZMPParam prev_ZMP;

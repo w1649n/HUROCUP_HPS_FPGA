@@ -84,26 +84,26 @@ void BalanceControl::initialize(const int control_cycle_msec)
     }
 
 	//ankle
-    PIDleftfoot_ankle_roll.setValueLimit(7, -7);
-    PIDleftfoot_ankle_pitch.setValueLimit(5, -5);
+    PIDleftfoot_ankle_roll.setValueLimit(0.5, -0.5);
+    PIDleftfoot_ankle_pitch.setValueLimit(0.5, -0.5);
     PIDleftfoot_ankle_roll.setKpid(0.05,0,0);
     PIDleftfoot_ankle_pitch.setKpid(0.05, 0, 0);
     // PIDleftfoot_ankle_roll.setControlGoal(init_imu_value[(int)imu::roll].pos);
     // PIDleftfoot_ankle_pitch.setControlGoal(init_imu_value[(int)imu::pitch].pos);
 
-	PIDrightfoot_ankle_roll.setValueLimit(7, -7);
-    PIDrightfoot_ankle_pitch.setValueLimit(5, -5);
+	PIDrightfoot_ankle_roll.setValueLimit(0.5, -0.5);
+    PIDrightfoot_ankle_pitch.setValueLimit(0.5, -0.5);
     PIDrightfoot_ankle_roll.setKpid(0.05,0,0);
     PIDrightfoot_ankle_pitch.setKpid(0.05, 0, 0);
     // PIDrightfoot_ankle_roll.setControlGoal(init_imu_value[(int)imu::roll].pos);
     // PIDrightfoot_ankle_pitch.setControlGoal(init_imu_value[(int)imu::pitch].pos);
 
-    PIDleftfoot_stand_pitch.setValueLimit(2, -2);
-    PIDleftfoot_stand_pitch.setKpid(0.04, 0, 0);//(0.03, 0, 0.02);  //0.03, 0, 0.02
+    PIDleftfoot_stand_pitch.setValueLimit(0.5, -0.5);
+    PIDleftfoot_stand_pitch.setKpid(0.03, 0, 0.02);//(0.03, 0, 0.02);  //0.03, 0, 0.02
     PIDleftfoot_stand_pitch.setControlGoal(init_imu_value[(int)imu::pitch].pos);
 
-	PIDrightfoot_stand_pitch.setValueLimit(2, -2);
-    PIDrightfoot_stand_pitch.setKpid(0.04, 0, 0);//(0.03, 0, 0.02);  //0.03, 0, 0.02
+	PIDrightfoot_stand_pitch.setValueLimit(0.5, -0.5);
+    PIDrightfoot_stand_pitch.setKpid(0.03, 0, 0.02);//(0.03, 0, 0.02);  //0.03, 0, 0.02
     PIDrightfoot_stand_pitch.setControlGoal(init_imu_value[(int)imu::pitch].pos);
 
 
@@ -242,16 +242,16 @@ void BalanceControl::initialize(const int control_cycle_msec)
 
 void BalanceControl::initialize_parameter()
 {
-	PIDleftfoot_hip_roll.setValueLimit(300, -300);
-    PIDleftfoot_hip_pitch.setValueLimit(300, -300);
-    PIDleftfoot_hip_roll.setKpid(roll_pid_[0], roll_pid_[1], roll_pid_[2]);//(0, 0, 0);//(0.005,0,0.003);//(0.03, 0.01, 0.01);//(0.03, 0.01, 0.015); //0.02, 0.01, 0.01 //0.03, 0, 0.02
+	PIDleftfoot_hip_roll.setValueLimit(0.5, -0.5);
+    PIDleftfoot_hip_pitch.setValueLimit(0.5, -0.5);
+    PIDleftfoot_hip_roll.setKpid(roll_pid_[0], roll_pid_[1], roll_pid_[2]);//(0, 0, 0);//(0.005,0,0.003);//(0.03, 0.01, 0.01);//(0.03, 0.01, 0.03); //0.02, 0.01, 0.01 //0.03, 0, 0.02
     PIDleftfoot_hip_pitch.setKpid(pitch_pid_[0], pitch_pid_[1], pitch_pid_[2]);//(0.02, 0, 0.005);//(0.03, 0, 0.02);  //0.03, 0, 0.02
     PIDleftfoot_hip_roll.setControlGoal(imu_desire_[0]);//(init_imu_value[(int)imu::roll].pos);
     PIDleftfoot_hip_pitch.setControlGoal(imu_desire_[1]);//(init_imu_value[(int)imu::pitch].pos);
 
-	PIDrightfoot_hip_roll.setValueLimit(300, -300);
-    PIDrightfoot_hip_pitch.setValueLimit(300, -300);
-    PIDrightfoot_hip_roll.setKpid(roll_pid_[0], roll_pid_[1], roll_pid_[2]);//(0, 0, 0);//(0.005,0,0.003);//(0.03, 0.01, 0.01);//(0.03, 0.01, 0.015); //0.02, 0.01, 0.01 //0.03, 0, 0.02
+	PIDrightfoot_hip_roll.setValueLimit(0.5, -0.5);
+    PIDrightfoot_hip_pitch.setValueLimit(0.5, -0.5);
+    PIDrightfoot_hip_roll.setKpid(roll_pid_[0], roll_pid_[1], roll_pid_[2]);//(0, 0, 0);//(0.005,0,0.003);//(0.03, 0.01, 0.01);//(0.03, 0.01, 0.03); //0.02, 0.01, 0.01 //0.03, 0, 0.02
     PIDrightfoot_hip_pitch.setKpid(pitch_pid_[0], pitch_pid_[1], pitch_pid_[2]);//(0.02, 0, 0.005);//(0.03, 0, 0.02);  //0.03, 0, 0.02
     PIDrightfoot_hip_roll.setControlGoal(imu_desire_[0]);//(init_imu_value[(int)imu::roll].pos);
     PIDrightfoot_hip_pitch.setControlGoal(imu_desire_[1]);//(init_imu_value[(int)imu::pitch].pos);
@@ -270,13 +270,13 @@ void BalanceControl::initialize_parameter()
 	PIDrightfoot_zmp_x.setControlGoal(0);
 	PIDrightfoot_zmp_y.setControlGoal(-5.5);
 	
-	PIDCoM_x.setValueLimit(7, -7);
+	PIDCoM_x.setValueLimit(2, -2);
 	PIDCoM_x.setKpid(com_pid_[0], com_pid_[1], com_pid_[2]);//(0.03, 0, 0.02);  //0.03, 0, 0.02
-	PIDCoM_x.setControlGoal(imu_desire_[2]);//(0);
+	PIDCoM_x.setControlGoal(0);//(0);imu_desire_[2]
 
-	// PIDCoM_z.setValueLimit(7, -7);
-	// PIDCoM_z.setKpid(com_pid_[0], com_pid_[1], com_pid_[2]);//(0.03, 0, 0.02);  //0.03, 0, 0.02
-	// PIDCoM_z.setControlGoal(0);//(0);
+	PIDCoM_z.setValueLimit(7, -7);
+	PIDCoM_z.setKpid(com_pid_[0], com_pid_[1], com_pid_[2]);//(0.03, 0, 0.02);  //0.03, 0, 0.02
+	PIDCoM_z.setControlGoal(0);//(0);
 
 }
 
@@ -322,8 +322,8 @@ void BalanceControl::get_sensor_value()
 	{
 		// foot_cog_x_ = 0;
 		// foot_cog_y_ = 0;
-		foot_cog_x_ = 26.2 * sin(cog_x_filtered);
-		foot_cog_y_ = 26.2 * sin(cog_y_filtered);
+		foot_cog_x_ = COM_HEIGHT * sin(cog_x_filtered);
+		foot_cog_y_ = COM_HEIGHT * sin(cog_y_filtered);
 	}
 	else
 	{
@@ -397,8 +397,8 @@ void BalanceControl::get_sensor_value()
 void BalanceControl::setSupportFoot()
 {
 	pre_sup_foot_ = sup_foot_;
-	if(walkinggait.time_point_% parameterinfo->parameters.Period_T > parameterinfo->parameters.DSP && walkinggait.time_point_% parameterinfo->parameters.Period_T < (parameterinfo->parameters.DSP + parameterinfo->parameters.SSP))
-	{
+	if(walkinggait.time_point_% parameterinfo->parameters.Period_T >= parameterinfo->parameters.DSP && walkinggait.time_point_% parameterinfo->parameters.Period_T < (parameterinfo->parameters.DSP + parameterinfo->parameters.SSP))
+	{//單支撐期間
 		if(parameterinfo->parameters.foot_flag){sup_foot_ = rightfoot;}
 		else{sup_foot_ = leftfoot;}
 	}
@@ -529,14 +529,14 @@ void BalanceControl::balance_control()
 
 	//----------- pitch ---------------------
 	ideal_imu_value[(int)imu::pitch].vel = getIdealV(pres_imu_value[(int)imu::pitch].pos, ideal_p_arry_pitch, ideal_v_arry);
-	pres_imu_value[(int)imu::pitch].vel = (pres_imu_value[(int)imu::pitch].pos-prev_imu_value[(int)imu::pitch].pos)/(0.03);
+	pres_imu_value[(int)imu::pitch].vel = (pres_imu_value[(int)imu::pitch].pos-prev_imu_value[(int)imu::pitch].pos)/(0.015);
 	passfilter_pres_imu_value[(int)imu::pitch].pos = butterfilter_imu[(int)imu::pitch].pos.getValue(pres_imu_value[(int)imu::pitch].pos);
 	passfilter_pres_imu_value[(int)imu::pitch].vel = butterfilter_imu[(int)imu::pitch].vel.getValue(pres_imu_value[(int)imu::pitch].vel);
 	passfilter_prev_imu_value[(int)imu::pitch] = passfilter_pres_imu_value[(int)imu::pitch];
 	
 	//----------- roll ----------------------
 	ideal_imu_value[(int)imu::roll].vel = getIdealV(pres_imu_value[(int)imu::roll].pos, ideal_p_arry_roll, ideal_v_arry);
-	pres_imu_value[(int)imu::roll].vel = (pres_imu_value[(int)imu::roll].pos-prev_imu_value[(int)imu::roll].pos)/(0.03);
+	pres_imu_value[(int)imu::roll].vel = (pres_imu_value[(int)imu::roll].pos-prev_imu_value[(int)imu::roll].pos)/(0.015);
 	passfilter_pres_imu_value[(int)imu::roll].pos = butterfilter_imu[(int)imu::roll].pos.getValue(pres_imu_value[(int)imu::roll].pos);
 	passfilter_pres_imu_value[(int)imu::roll].vel = butterfilter_imu[(int)imu::roll].vel.getValue(pres_imu_value[(int)imu::roll].vel);
 	passfilter_prev_imu_value[(int)imu::roll] = passfilter_pres_imu_value[(int)imu::roll];
@@ -576,26 +576,26 @@ void BalanceControl::balance_control()
 		//sup
 		PIDleftfoot_ankle_roll.setControlGoal(0); 
 		//----------- pitch ---------------------
-		leftfoot_hip_pitch_value.control_value_once = PIDleftfoot_hip_pitch.calculateExpValue(sensor.rpy_[1])*0.015;//dt = 0.03
+		leftfoot_hip_pitch_value.control_value_once = PIDleftfoot_hip_pitch.calculateExpValue(sensor.gyro_[1])*0.015;//dt = 0.03 *0.015
 		leftfoot_hip_pitch_value.control_value_total -= leftfoot_hip_pitch_value.control_value_once;
 		// leftfoot_hip_pitch_value.control_value_total = PIDleftfoot_hip_pitch.limitCheck(leftfoot_hip_pitch_value.control_value_total);
 		leftfoot_hip_pitch = leftfoot_hip_pitch_value.control_value_total/180.0*PI;
 
 		leftfoot_ankle_pitch_value.control_value_once = PIDleftfoot_ankle_pitch.calculateExpValue(pres_ZMP.feet_pos.x);//dt = 0.03
-		// leftfoot_ankle_pitch_value.control_value_once = PIDleftfoot_ankle_pitch.calculateExpValue(foot_cog_x_)*0.015;//dt = 0.03
+		// leftfoot_ankle_pitch_value.control_value_once = PIDleftfoot_ankle_pitch.calculateExpValue(foot_cog_x_)*0.03;//dt = 0.03
 		leftfoot_ankle_pitch_value.control_value_total -= leftfoot_ankle_pitch_value.control_value_once;
 		leftfoot_ankle_pitch_value.control_value_total = PIDleftfoot_ankle_pitch.limitCheck(leftfoot_ankle_pitch_value.control_value_total);
 		leftfoot_ankle_pitch_value.control_value_total = asin(leftfoot_ankle_pitch_value.control_value_total/COM_HEIGHT);		
 		leftfoot_ankle_pitch = leftfoot_ankle_pitch_value.control_value_total;
 		//----------- roll ----------------------
-		leftfoot_hip_roll_value.control_value_once = PIDleftfoot_hip_roll.calculateExpValue(sensor.rpy_[0])*0.03;//dt = 0.03;
+		leftfoot_hip_roll_value.control_value_once = PIDleftfoot_hip_roll.calculateExpValue(sensor.gyro_[0])*0.015;//dt = 0.03; 
 		leftfoot_hip_roll_value.control_value_total += leftfoot_hip_roll_value.control_value_once;
 		// leftfoot_hip_roll_value.control_value_total = PIDleftfoot_hip_roll.limitCheck(leftfoot_hip_roll_value.control_value_total);
 		// leftfoot_hip_roll += leftfoot_hip_roll_value.control_value_total/180.0*PI;
 		leftfoot_hip_roll = leftfoot_hip_roll_value.control_value_total/180.0*PI;
 
-		leftfoot_ankle_roll_value.control_value_once = PIDleftfoot_ankle_roll.calculateExpValue(pres_ZMP.feet_pos.y);//dt = 0.03;。
-		// leftfoot_ankle_roll_value.control_value_once = PIDleftfoot_ankle_roll.calculateExpValue_roll(foot_cog_y_)*0.015;//dt = 0.03;
+		// leftfoot_ankle_roll_value.control_value_once = PIDleftfoot_ankle_roll.calculateExpValue(pres_ZMP.feet_pos.y);//dt = 0.03;。
+		leftfoot_ankle_roll_value.control_value_once = PIDleftfoot_ankle_roll.calculateExpValue_roll(foot_cog_y_);//dt = 0.03;*0.03
 		leftfoot_ankle_roll_value.control_value_total -= leftfoot_ankle_roll_value.control_value_once;
 		leftfoot_ankle_roll_value.control_value_total = PIDleftfoot_ankle_roll.limitCheck(leftfoot_ankle_roll_value.control_value_total);
 		leftfoot_ankle_roll_value.control_value_total = asin(leftfoot_ankle_roll_value.control_value_total/COM_HEIGHT);				
@@ -640,26 +640,26 @@ void BalanceControl::balance_control()
 		//sup
 		PIDrightfoot_ankle_roll.setControlGoal(0); 
 		//----------- pitch ---------------------
-		rightfoot_hip_pitch_value.control_value_once = PIDrightfoot_hip_pitch.calculateExpValue(sensor.rpy_[1])*0.015;//dt = 0.03
+		rightfoot_hip_pitch_value.control_value_once = PIDrightfoot_hip_pitch.calculateExpValue(sensor.gyro_[1])*0.015;//dt = 0.03 *0.015
 		rightfoot_hip_pitch_value.control_value_total -= rightfoot_hip_pitch_value.control_value_once;
 		// rightfoot_hip_pitch_value.control_value_total = PIDrightfoot_hip_pitch.limitCheck(rightfoot_hip_pitch_value.control_value_total);
 		rightfoot_hip_pitch = rightfoot_hip_pitch_value.control_value_total/180.0*PI;
 		
 		rightfoot_ankle_pitch_value.control_value_once = PIDleftfoot_ankle_pitch.calculateExpValue(pres_ZMP.feet_pos.x) ;//dt = 0.03
-		// rightfoot_ankle_pitch_value.control_value_once = PIDrightfoot_ankle_pitch.calculateExpValue(foot_cog_x_)*0.015;
+		// rightfoot_ankle_pitch_value.control_value_once = PIDrightfoot_ankle_pitch.calculateExpValue(foot_cog_x_)*0.03;
 		rightfoot_ankle_pitch_value.control_value_total -= rightfoot_ankle_pitch_value.control_value_once;
 		rightfoot_ankle_pitch_value.control_value_total = PIDrightfoot_ankle_pitch.limitCheck(rightfoot_ankle_pitch_value.control_value_total);
 		rightfoot_ankle_pitch_value.control_value_total = asin(rightfoot_ankle_pitch_value.control_value_total/COM_HEIGHT);
 		rightfoot_ankle_pitch = rightfoot_ankle_pitch_value.control_value_total;
 		//----------- roll ----------------------
-		rightfoot_hip_roll_value.control_value_once = PIDrightfoot_hip_roll.calculateExpValue(sensor.rpy_[0])*0.015 ;//dt = 0.03;
+		rightfoot_hip_roll_value.control_value_once = PIDrightfoot_hip_roll.calculateExpValue(sensor.gyro_[0])*0.015;//dt = 0.03;*0.015
 		rightfoot_hip_roll_value.control_value_total += rightfoot_hip_roll_value.control_value_once;
 		// rightfoot_hip_roll_value.control_value_total = PIDrightfoot_hip_roll.limitCheck(rightfoot_hip_roll_value.control_value_total);
 		// rightfoot_hip_roll += rightfoot_hip_roll_value.control_value_total/180.0*PI;
 		rightfoot_hip_roll = rightfoot_hip_roll_value.control_value_total/180.0*PI;
 
-		rightfoot_ankle_roll_value.control_value_once = PIDleftfoot_ankle_roll.calculateExpValue(pres_ZMP.feet_pos.y) ;//dt = 0.03;
-		// rightfoot_ankle_roll_value.control_value_once = PIDrightfoot_ankle_roll.calculateExpValue_roll(foot_cog_y_)*0.015;//dt = 0.03;
+		// rightfoot_ankle_roll_value.control_value_once = PIDleftfoot_ankle_roll.calculateExpValue(pres_ZMP.feet_pos.y) ;//dt = 0.03;
+		rightfoot_ankle_roll_value.control_value_once = PIDrightfoot_ankle_roll.calculateExpValue_roll(foot_cog_y_);//dt = 0.03;*0.03
 		rightfoot_ankle_roll_value.control_value_total -= rightfoot_ankle_roll_value.control_value_once;
 		rightfoot_ankle_roll_value.control_value_total = PIDrightfoot_ankle_roll.limitCheck(rightfoot_ankle_roll_value.control_value_total);
 		rightfoot_ankle_roll_value.control_value_total = asin(rightfoot_ankle_roll_value.control_value_total/COM_HEIGHT);
@@ -698,12 +698,14 @@ void BalanceControl::balance_control()
 		}
 		//----------- pitch ---------------------
 		// leftfoot_hip_pitch_value.control_value_once = fuzzy.fuzzy_pitch_control(passfilter_pres_imu_value[(int)imu::pitch].pos, passfilter_pres_imu_value[(int)imu::pitch].vel);
-		leftfoot_hip_pitch_value.control_value_once = PIDleftfoot_stand_pitch.calculateExpValue(passfilter_pres_imu_value[(int)imu::pitch].vel)*0.015;//dt = 0.03
+		// leftfoot_hip_pitch_value.control_value_once = PIDleftfoot_stand_pitch.calculateExpValue(passfilter_pres_imu_value[(int)imu::pitch].vel)*0.015;//dt = 0.03 *0.015
+		leftfoot_hip_pitch_value.control_value_once = PIDleftfoot_hip_pitch.calculateExpValue(sensor.gyro_[1])*0.03;
 		leftfoot_hip_pitch_value.control_value_total -= leftfoot_hip_pitch_value.control_value_once;
 		leftfoot_hip_pitch = leftfoot_hip_pitch_value.control_value_total/180.0*PI;
 
 		// rightfoot_hip_pitch_value.control_value_once = fuzzy.fuzzy_pitch_control(passfilter_pres_imu_value[(int)imu::pitch].pos, passfilter_pres_imu_value[(int)imu::pitch].vel);
-		rightfoot_hip_pitch_value.control_value_once = PIDrightfoot_stand_pitch.calculateExpValue(passfilter_pres_imu_value[(int)imu::pitch].vel)*0.015;//dt = 0.03
+		// rightfoot_hip_pitch_value.control_value_once = PIDrightfoot_stand_pitch.calculateExpValue(passfilter_pres_imu_value[(int)imu::pitch].vel)*0.015;//dt = 0.03 *0.015
+		rightfoot_hip_pitch_value.control_value_once = PIDleftfoot_hip_pitch.calculateExpValue(sensor.gyro_[1])*0.03 ;
 		rightfoot_hip_pitch_value.control_value_total -= rightfoot_hip_pitch_value.control_value_once;
 		rightfoot_hip_pitch = rightfoot_hip_pitch_value.control_value_total/180.0*PI;
 		
@@ -712,10 +714,10 @@ void BalanceControl::balance_control()
 		rightfoot_ankle_pitch -= rightfoot_hip_pitch;
 		rightfoot_ankle_roll -= rightfoot_hip_roll;
 
-		// parameterinfo->points.IK_Point_LZ = walkinggait.end_point_lz_;
-		// parameterinfo->points.IK_Point_RZ = walkinggait.end_point_rz_;
-		// parameterinfo->points.IK_Point_LZ += PIDCoM_z.calculateExpValue(cos((90-passfilter_pres_imu_value[(int)imu::roll].pos)*PI/180.0))*4.5;
-		// parameterinfo->points.IK_Point_RZ -= PIDCoM_z.calculateExpValue(cos((90-passfilter_pres_imu_value[(int)imu::roll].pos)*PI/180.0))*4.5;
+		parameterinfo->points.IK_Point_LZ = walkinggait.end_point_lz_;
+		parameterinfo->points.IK_Point_RZ = walkinggait.end_point_rz_;
+		parameterinfo->points.IK_Point_LZ += PIDCoM_z.calculateExpValue(cos((90-passfilter_pres_imu_value[(int)imu::roll].pos)*PI/180.0))*4.5;
+		parameterinfo->points.IK_Point_RZ -= PIDCoM_z.calculateExpValue(cos((90-passfilter_pres_imu_value[(int)imu::roll].pos)*PI/180.0))*4.5;
 	}
 	// map_roll.find("left_control_once_roll")->second.push_back(leftfoot_hip_roll_value.control_value_once);
 	// map_roll.find("left_control_total_roll")->second.push_back(leftfoot_hip_roll_value.control_value_total);
@@ -755,7 +757,7 @@ void BalanceControl::InitEndPointControl()
 	rightfoot_hip_pitch_value.initialize();
 	CoM_EPx_value.initialize();
 	PIDCoM_x.initParam();
-	// PIDCoM_z.initParam();
+	PIDCoM_z.initParam();
 	parameterinfo->points.IK_Point_LX = 0;
 	parameterinfo->points.IK_Point_RX = 0;
 	parameterinfo->points.IK_Point_LZ = Length_Leg;
@@ -876,15 +878,54 @@ void BalanceControl::control_after_ik_calculation()
 	}
 	else
 	{
-		Points.Thta[10] += leftfoot_hip_roll;
+		if(sup_foot_ == 0){Points.Thta[10] += leftfoot_hip_roll;}//
+		else{Points.Thta[10] += leftfoot_hip_roll;}
 		Points.Thta[11] += leftfoot_hip_pitch-Points.back_offset;
 		Points.Thta[13] += leftfoot_ankle_pitch-Points.back_offset/2;
 		Points.Thta[14] += leftfoot_ankle_roll;
 
-		Points.Thta[16] += rightfoot_hip_roll;
+		if(sup_foot_ == 1){Points.Thta[16] += rightfoot_hip_roll;}	//
+		else{Points.Thta[16] += rightfoot_hip_roll;}
 		Points.Thta[17] += rightfoot_hip_pitch-Points.back_offset;
 		Points.Thta[19] += rightfoot_ankle_pitch-Points.back_offset/2;
 		Points.Thta[20] += rightfoot_ankle_roll;
+		// if(Points.Inverse_PointR_Y < 0 && (original_ik_point_rz_ != original_ik_point_lz_))
+		// {
+		// 	// Points.Thta[10] = PI_2 - (Points.Thta[10] - PI_2) *1;
+		// 	// Points.Thta[16] = PI_2 + (Points.Thta[16] - PI_2) *1;			
+			
+		// 	double tmp = (Points.Thta[10] * 1.075) - Points.Thta[10];
+		// 	Points.Thta[10] -= tmp;
+		// 	Points.Thta[16] *= 1.075;//1.025;
+
+
+		// 	// double tmp = (Points.Thta[10] * 1.05) - Points.Thta[10];
+		// 	// Points.Thta[10] -= tmp;
+		// 	// Points.Thta[16] *= 1.05;//1.025;
+
+		// 	// double tmp = (PI_2 - Points.Thta[10]) * gain;
+		// 	// Points.Thta[10] = PI_2 - fabs(tmp);
+		// 	// tmp = (PI_2 - Points.Thta[16]) * gain;
+		// 	// Points.Thta[16] = PI_2 + fabs(tmp);
+		// } 
+		// else if(Points.Inverse_PointR_Y > 0 && (original_ik_point_rz_ != original_ik_point_lz_))
+		// {
+		// 	// Points.Thta[10] = PI_2 + (Points.Thta[10] - PI_2) *1;
+		// 	// Points.Thta[16] = PI_2 - (Points.Thta[16] - PI_2) *1;	
+
+		// 	double tmp = (Points.Thta[10] * 1.075) - Points.Thta[10];
+		// 	Points.Thta[10] -= tmp;
+		// 	Points.Thta[16] *= 1.075;//1.025;
+
+		// 	// double tmp = (Points.Thta[10] * 1.05) - Points.Thta[10];
+		// 	// Points.Thta[10] -= tmp;
+		// 	// Points.Thta[16] *= 1.05;//1.025;
+
+		// 	// double tmp = (PI_2 - Points.Thta[10]) * gain;
+		// 	// Points.Thta[10] = PI_2 - fabs(tmp);
+		// 	// tmp = (PI_2 - Points.Thta[16]) * gain;
+		// 	// Points.Thta[16] = PI_2 + fabs(tmp);
+		// }
 	}
 }
 
@@ -960,14 +1001,14 @@ float PID_Controller::calculateExpValue(float value)//Expected value
     this->value = value;
     this->pre_error = this->error;
     this->error = this->x1c - this->value;
-    this->errors += this->error*0.015;
+    this->errors += this->error*0.03;
     if(this->pre_error == 0)
     {
         this->errord = 0;
     } 
     else
     {
-        this->errord = (this->error - this->pre_error)/0.015;
+        this->errord = (this->error - this->pre_error)/0.03;
     }
     this->exp_value = this->Kp*this->error + this->Ki*this->errors + this->Kd*this->errord;
     if(this->exp_value > this->upper_limit)
@@ -1012,14 +1053,14 @@ float PID_Controller::calculateExpValue_roll(float value)//Expected value
     this->value = value;
     this->pre_error = this->error;
     // this->error = this->x1c - this->value;
-    this->errors += this->error*0.03;
+    this->errors += this->error*0.015;
     if(this->pre_error == 0)
     {
         this->errord = 0;
     } 
     else
     {
-        this->errord = (this->error - this->pre_error)/0.03;
+        this->errord = (this->error - this->pre_error)/0.015;
     }
     this->exp_value = this->Kp*this->error + this->Ki*this->errors + this->Kd*this->errord;
     if(this->exp_value > this->upper_limit)

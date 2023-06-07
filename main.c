@@ -57,6 +57,7 @@ int main()
 				datamodule.stand_flag = false;
 			}
 			datamodule.motion_execute();
+			read_feedback = true;
 		}
 		/*-----------*/
 		sensor.load_imu(); //獲得IMU值
@@ -64,6 +65,13 @@ int main()
 		sensor.load_press_left(); 
 		sensor.load_press_right();
 		/*----------*/
+		/*-----------------------------------------*/
+		/*---馬達回授---*/
+		// feedbackmotor.load_motor_data_left_foot();
+		// feedbackmotor.load_motor_data_right_foot();
+		// feedbackmotor.pushData();
+		// read_feedback = false;
+		/*-------------*/
 		sensor.load_sensor_setting(); //balance補償([raw,pitch,com]PID,[sup,nsup]foot_offset)
 		sensor.sensor_package_generate(); //建立感測器資料;回傳IMU值給IPC
 		/*---讀取步態資訊---*/
@@ -189,16 +197,6 @@ int main()
 			read_feedback = true;
 		}
 		
-		/*-----------------------------------------*/
-		/*---馬達回授---*/
-		if(read_feedback)
-		{
-			feedbackmotor.load_motor_data_left_foot();
-			feedbackmotor.load_motor_data_right_foot();
-			feedbackmotor.pushData();
-			read_feedback = false;
-		}
-		/*-------------*/
 	}
 	// clean up our memory mapping and exit
 	init.Clear_Memory_Mapping();

@@ -584,7 +584,7 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
     }/////////////////////////////////////
 
     Points.Thta[12] = PI - acos((l1_2 + l2_2 -LL_2)/(2*Parameters.l1*Parameters.l2)); //左膝
-    Points.Thta[13] = PI - Points.Thta[11] -Points.Thta[12]; //左踝
+    Points.Thta[13] = PI - (Points.Thta[11] + Points.Thta[12]);//左踝
 
     if(flag_ ==  0)
         Points.Thta[14] = PI - Points.Thta[10];
@@ -627,13 +627,14 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
     Points.Thta[18] = PI - acos((l1_2 + l2_2 - RL_2)/(2*Parameters.l1*Parameters.l2));
     Points.Thta[19] = PI - Points.Thta[17] - Points.Thta[18];
 
+
     if(flag_ ==  0)
         Points.Thta[20] = PI - Points.Thta[16];
     else
         Points.Thta[20] = PI - Points.Thta[16]-rotate_body_l_;
 	
 
-	if(parameterinfo->LCBalanceOn)
+	if(parameterinfo->LCBalanceOn && !datamodule.stand_flag)
 	{
 		balance.control_after_ik_calculation();
 		// balance.saveData();

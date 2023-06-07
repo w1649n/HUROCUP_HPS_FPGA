@@ -338,7 +338,7 @@ void Walkinggait::pushData()
             IK.saveData();
             // feedbackmotor.saveData();
             saveData();
-            // balance.saveData();
+            balance.saveData();
         }  
     }        
     if(push_data_)
@@ -369,7 +369,7 @@ void Walkinggait::pushData()
         // map_walk.find("r_foot_t")->second.push_back(step_point_rthta_);
         map_walk.find("com_x")->second.push_back(px_);
         map_walk.find("com_y")->second.push_back(py_);
-        map_walk.find("now_step_")->second.push_back(now_step_);
+        map_walk.find("now_step_")->second.push_back(com_y);
         // map_walk.find("ideal_zmp_x")->second.push_back(zmp_x);
         // map_walk.find("ideal_zmp_y")->second.push_back(zmp_y);        
         // map_walk.find("points")->second.push_back(now_width_);
@@ -382,8 +382,8 @@ void Walkinggait::pushData()
         map_walk.find("foot")->second.push_back(balance.sup_foot_);   
         // map_walk.find("theta")->second.push_back(theta_);
         // map_walk.find("var_theta_")->second.push_back(var_theta_); 
-        map_walk.find("Cpz")->second.push_back(parameterinfo->parameters.DSP);
-        map_walk.find("Cpx")->second.push_back(parameterinfo->parameters.SSP);          
+        map_walk.find("Cpz")->second.push_back(balance.leftfoot_hip_roll_value.control_value_total);
+        map_walk.find("Cpx")->second.push_back(balance.rightfoot_hip_roll_value.control_value_total);          
     }
 }
 
@@ -494,8 +494,8 @@ void WalkingGaitByLIPM::readWalkParameter()
     lift_height_ = parameterinfo->parameters.BASE_Default_Z;
     board_hight = parameterinfo->parameters.BASE_LIFT_Z;
     com_y_swing = parameterinfo->parameters.X_Swing_Range;
-    parameterinfo->parameters.DSP = (parameterinfo->parameters.Period_T*parameterinfo->parameters.OSC_LockRange)/2000;
-    parameterinfo->parameters.SSP = (parameterinfo->parameters.Period_T-(parameterinfo->parameters.Period_T*parameterinfo->parameters.OSC_LockRange))/1000;
+    parameterinfo->parameters.DSP = (parameterinfo->parameters.Period_T*parameterinfo->parameters.OSC_LockRange)/2;
+    parameterinfo->parameters.SSP = (parameterinfo->parameters.Period_T-(parameterinfo->parameters.Period_T*parameterinfo->parameters.OSC_LockRange));
     if(parameterinfo->parameters.X_Swing_COM >3)
     {
         rightfoot_shift_z = 3;
@@ -1044,9 +1044,9 @@ void WalkingGaitByLIPM::process()
     // //px_ = px_ + 0.5 * ( px_ - com_x);
     // /* --- */
     // }
-    py_u = py_;
+    // py_u = py_;
     px_u = px_;    
-    // py_u = py_ + 0.6 * ( py_ - com_y);
+    py_u = py_ + 0.2 * ( py_ - com_y);
     // px_u = px_ - 0.1 * ( px_ - com_x);
 
 
@@ -1691,6 +1691,22 @@ double WalkingGaitByLIPM::wComVelocityInit(double x0, double xt, double px, doub
 double WalkingGaitByLIPM::wComPosition(double x0, double vx0, double px, double t, double T)
 {
     return (x0*cosh(t/T) + T*vx0*sinh(t/T) - px*(cosh(t/T)-1));
+}
+double WalkingGaitByLIPM::wComPosition_y(double x0, double vx0, double px, double t, double T,double Tdsp,double TT)
+{
+    double SSP = TT*(1-Tdsp)/2;
+    double T2 = TT/2;
+    if(Tdsp == 0)
+        return (x0*cosh(t/T) + T*vx0*sinh(t/T) - px*(cosh(t/T)-1));
+    else
+    {
+        if(t<T2)
+            return (x0*cosh(t/T) + T*vx0*sinh(t/T) - px*(cosh(t/T)-1));
+        else if (t>=T2 && t<T2+SSP)
+            return (x0*cosh(t/T) + T*vx0*sinh(t/T) - px*(cosh(t/T)-1))*sin(PI*(t/(T2+SSP)));
+        else
+            return 0;
+    }
 }
 double WalkingGaitByLIPM::wFootPosition(const double start, const double length, const double t, const double T, const double T_DSP)
 {

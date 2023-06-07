@@ -68,6 +68,7 @@ public:
     // double wtestComVelocity(double pre_x,double pre_v,double px,double t ,double T);
     double wComVelocityInit(double x0, double xt, double px, double t, double T);
     double wComPosition(double x0, double vx0, double px, double t, double T);
+    double wComPosition_y(double x0, double vx0, double px, double t, double T,double Tdsp,double TT);
     double wFootPosition(const double start, const double length, const double t, const double T, const double T_DSP);
     double wFootPositionRepeat(const double start, const double length, const double t, const double T, const double T_DSP);
     double wFootPositionZ(const double height, const double t, const double T, const double T_DSP);
