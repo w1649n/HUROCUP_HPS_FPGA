@@ -211,7 +211,10 @@ public:
     unsigned short update_crc(unsigned short , unsigned char *, unsigned short);
 
     unsigned char packet_char_[203];
-    
+    int correct_angle[21];
+    int origin_angle[21];
+
+
 private:
     double speed_gain_[21];
     double angle_gain_[21];

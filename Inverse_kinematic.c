@@ -246,9 +246,13 @@ void Locus::control_by_robot_status(){
 	Points.Thta[4] = base_R;
 	if(parameterinfo->X<0)
 	{
-		Points.back_offset = 1.2*PI/180;
+		Points.back_offset = 0.8*PI/180;
 		Points.Thta[8] = base_Waist;
 		Points.waist_offset = 0;
+	}
+	else if(parameterinfo->X>=2)
+	{
+		Points.back_offset = 0.5*parameterinfo->X*PI/180;
 	}
 	else
 	{
@@ -440,13 +444,16 @@ void InverseKinematic::initial_points()
 	Points.P_Table[5] = 0;                     //Positive
 	Points.P_Table[6] = 0;                     //Positive
 	Points.P_Table[7] = 0;                     //Positive
+	//腰
 	Points.P_Table[8] = 0;                     //Positive
+	//左腳
 	Points.P_Table[9] = 0;                     //Positive
 	Points.P_Table[10] = 0;                    //Positive
 	Points.P_Table[11] = 0;                    //Positive
 	Points.P_Table[12] = 0;                    //Positive
 	Points.P_Table[13] = 1;                    //Negitive
 	Points.P_Table[14] = 1;                    //Negitive
+	//右腳
 	Points.P_Table[15] = 0;                    //Positive
 	Points.P_Table[16] = 0;                    //Pogitive
 	Points.P_Table[17] = 1;                    //Negitive
@@ -633,7 +640,21 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
     else
         Points.Thta[20] = PI - Points.Thta[16]-rotate_body_l_;
 	
-
+	
+	//-----test-----//
+	for( i = 0; i < 21; i++)
+    {
+		if(Points.P_Table[i])
+        {
+            origin_angle[i] = (unsigned int)(Max_value - (Points.Thta[i] * PI_TO_OUTPUT + Position_Zero));
+        }
+        else
+        {
+            origin_angle[i] = (unsigned int)(Points.Thta[i] * PI_TO_OUTPUT + Position_Zero);
+        }
+        origin_angle[i] += output_base_[i];
+	}
+	//--------------//
 	if(parameterinfo->LCBalanceOn && !datamodule.stand_flag)
 	{
 		balance.control_after_ik_calculation();
@@ -673,7 +694,7 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
             output_angle_[i] = (unsigned int)(Points.Thta[i] * PI_TO_OUTPUT + Position_Zero);
         }
         output_angle_[i] += output_base_[i];
-
+		correct_angle[i] = output_angle_[i];
         double different_thta;
         different_thta = fabs( past_thta_[i] - Points.Thta[i]);
         if(different_thta > 0.0)
@@ -720,6 +741,14 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
 			}
 		}
 		///////////////////////////////////////////////////////
+		if(walkinggait.locus_flag_)
+		{
+			// if((output_angle_[13]-datamodule.Walking_standangle[13])>200){output_angle_[13] = datamodule.Walking_standangle[13]+200;}
+			// else if((output_angle_[13]-datamodule.Walking_standangle[13])<-200){output_angle_[13] = datamodule.Walking_standangle[13]-200;}
+
+			// if((output_angle_[19]-datamodule.Walking_standangle[19])>200){output_angle_[19] = datamodule.Walking_standangle[19]+200;}
+			// else if((output_angle_[19]-datamodule.Walking_standangle[19])<-200){output_angle_[19] = datamodule.Walking_standangle[19]-200;}
+		}
 		*((uint32_t *)init.robot_motion_addr+(2*i+1)) = output_speed_[i];
 		*((uint32_t *)init.robot_motion_addr+(2*i)) = output_angle_[i];
     }

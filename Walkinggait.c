@@ -351,12 +351,12 @@ void Walkinggait::pushData()
         // map_walk.find("l_foot_z")->second.push_back(step_point_lz_);
         // map_walk.find("r_foot_z")->second.push_back(step_point_rz_);
 
-        map_walk.find("l_foot_x")->second.push_back(end_point_lx_);
-        map_walk.find("r_foot_x")->second.push_back(end_point_rx_);
+        map_walk.find("l_foot_x")->second.push_back(balance.leftfoot_hip_pitch);
+        map_walk.find("r_foot_x")->second.push_back(balance.rightfoot_hip_pitch);
         map_walk.find("l_foot_y")->second.push_back(end_point_ly_);
         map_walk.find("r_foot_y")->second.push_back(end_point_ry_);
-        map_walk.find("l_foot_z")->second.push_back(end_point_lz_);
-        map_walk.find("r_foot_z")->second.push_back(end_point_rz_);
+        map_walk.find("l_foot_z")->second.push_back(IK.origin_angle[17]);
+        map_walk.find("r_foot_z")->second.push_back(IK.correct_angle[17]);
 
         // map_walk.find("l_foot_x")->second.push_back(lpx_);
         // map_walk.find("r_foot_x")->second.push_back(rpx_);
@@ -370,10 +370,10 @@ void Walkinggait::pushData()
         map_walk.find("com_x")->second.push_back(px_);
         map_walk.find("com_y")->second.push_back(py_);
         map_walk.find("now_step_")->second.push_back(com_y);
-        // map_walk.find("ideal_zmp_x")->second.push_back(zmp_x);
-        // map_walk.find("ideal_zmp_y")->second.push_back(zmp_y);        
-        // map_walk.find("points")->second.push_back(now_width_);
-        // map_walk.find("t_")->second.push_back(t_);
+        map_walk.find("ideal_zmp_x")->second.push_back(balance.PIDleftfoot_hip_pitch.error);
+        map_walk.find("ideal_zmp_y")->second.push_back(balance.PIDleftfoot_hip_pitch.errors);        
+        map_walk.find("points")->second.push_back(balance.PIDleftfoot_hip_roll.error);
+        map_walk.find("t_")->second.push_back(balance.PIDleftfoot_hip_roll.errors);
         map_walk.find("time_point_")->second.push_back(time_point_);
         // map_walk.find("case")->second.push_back(Step_Count_);
         // map_walk.find("sensor.roll")->second.push_back(sensor.rpy_[0]);
@@ -382,8 +382,8 @@ void Walkinggait::pushData()
         map_walk.find("foot")->second.push_back(balance.sup_foot_);   
         // map_walk.find("theta")->second.push_back(theta_);
         // map_walk.find("var_theta_")->second.push_back(var_theta_); 
-        map_walk.find("Cpz")->second.push_back(balance.leftfoot_hip_roll_value.control_value_total);
-        map_walk.find("Cpx")->second.push_back(balance.rightfoot_hip_roll_value.control_value_total);          
+        map_walk.find("Cpz")->second.push_back(balance.foot_cog_x_);
+        map_walk.find("Cpx")->second.push_back(balance.foot_cog_y_);          
     }
 }
 
@@ -469,11 +469,11 @@ void WalkingGaitByLIPM::initialize()
         map_walk["com_x"] = temp;
 		map_walk["com_y"] = temp;
         map_walk["now_step_"] = temp;
-		// map_walk["ideal_zmp_x"] = temp;
-		// map_walk["ideal_zmp_y"] = temp;
+		map_walk["ideal_zmp_x"] = temp;
+		map_walk["ideal_zmp_y"] = temp;
         
-		// map_walk["points"] = temp;
-        // map_walk["t_"] = temp;
+		map_walk["points"] = temp;
+        map_walk["t_"] = temp;
         map_walk["time_point_"] = temp;
         // map_walk["case"] = temp;
         map_walk["foot"] = temp;
@@ -1044,9 +1044,9 @@ void WalkingGaitByLIPM::process()
     // //px_ = px_ + 0.5 * ( px_ - com_x);
     // /* --- */
     // }
-    // py_u = py_;
+    py_u = py_;
     px_u = px_;    
-    py_u = py_ + 0.2 * ( py_ - com_y);
+    // py_u = py_ + 0.2 * ( py_ - com_y);
     // px_u = px_ - 0.1 * ( px_ - com_x);
 
 

@@ -121,14 +121,18 @@ public:
     // void setErrorsValue(float errors);
     // void setErrordValue(float errord);
     // float getFixValue();
+	float error;
+    float pre_error;
+    float errors;
+    float errord;
 private:
     double Kp;
     double Ki;
     double Kd;
-    float error;
-    float pre_error;
-    float errors;
-    float errord;
+    // float error;
+    // float pre_error;
+    // float errors;
+    // float errord;
     float x1c;
     float x2c;
     float x3c;
@@ -393,6 +397,9 @@ public:
     IMUParam passfilter_prev_imu_value[3];
 
 	ButterWorthIMUParam butterfilter_imu[3];
+
+	BalanceParam pitch_value;
+	PID_Controller PID_pitch;
 	//hip
 	BalanceParam leftfoot_hip_roll_value;
     BalanceParam leftfoot_hip_pitch_value;
@@ -442,6 +449,7 @@ public:
     // float swingfoot_hip_pitch;
     // float swingfoot_ankle_roll;
     // float swingfoot_ankle_pitch;
+	float foot_pitch;
 	float leftfoot_hip_roll;
     float leftfoot_hip_pitch;
     float leftfoot_ankle_roll;
@@ -488,6 +496,8 @@ public:
 	float tmp;
 	float tmp_com;
 	float tmp_com_total;
+	bool support_flag_y = false,support_flag_x = false;
+	bool change_roll = false,change_pitch = false;
 	bool flag = false;
 	//LIPM end
 };

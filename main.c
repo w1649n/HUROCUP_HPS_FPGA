@@ -42,7 +42,7 @@ int main()
 	//usleep(500 * 1000); 	//0.5s
 	//sleep(2);				//2s
 	while(1)
-	{ 
+	{  
 		/*---動作串---*/
 		datamodule.load_database();
 		if(datamodule.motion_execute_flag_)
@@ -131,7 +131,7 @@ int main()
 		{
 			walkinggait.setcom_pos(IB.WpB(0),IB.WpB(1));
 			walkinggait.walking_timer();
-			walkinggait.pushData();
+			
 
 			gettimeofday(&walkinggait.timer_start_, NULL);
 			// balance.balance_control();
@@ -189,6 +189,7 @@ int main()
 			locus.get_cpg_with_offset();  //獲取末端點
 			locus.control_by_robot_status(); //擺手&擺腰
 			IK.calculate_inverse_kinematic(walkinggait.motion_delay_); //計算逆運動學
+			walkinggait.pushData();
 			locus.do_motion();
 
 			walkinggait.LIPM_flag_ = false;
