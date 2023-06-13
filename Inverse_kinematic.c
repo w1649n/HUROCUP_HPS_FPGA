@@ -741,14 +741,7 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
 			}
 		}
 		///////////////////////////////////////////////////////
-		if(walkinggait.locus_flag_)
-		{
-			// if((output_angle_[13]-datamodule.Walking_standangle[13])>200){output_angle_[13] = datamodule.Walking_standangle[13]+200;}
-			// else if((output_angle_[13]-datamodule.Walking_standangle[13])<-200){output_angle_[13] = datamodule.Walking_standangle[13]-200;}
-
-			// if((output_angle_[19]-datamodule.Walking_standangle[19])>200){output_angle_[19] = datamodule.Walking_standangle[19]+200;}
-			// else if((output_angle_[19]-datamodule.Walking_standangle[19])<-200){output_angle_[19] = datamodule.Walking_standangle[19]-200;}
-		}
+		
 		*((uint32_t *)init.robot_motion_addr+(2*i+1)) = output_speed_[i];
 		*((uint32_t *)init.robot_motion_addr+(2*i)) = output_angle_[i];
     }

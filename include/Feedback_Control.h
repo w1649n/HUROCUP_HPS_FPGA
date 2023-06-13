@@ -385,7 +385,7 @@ public:
 	double y_adj_by_cog_;
 	double original_ik_point_rz_, original_ik_point_lz_;
 	double ankle_pitch_;
-
+	float x_offset,y_offset_l,y_offset_r;
 	//LIPM
 	etSupFoot sup_foot_, pre_sup_foot_;
 

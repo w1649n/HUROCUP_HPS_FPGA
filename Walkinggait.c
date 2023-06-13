@@ -343,7 +343,7 @@ void Walkinggait::pushData()
     }        
     if(push_data_)
     {
-        IK.pushData();
+        // IK.pushData();
         // map_walk.find("l_foot_x")->second.push_back(step_point_lx_);
         // map_walk.find("r_foot_x")->second.push_back(step_point_rx_);
         // map_walk.find("l_foot_y")->second.push_back(step_point_ly_);
@@ -351,8 +351,8 @@ void Walkinggait::pushData()
         // map_walk.find("l_foot_z")->second.push_back(step_point_lz_);
         // map_walk.find("r_foot_z")->second.push_back(step_point_rz_);
 
-        map_walk.find("l_foot_x")->second.push_back(balance.leftfoot_hip_pitch);
-        map_walk.find("r_foot_x")->second.push_back(balance.rightfoot_hip_pitch);
+        map_walk.find("l_foot_x")->second.push_back(balance.x_offset);
+        map_walk.find("r_foot_x")->second.push_back(balance.y_offset_l);
         map_walk.find("l_foot_y")->second.push_back(end_point_ly_);
         map_walk.find("r_foot_y")->second.push_back(end_point_ry_);
         map_walk.find("l_foot_z")->second.push_back(IK.origin_angle[17]);
@@ -370,20 +370,20 @@ void Walkinggait::pushData()
         map_walk.find("com_x")->second.push_back(px_);
         map_walk.find("com_y")->second.push_back(py_);
         map_walk.find("now_step_")->second.push_back(com_y);
-        map_walk.find("ideal_zmp_x")->second.push_back(balance.PIDleftfoot_hip_pitch.error);
-        map_walk.find("ideal_zmp_y")->second.push_back(balance.PIDleftfoot_hip_pitch.errors);        
-        map_walk.find("points")->second.push_back(balance.PIDleftfoot_hip_roll.error);
+        map_walk.find("ideal_zmp_x")->second.push_back(balance.support_flag_y);
+        map_walk.find("ideal_zmp_y")->second.push_back(balance.support_flag_x);        
+        map_walk.find("points")->second.push_back(balance.y_offset_r);
         map_walk.find("t_")->second.push_back(balance.PIDleftfoot_hip_roll.errors);
         map_walk.find("time_point_")->second.push_back(time_point_);
         // map_walk.find("case")->second.push_back(Step_Count_);
-        // map_walk.find("sensor.roll")->second.push_back(sensor.rpy_[0]);
-        // map_walk.find("sensor.pitch")->second.push_back(sensor.rpy_[1]);
-        // map_walk.find("sensor.yaw")->second.push_back(sensor.rpy_[2]);
+        map_walk.find("sensor.roll")->second.push_back(sensor.rpy_[0]);
+        map_walk.find("sensor.pitch")->second.push_back(sensor.rpy_[1]);
+        map_walk.find("sensor.yaw")->second.push_back(sensor.rpy_[2]);
         map_walk.find("foot")->second.push_back(balance.sup_foot_);   
         // map_walk.find("theta")->second.push_back(theta_);
         // map_walk.find("var_theta_")->second.push_back(var_theta_); 
-        map_walk.find("Cpz")->second.push_back(balance.foot_cog_x_);
-        map_walk.find("Cpx")->second.push_back(balance.foot_cog_y_);          
+        map_walk.find("Cpz")->second.push_back(balance.change_pitch);
+        map_walk.find("Cpx")->second.push_back(balance.change_roll);          
     }
 }
 
@@ -477,9 +477,9 @@ void WalkingGaitByLIPM::initialize()
         map_walk["time_point_"] = temp;
         // map_walk["case"] = temp;
         map_walk["foot"] = temp;
-        // map_walk["sensor.roll"] = temp;
-		// map_walk["sensor.pitch"] = temp;
-		// map_walk["sensor.yaw"] = temp;
+        map_walk["sensor.roll"] = temp;
+		map_walk["sensor.pitch"] = temp;
+		map_walk["sensor.yaw"] = temp;
         
         // map_walk["theta"] = temp;
         // map_walk["var_theta_"] = temp;
@@ -536,53 +536,6 @@ void WalkingGaitByLIPM::readWalkData()
 
         
         abs_theta_ = fabs(var_theta_);
-
-
-
-        // if(Step_Count_ == 1)
-        // {
-        //     Step_Count_ += 1;
-        // }
-        // else if (Step_Count_ == 3)
-        // {
-        //     Step_Count_ = 0 ;
-        //     Stepout_flag_X_ = false;
-        //     Stepout_flag_Y_ = false;
-
-        // }
-        // else
-        // {
-        //     Step_Count_ = Step_Count_ ;
-        //     Stepout_flag_X_ = Stepout_flag_X_;
-        //     Stepout_flag_Y_ = Stepout_flag_Y_;
-        // }
-
-        if( ( Stepout_flag_X_ || Stepout_flag_Y_ ) && Step_Count_ >= 2)
-        {
-            Stepout_flag_X_ = false;
-            Stepout_flag_Y_ = false;
-            Control_Step_length_X_ = 0;
-            Control_Step_length_Y_ = 0;
-            Step_Count_ = 0;
-        }
-        else if( ( Stepout_flag_X_ || Stepout_flag_Y_ ) && (Step_Count_ <= 1))
-        {
-            if(((pre_step_%2 == 0) && (Control_Step_length_Y_ < 0))||((pre_step_%2 == 1) && (Control_Step_length_Y_ > 0)))
-            
-            {
-
-            }
-            else
-            {
-                Step_Count_ += 1;
-                // step_length_ -= Control_Step_length_X_;
-                // shift_length_ -= Control_Step_length_Y_;
-            }
-        }
-        else
-        {
-
-        }
 
         is_parameter_load_ = true;
     }
@@ -1044,8 +997,16 @@ void WalkingGaitByLIPM::process()
     // //px_ = px_ + 0.5 * ( px_ - com_x);
     // /* --- */
     // }
-    py_u = py_;
-    px_u = px_;    
+    
+
+    if(abs(sensor.rpy_[0])>5)
+       py_u = py_  - 0.2 * ( py_ - com_y);
+    else
+       py_u = py_;   
+    if(balance.pitch_over_limit_)
+        px_u = px_ - 0.05 * ( px_ - com_x);
+    else
+        px_u = px_;    
     // py_u = py_ + 0.2 * ( py_ - com_y);
     // px_u = px_ - 0.1 * ( px_ - com_x);
 
@@ -1083,12 +1044,12 @@ void WalkingGaitByLIPM::process()
         push_data_ = true; 
     }
     parameterinfo->points.IK_Point_RX = end_point_rx_;
-	parameterinfo->points.IK_Point_RY = end_point_ry_;
-	parameterinfo->points.IK_Point_RZ = end_point_rz_;
+	parameterinfo->points.IK_Point_RY = end_point_ry_+balance.y_offset_r;
+	parameterinfo->points.IK_Point_RZ = end_point_rz_-balance.x_offset-balance.y_offset_r;
 	parameterinfo->points.IK_Point_RThta = end_point_rthta_;
 	parameterinfo->points.IK_Point_LX = end_point_lx_;
-	parameterinfo->points.IK_Point_LY = end_point_ly_;
-	parameterinfo->points.IK_Point_LZ = end_point_lz_;
+	parameterinfo->points.IK_Point_LY = end_point_ly_+balance.y_offset_l;
+	parameterinfo->points.IK_Point_LZ = end_point_lz_-balance.x_offset-balance.y_offset_l;
 	parameterinfo->points.IK_Point_LThta = end_point_lthta_;
 }
 

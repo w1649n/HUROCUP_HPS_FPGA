@@ -131,7 +131,7 @@ int main()
 		{
 			walkinggait.setcom_pos(IB.WpB(0),IB.WpB(1));
 			walkinggait.walking_timer();
-			
+			walkinggait.pushData();
 
 			gettimeofday(&walkinggait.timer_start_, NULL);
 			// balance.balance_control();
@@ -189,7 +189,8 @@ int main()
 			locus.get_cpg_with_offset();  //獲取末端點
 			locus.control_by_robot_status(); //擺手&擺腰
 			IK.calculate_inverse_kinematic(walkinggait.motion_delay_); //計算逆運動學
-			walkinggait.pushData();
+			IK.pushData();
+			
 			locus.do_motion();
 
 			walkinggait.LIPM_flag_ = false;
@@ -197,7 +198,7 @@ int main()
 			walkinggait.locus_flag_ = false;
 			read_feedback = true;
 		}
-		
+		 
 	}
 	// clean up our memory mapping and exit
 	init.Clear_Memory_Mapping();
