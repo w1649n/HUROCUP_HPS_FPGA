@@ -12,6 +12,7 @@
         "zmpprocess.h": "c",
         "datamodule.h": "c",
         "pid_controller.h": "c",
-        "rmotor.h": "c"
+        "rmotor.h": "c",
+        "data_txt.h": "c"
     }
 }

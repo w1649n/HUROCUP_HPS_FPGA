@@ -370,8 +370,8 @@ void Walkinggait::pushData()
         map_walk.find("com_x")->second.push_back(px_);
         map_walk.find("com_y")->second.push_back(py_);
         map_walk.find("now_step_")->second.push_back(com_y);
-        map_walk.find("ideal_zmp_x")->second.push_back(balance.support_flag_y);
-        map_walk.find("ideal_zmp_y")->second.push_back(balance.support_flag_x);        
+        map_walk.find("ideal_zmp_x")->second.push_back(balance.support_flag_r);
+        map_walk.find("ideal_zmp_y")->second.push_back(balance.support_flag_l);        
         map_walk.find("points")->second.push_back(balance.y_offset_r);
         map_walk.find("t_")->second.push_back(balance.PIDleftfoot_hip_roll.errors);
         map_walk.find("time_point_")->second.push_back(time_point_);
@@ -999,7 +999,7 @@ void WalkingGaitByLIPM::process()
     // }
     
 
-    if(abs(sensor.rpy_[0])>5)
+    if(abs(sensor.rpy_[0])>3.5)
        py_u = py_  - 0.2 * ( py_ - com_y);
     else
        py_u = py_;   

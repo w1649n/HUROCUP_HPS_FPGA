@@ -496,7 +496,7 @@ public:
 	float tmp;
 	float tmp_com;
 	float tmp_com_total;
-	bool support_flag_y = false,support_flag_x = false;
+	bool support_flag_l = true,support_flag_r = true;
 	bool change_roll = false,change_pitch = false;
 	bool flag = false;
 	//LIPM end
