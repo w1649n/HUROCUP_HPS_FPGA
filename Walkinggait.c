@@ -491,6 +491,18 @@ void WalkingGaitByLIPM::readWalkParameter()
 {
     period_t_ = parameterinfo->parameters.Period_T;
     T_DSP_ = parameterinfo->parameters.OSC_LockRange;
+    if(parameterinfo->LCBalanceOn && parameterinfo->walking_mode == Continuous)
+    {
+        if(abs(step_length_) < 4)
+        {
+            lift_height_ = parameterinfo->parameters.BASE_Default_Z+abs(step_length_)*0.25;
+        }
+        else
+        {
+            lift_height_ = parameterinfo->parameters.BASE_Default_Z+abs(step_length_)*0.3;
+        }
+    }
+    else{lift_height_ = parameterinfo->parameters.BASE_Default_Z;}
     lift_height_ = parameterinfo->parameters.BASE_Default_Z;
     board_hight = parameterinfo->parameters.BASE_LIFT_Z;
     com_y_swing = parameterinfo->parameters.X_Swing_Range;
@@ -999,15 +1011,15 @@ void WalkingGaitByLIPM::process()
     // }
     
 
-    if(abs(sensor.rpy_[0])>3.5)
-       py_u = py_  - 0.2 * ( py_ - com_y);
-    else
-       py_u = py_;   
+    // if(abs(sensor.rpy_[0])>3.5)
+    //    py_u = py_  - 0.2 * ( py_ - com_y);
+    // else
+    //    py_u = py_;   
     if(balance.pitch_over_limit_)
         px_u = px_ - 0.05 * ( px_ - com_x);
     else
         px_u = px_;    
-    // py_u = py_ + 0.2 * ( py_ - com_y);
+    py_u = py_ + 0.6 * ( py_ - com_y);
     // px_u = px_ - 0.1 * ( px_ - com_x);
 
 

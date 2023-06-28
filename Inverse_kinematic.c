@@ -151,7 +151,7 @@ void Locus::control_by_robot_status(){
 		tmp = atan2(Points.Inverse_PointL_X, (Points.Inverse_PointL_Z+SHOULDER_TO_COM)) * PI_2_Angle;	//左手擺的幅度跟隨右腳往前的幅度
 	else
 		tmp = -atan2(Points.Inverse_PointR_X, (Points.Inverse_PointR_Z+SHOULDER_TO_COM)) * PI_2_Angle;
-	tmp_waist = tmp *0.1;
+	tmp_waist = tmp *0.05;
 	tmp_pitch = tmp *0.05;
 	tmp *= 0.08;
 	
