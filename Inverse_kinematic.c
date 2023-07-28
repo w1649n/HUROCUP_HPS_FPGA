@@ -7,11 +7,9 @@ struct Parameters_Struct Parameters;
 struct Status_Struct RobotStatus;
 
 extern Initial init;
-extern Walkinggait walkinggait;
 extern Datamodule datamodule;
 extern BalanceControl balance;
 extern kickgait_space::KickingGait kickinggait;
-extern SensorDataProcess sensor;
 
 Locus::Locus()
 {
@@ -32,7 +30,7 @@ void Locus::do_motion()
 		if(avalon_locus_idle)
 		{
 			*(uint32_t *)(init.h2p_avalon_locus_addr_1) = 0x01;
-			//usleep(100);
+			usleep(100);
 			*(uint32_t *)(init.h2p_avalon_locus_addr_1) = 0;
 			break;
 		}
@@ -54,20 +52,8 @@ void Locus::set_point_by_body()
 	Points.Inverse_PointL_Z = COM_HEIGHT - Points.Inverse_Pointbody_Z;
 	Points.Inverse_PiontL_Thta = Points.Inverse_Piontbody_Thta;
 }
-void Locus::get_first_stand()
-{
-	Points.Inverse_PointR_X 			= walkinggait.end_point_rx_;
-	Points.Inverse_PointR_Y 			= walkinggait.end_point_ry_;
-	Points.Inverse_PointR_Z 			= walkinggait.end_point_rz_;
-	Points.Inverse_PointL_X 			= walkinggait.end_point_lx_;
-	Points.Inverse_PointL_Y 			= walkinggait.end_point_ly_;
-	Points.Inverse_PointL_Z 			= walkinggait.end_point_lz_;
-	Points.Inverse_PiontR_Thta			= walkinggait.end_point_rthta_;
-	Points.Inverse_PiontL_Thta			= walkinggait.end_point_lthta_;
-	walkinggait.if_finish_				= true;
-}
-void Locus::get_cpg_with_offset()
-{
+
+void Locus::get_cpg_with_offset(){
 	Points.Inverse_Uncontrol_PointR_X	= parameterinfo->points.IK_Point_RX;
     Points.Inverse_Uncontrol_PointR_Y	= parameterinfo->points.IK_Point_RY;
     Points.Inverse_PointR_Z				= parameterinfo->points.IK_Point_RZ;
@@ -141,122 +127,31 @@ void Locus::calculate_robot_status(){
 
 void Locus::control_by_robot_status(){
 	double tmp = 0;
-	double tmp_waist = 0;
-	double tmp_pitch = 0;
-	double base_L 	  = PI_2;
-	double base_R 	  = PI_2;
-	double base_Waist = PI_2;
+	double base_L = PI_2;
+	double base_R = PI_2;
 
-	if((walkinggait.now_step_ % 2) == 1)
-		tmp = atan2(Points.Inverse_PointL_X, (Points.Inverse_PointL_Z+SHOULDER_TO_COM)) * PI_2_Angle;	//左手擺的幅度跟隨右腳往前的幅度
-	else
-		tmp = -atan2(Points.Inverse_PointR_X, (Points.Inverse_PointR_Z+SHOULDER_TO_COM)) * PI_2_Angle;
-	tmp_waist = tmp *0.05;
-	tmp_pitch = tmp *0.05;
-	tmp *= 0.08;
-	
+	tmp = atan2(Points.Inverse_PointL_X, (Points.Inverse_PointL_Z+SHOULDER_TO_COM)) * PI_2_Angle;	//左手擺的幅度跟隨右腳往前的幅度
+	tmp *= 0.1;
+
 	if(tmp > PI_6)
 		tmp = PI_6;
 	else if(tmp < -PI_6)
 		tmp = -PI_6;
 
-	if(tmp_waist > (PI_6/2))
-		tmp_waist = (PI_6/2);
-	else if(tmp_waist < -(PI_6/2))
-		tmp_waist = -(PI_6/2);
-
-	Points.waist_offset = tmp_waist;
-	
-
 	if(Points.Inverse_PointL_X > 0)
 	{
-		Points.Thta[0] = base_L + tmp;//base - (base - tmp);
-		Points.Thta[4] = base_R + tmp;//base - (base - tmp);
-		Points.Thta[8] = base_Waist + tmp_waist;
+		Points.Thta[0] = base_L - tmp;//base - (base - tmp);
+		Points.Thta[4] = base_R - tmp;//base - (base - tmp);
 	}
 	else if(Points.Inverse_PointL_X < 0)
 	{
-		Points.Thta[0] = base_L + tmp;//base + (base - tmp);
-		Points.Thta[4] = base_R + tmp;//base + (base - tmp);
-		Points.Thta[8] = base_Waist + tmp_waist;
-	}
-	else if(Points.Inverse_PointR_X >0)
-	{
-		// tmp = atan2(Points.Inverse_PointR_X, (Points.Inverse_PointR_Z+SHOULDER_TO_COM)) * PI_2_Angle;
-		// tmp_waist = tmp *0.05;
-		// tmp *= 0.08;
-		Points.Thta[0] = base_L + tmp;//base + (base - tmp);
-		Points.Thta[4] = base_R + tmp;//base + (base - tmp);
-		Points.Thta[8] = base_Waist + tmp_waist;
-	}
-	else if(Points.Inverse_PointR_X < 0)
-	{
-		Points.Thta[0] = base_L + tmp;//base + (base - tmp);
-		Points.Thta[4] = base_R + tmp;//base + (base - tmp);
-		Points.Thta[8] = base_Waist + tmp_waist;
+		Points.Thta[0] = base_L - tmp;//base + (base - tmp);
+		Points.Thta[4] = base_R - tmp;//base + (base - tmp);
 	}
 	else
 	{
 		Points.Thta[0] = base_L;
 		Points.Thta[4] = base_R;
-		Points.Thta[8] = base_Waist;
-	}
-	  							/*上板=2*/  							/*stop_step=3*/
-	if(parameterinfo->walking_mode == 2)
-	{
-		if(parameterinfo->complan.walking_state == 1)
-		{
-			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2*walkinggait.t_/walkinggait.TT_);
-			// Points.roll_offset = sensor.roll_pid_[0]*0.1*sin(PI/2*walkinggait.t_/walkinggait.TT_);
-		}
-		else
-		{
-			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2);
-			// Points.roll_offset  = sensor.pitch_pid_[0]*0.1*sin(PI/2);
-		}
-		Points.Thta[0] = base_L;
-		Points.Thta[4] = base_R;
-		Points.Thta[8] = base_Waist;
-		Points.waist_offset = 0;
-	}
-	else if(parameterinfo->walking_mode == 3)
-	{
-		if(parameterinfo->complan.walking_state == 1)
-		{
-			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2*walkinggait.t_/walkinggait.TT_);
-			// Points.roll_offset = sensor.roll_pid_[0]*0.1*sin(PI/2*walkinggait.t_/walkinggait.TT_);
-		}
-		else
-		{
-			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2);
-			// Points.roll_offset  = sensor.pitch_pid_[0]*0.1*sin(PI/2);
-		}
-		Points.Thta[0] = base_L;
-		Points.Thta[4] = base_R;
-		Points.Thta[8] = base_Waist;
-		Points.waist_offset = 0;
-	}
-
-	if(!parameterinfo->LCBalanceOn)
-	{
-		// Points.Thta[0] = base_L;
-		// Points.Thta[4] = base_R;
-	}
-	Points.Thta[0] = base_L;
-	Points.Thta[4] = base_R;
-	if(parameterinfo->X<0)
-	{
-		Points.back_offset = 0.8*PI/180;
-		Points.Thta[8] = base_Waist;
-		Points.waist_offset = 0;
-	}
-	else if(parameterinfo->X>=2)
-	{
-		Points.back_offset = 0.5*parameterinfo->X*PI/180;
-	}
-	else
-	{
-		Points.back_offset = 0;
 	}
 }
 
@@ -270,7 +165,6 @@ InverseKinematic::InverseKinematic()
 	std::vector<double> temp;
 	// if(map_motor.empty())
 	// {
-		map_motor["motor_9"] = temp;
 		map_motor["motor_11"] = temp;
         map_motor["motor_12"] = temp;
         map_motor["motor_13"] = temp;
@@ -335,18 +229,18 @@ void InverseKinematic::initial_speed_gain()
 	speed_gain_[8] = ALL_Speed_Gain * 1;//0.8;
 
 	speed_gain_[9] = ALL_Speed_Gain * 1;//2;
-	speed_gain_[10] = ALL_Speed_Gain * 2;
+	speed_gain_[10] = ALL_Speed_Gain * 1;
 	speed_gain_[11] = ALL_Speed_Gain * 1;//2;//3;
 	speed_gain_[12] = ALL_Speed_Gain * 1;
 	speed_gain_[13] = ALL_Speed_Gain * 1;
-	speed_gain_[14] = ALL_Speed_Gain * 2;
+	speed_gain_[14] = ALL_Speed_Gain * 1;
 
 	speed_gain_[15] = ALL_Speed_Gain * 1;
-	speed_gain_[16] = ALL_Speed_Gain * 2;
+	speed_gain_[16] = ALL_Speed_Gain * 1;
 	speed_gain_[17] = ALL_Speed_Gain * 1;
 	speed_gain_[18] = ALL_Speed_Gain * 1;
 	speed_gain_[19] = ALL_Speed_Gain * 1;
-	speed_gain_[20] = ALL_Speed_Gain * 2;
+	speed_gain_[20] = ALL_Speed_Gain * 1;
 }
 
 void InverseKinematic::initial_inverse_kinematic()
@@ -355,7 +249,8 @@ void InverseKinematic::initial_inverse_kinematic()
 
 	initial_parameters();
 	
-	double Motion_Delay = Parameters.Period_T/Parameters.Sample_Time;           //600 / 24 = 25
+	// double Motion_Delay = Parameters.Period_T/Parameters.Sample_Time;           //600 / 24 = 25
+	double Motion_Delay = Parameters.Sample_Time;
 	initial_points();
 	initial_points_process();
 
@@ -396,11 +291,11 @@ void InverseKinematic::initial_inverse_kinematic()
 	output_base_[16] -= 0;
 	Parameters.Body_Pitch_tmp = Parameters.Body_Pitch;
 }
- 
+
 void InverseKinematic::initial_parameters(){
 	Parameters.Phase_Shift = PI;      //-pi~pi
 	Parameters.X_Swing_Range = 1;     //cm
-	Parameters.Y_Swing_Range = 5.5;  //3   //cm
+	Parameters.Y_Swing_Range = 3;     //cm
 	Parameters.COM_Height = COM_HEIGHT;     //cm//////	21.7
 	Parameters.l1 = 12.5;//10.2;             //cm Upper	10th: 12.5 11st: 10.2 robotcup: 14
 	Parameters.l2 = 12.5;//10.2;             //cm Down	10th: 12.5 11st: 10.4 robotcup: 14
@@ -444,16 +339,13 @@ void InverseKinematic::initial_points()
 	Points.P_Table[5] = 0;                     //Positive
 	Points.P_Table[6] = 0;                     //Positive
 	Points.P_Table[7] = 0;                     //Positive
-	//腰
 	Points.P_Table[8] = 0;                     //Positive
-	//左腳
 	Points.P_Table[9] = 0;                     //Positive
 	Points.P_Table[10] = 0;                    //Positive
 	Points.P_Table[11] = 0;                    //Positive
 	Points.P_Table[12] = 0;                    //Positive
 	Points.P_Table[13] = 1;                    //Negitive
 	Points.P_Table[14] = 1;                    //Negitive
-	//右腳
 	Points.P_Table[15] = 0;                    //Positive
 	Points.P_Table[16] = 0;                    //Pogitive
 	Points.P_Table[17] = 1;                    //Negitive
@@ -462,29 +354,10 @@ void InverseKinematic::initial_points()
 	Points.P_Table[20] = 1;                    //Negitive
 
 #ifdef Robot1    
-	// for(i = 0; i < 21; i++)
-	// {
-	// 	thta_base_[i] = datamodule.totalangle_[i];
-	// }
-	//-----------------上半身角度base----------------------
-	for(i = 0; i < 9; i++)
+	for(i = 0; i < 21; i++)
 	{
 		thta_base_[i] = datamodule.totalangle_[i];
 	}
-	//-----------------下半身角度base----------------------
-	thta_base_[9]  = datamodule.Calculate_standangle[0];
-	thta_base_[10] = datamodule.Calculate_standangle[1];
-	thta_base_[11] = datamodule.Calculate_standangle[2];
-	thta_base_[12] = datamodule.Calculate_standangle[3];
-	thta_base_[13] = datamodule.Calculate_standangle[4];
-	thta_base_[14] = datamodule.Calculate_standangle[5];
-	thta_base_[15] = datamodule.Calculate_standangle[6];
-	thta_base_[16] = datamodule.Calculate_standangle[7];
-	thta_base_[17] = datamodule.Calculate_standangle[8];
-	thta_base_[18] = datamodule.Calculate_standangle[9];
-	thta_base_[19] = datamodule.Calculate_standangle[10];
-	thta_base_[20] = datamodule.Calculate_standangle[11];
-	//----------------------------------------------------
 #else
 	thta_base_[0] = 3044;
 	thta_base_[1] = 466;
@@ -558,7 +431,7 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
     RL_2 = R_Lxyz * R_Lxyz;
     LL_2 = L_Lxyz * L_Lxyz;
 
-    Points.Thta[9] = Points.Inverse_PiontL_Thta + PI_2 - Points.waist_offset;
+    Points.Thta[9] = Points.Inverse_PiontL_Thta + PI_2;
     if(Points.Inverse_PointL_Y == 0)
     {
         Points.Thta[10] = PI_2;    //pi/2
@@ -591,14 +464,14 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
     }/////////////////////////////////////
 
     Points.Thta[12] = PI - acos((l1_2 + l2_2 -LL_2)/(2*Parameters.l1*Parameters.l2)); //左膝
-    Points.Thta[13] = PI - (Points.Thta[11] + Points.Thta[12]);//左踝
+    Points.Thta[13] = PI - Points.Thta[11] -Points.Thta[12]; //左踝
 
     if(flag_ ==  0)
         Points.Thta[14] = PI - Points.Thta[10];
     else
         Points.Thta[14] = PI - Points.Thta[10]-rotate_body_l_;
 
-    Points.Thta[15] = Points.Inverse_PiontR_Thta + PI_2 - Points.waist_offset;
+    Points.Thta[15] = Points.Inverse_PiontR_Thta + PI_2;
   //  printf("Points.Inverse_PiontR_Thta = %f\n",Points.Inverse_PiontR_Thta);
 
     if(Points.Inverse_PointR_Y == 0)
@@ -634,44 +507,27 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
     Points.Thta[18] = PI - acos((l1_2 + l2_2 - RL_2)/(2*Parameters.l1*Parameters.l2));
     Points.Thta[19] = PI - Points.Thta[17] - Points.Thta[18];
 
-
     if(flag_ ==  0)
         Points.Thta[20] = PI - Points.Thta[16];
     else
         Points.Thta[20] = PI - Points.Thta[16]-rotate_body_l_;
 	
-	
-	//-----test-----//
-	for( i = 0; i < 21; i++)
-    {
-		if(Points.P_Table[i])
-        {
-            origin_angle[i] = (unsigned int)(Max_value - (Points.Thta[i] * PI_TO_OUTPUT + Position_Zero));
-        }
-        else
-        {
-            origin_angle[i] = (unsigned int)(Points.Thta[i] * PI_TO_OUTPUT + Position_Zero);
-        }
-        origin_angle[i] += output_base_[i];
-	}
-	//--------------//
-	if(parameterinfo->LCBalanceOn && !datamodule.stand_flag)
+
+
+	//balance.control_after_ik_calculation();
+
+	if(kickinggait.kicking_process_flag_)
 	{
-		balance.control_after_ik_calculation();
-		// balance.saveData();
+		kickinggait.hipPostureControl();
+		kickinggait.ankleBalanceControl();
+		kickinggait.hipPitchControl();
 	}
-	// if(kickinggait.kicking_process_flag_)
-	// {
-	// 	kickinggait.hipPostureControl();
-	// 	kickinggait.ankleBalanceControl();
-	// 	kickinggait.hipPitchControl();
-	// }
-	
+
 
 	if(old_walking_stop == false && parameterinfo->complan.walking_stop == true)
 	{
-		//balance.saveData();
-		//saveData();
+		balance.saveData();
+		saveData();
 	}
 	old_walking_stop = parameterinfo->complan.walking_stop;
 
@@ -694,15 +550,17 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
             output_angle_[i] = (unsigned int)(Points.Thta[i] * PI_TO_OUTPUT + Position_Zero);
         }
         output_angle_[i] += output_base_[i];
-		correct_angle[i] = output_angle_[i];
+
         double different_thta;
         different_thta = fabs( past_thta_[i] - Points.Thta[i]);
         if(different_thta > 0.0)
         {
-        	delay_time_[i] = (unsigned int)(different_thta/(2*PI) * (1000/Motion_Delay) * 60 / 0.229);	// ((percent of circle(rad)) / ((delta t/1000)*60(min))) / 0.229(rpm/unit)
+        	// delay_time_[i] = (unsigned int)(different_thta/(2*PI) * (1000/Motion_Delay) * 60 / 0.229);	// ((percent of circle(rad)) / ((delta t/1000)*60(min))) / 0.229(rpm/unit)
+			delay_time_[i] = (unsigned int)(different_thta/(2*PI) * (1000/60) * 60 / 0.229);	// ((percent of circle(rad)) / ((delta t/1000)*60(min))) / 0.229(rpm/unit)
         }
         past_thta_[i] = Points.Thta[i];
-        output_speed_[i] = delay_time_[i]  * SPEED_TRANS;
+        // output_speed_[i] = delay_time_[i]  * SPEED_TRANS;
+		output_speed_[i] = delay_time_[i];
         output_speed_[i] = output_speed_[i] * speed_gain_[i];
 		//----------------------printf-----------------------------
         #ifdef Auto_Stand
@@ -728,27 +586,25 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
         {
             output_speed_[i] = 32767;
 		}
-		///////////////////儲存屈膝站姿//////////////////////////
-		if(i>8)
-		{	
-			if(walkinggait.if_finish_)
-			{
-				if(datamodule.stand_flag)
-					datamodule.Walking_standangle[i] = output_angle_[i]; // for stand
-				else
-					datamodule.totalangle_[i] 		 = output_angle_[i]; // for motion
-				
-			}
-		}
-		///////////////////////////////////////////////////////
-		
+		// if(i>9 && i<15)
+			// printf("IK %d:\t%d\tSP %d:\t%d\n", i+1, output_angle_[i], i+1, output_speed_[i]);
 		*((uint32_t *)init.robot_motion_addr+(2*i+1)) = output_speed_[i];
 		*((uint32_t *)init.robot_motion_addr+(2*i)) = output_angle_[i];
+		// printf("32\n");
     }
-	// if(walkinggait.push_data_)
-	// {
-		
-	// }
+
+	map_motor.find("motor_11")->second.push_back((double)output_angle_[10]);
+	map_motor.find("motor_12")->second.push_back((double)output_angle_[11]);
+	map_motor.find("motor_13")->second.push_back((double)output_angle_[12]);
+	map_motor.find("motor_14")->second.push_back((double)output_angle_[13]);
+	map_motor.find("motor_15")->second.push_back((double)output_angle_[14]);
+
+	map_motor.find("motor_17")->second.push_back((double)output_angle_[16]);
+	map_motor.find("motor_18")->second.push_back((double)output_angle_[17]);
+	map_motor.find("motor_19")->second.push_back((double)output_angle_[18]);
+	map_motor.find("motor_20")->second.push_back((double)output_angle_[19]);
+	map_motor.find("motor_21")->second.push_back((double)output_angle_[20]);
+	// printf("\n");
 	*((uint32_t *)init.robot_motion_addr+(42)) = Motion_Delay;
 	*((uint32_t *)init.robot_motion_addr+(43)) = 0x00000070;
 
@@ -860,216 +716,6 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
 	// printf("%d",output_angle_[10]);
 
 	
-}
-
-void InverseKinematic::calculate_inverse_kinematic_forstand(int Motion_Delay)
-{
-	double R_Lyz, L_Lyz, R_Lxyz, L_Lxyz;
-    double RX_2, RY_2, RZ_2, LX_2, LY_2, LZ_2;
-    double l1_2, l2_2, l1_l2, RL_2, LL_2;
-    int i;
-	printf("LH = %f, RH = %f\n",Points.Inverse_PointR_Z,Points.Inverse_PointL_Z);
-	//printf("//////////////\nR_X: %f, R_Y: %f, R_Z: %f, R_T: %f\nL_X: %f, L_Y: %f, L_Z: %f, L_T: %f\n\n",Points.Inverse_PointR_X, Points.Inverse_PointR_Y, Points.Inverse_PointR_Z, Points.Inverse_PiontR_Thta, Points.Inverse_PointL_X, Points.Inverse_PointL_Y, Points.Inverse_PointL_Z, Points.Inverse_PiontL_Thta);
-	//usleep(10000);
-
-    RX_2 = Points.Inverse_PointR_X * Points.Inverse_PointR_X;
-    RY_2 = Points.Inverse_PointR_Y * Points.Inverse_PointR_Y;
-    RZ_2 = Points.Inverse_PointR_Z * Points.Inverse_PointR_Z;
-    LX_2 = Points.Inverse_PointL_X * Points.Inverse_PointL_X;
-    LY_2 = Points.Inverse_PointL_Y * Points.Inverse_PointL_Y;
-    LZ_2 = Points.Inverse_PointL_Z * Points.Inverse_PointL_Z;
-    l1_2 = Parameters.l1 * Parameters.l1; /////大腿長度平方
-    l2_2 = Parameters.l2 * Parameters.l2; /////小腿長度平方
-    l1_l2 = Parameters.l1 + Parameters.l2; /////大腿+小腿長度
-    R_Lyz = sqrt(RY_2 + RZ_2);  // Lr for roll
-    L_Lyz = sqrt(LY_2 + LZ_2); //Ll   for roll
-    R_Lxyz = sqrt(RX_2 + RZ_2 + RY_2); //LR for pit 末端點到原點距離
-    L_Lxyz = sqrt(LX_2 + LZ_2 + LY_2); //LL for pit
-    if(R_Lxyz > (l1_l2))
-        R_Lxyz = l1_l2;
-    if(L_Lxyz > (l1_l2))
-        L_Lxyz = l1_l2;
-    RL_2 = R_Lxyz * R_Lxyz;
-    LL_2 = L_Lxyz * L_Lxyz;
-
-    Points.Thta[9] = Points.Inverse_PiontL_Thta + PI_2;//10號馬達(左腳)
-    if(Points.Inverse_PointL_Y == 0)
-    {
-        Points.Thta[10] = PI_2;    //pi/2
-    }
-    else
-    {
-        Points.Thta[10] = atan2(Points.Inverse_PointL_Z, Points.Inverse_PointL_Y);//0.17896442525332481013377688544073-rotate_body_l_
-
-    }
-
-    if(Points.Inverse_PointL_X == 0)
-    {
-        Points.Thta[11] = PI_2 - acos((l1_2 + LL_2 - l2_2)/(2*Parameters.l1*L_Lxyz));   //左腳髖關
-    }
-//    else if(Points.Inverse_PointL_X > 0)//////////////
-//    {
-//        Points.Thta[11] = PI - acos((l1_2 + LL_2 - l2_2)/(2*Parameters.l1*L_Lxyz)) - atan2(L_Lyz,-Points.Inverse_PointL_X);
-//    }
-//    else
-//    {
-//        Points.Thta[11] = PI - acos((l1_2 + LL_2 - l2_2)/(2*Parameters.l1*L_Lxyz)) - atan2(L_Lyz,-Points.Inverse_PointL_X);
-//    }/////////////////////////////////////
-    else if(Points.Inverse_PointL_X > 0)//////////////
-    {
-        Points.Thta[11] = PI_2 - acos((l1_2 + LL_2 - l2_2)/(2*Parameters.l1*L_Lxyz)) - atan2(Points.Inverse_PointL_X,L_Lyz);
-    }
-    else
-    {
-        Points.Thta[11] = PI - acos((l1_2 + LL_2 - l2_2)/(2*Parameters.l1*L_Lxyz)) - atan2(L_Lyz,-Points.Inverse_PointL_X);
-    }/////////////////////////////////////
-
-    Points.Thta[12] = PI - acos((l1_2 + l2_2 -LL_2)/(2*Parameters.l1*Parameters.l2)); //左膝
-    Points.Thta[13] = PI - Points.Thta[11] -Points.Thta[12]; //左踝
-
-    if(flag_ ==  0)
-        Points.Thta[14] = PI - Points.Thta[10];
-    else
-        Points.Thta[14] = PI - Points.Thta[10]-rotate_body_l_;
-
-    Points.Thta[15] = Points.Inverse_PiontR_Thta + PI_2;//16號馬達(右腳)
-  //  printf("Points.Inverse_PiontR_Thta = %f\n",Points.Inverse_PiontR_Thta);
-
-    if(Points.Inverse_PointR_Y == 0)
-    {
-        Points.Thta[16] = PI_2;
-    }
-    else
-    {
-        Points.Thta[16] = atan2(Points.Inverse_PointR_Z, Points.Inverse_PointR_Y);
-    }
-
-    if(Points.Inverse_PointR_X == 0)
-    {
-        Points.Thta[17] = PI_2 - acos((l1_2 + RL_2 - l2_2)/(2*Parameters.l1*R_Lxyz));
-    }
-//    else if(Points.Inverse_PointR_X > 0)////////////////////////
-//    {
-//        Points.Thta[17] = PI - acos((l1_2 + RL_2 - l2_2)/(2*Parameters.l1*R_Lxyz)) - atan2(R_Lyz,-Points.Inverse_PointR_X);
-//    }
-//    else
-//    {
-//        Points.Thta[17] = PI - acos((l1_2 + RL_2 - l2_2)/(2*Parameters.l1*R_Lxyz)) - atan2(R_Lyz,-Points.Inverse_PointR_X);
-//    }///////////////////////////////
-    else if(Points.Inverse_PointR_X > 0)////////////////////////
-    {
-        Points.Thta[17] = PI_2 - acos((l1_2 + RL_2 - l2_2)/(2*Parameters.l1*R_Lxyz)) - atan2(Points.Inverse_PointR_X,R_Lyz);
-    }
-    else
-    {
-        Points.Thta[17] = PI - acos((l1_2 + RL_2 - l2_2)/(2*Parameters.l1*R_Lxyz)) - atan2(R_Lyz,-Points.Inverse_PointR_X);
-    }///////////////////////////////
-
-    Points.Thta[18] = PI - acos((l1_2 + l2_2 - RL_2)/(2*Parameters.l1*Parameters.l2));
-    Points.Thta[19] = PI - Points.Thta[17] - Points.Thta[18];
-
-    if(flag_ ==  0)
-        Points.Thta[20] = PI - Points.Thta[16];
-    else
-        Points.Thta[20] = PI - Points.Thta[16]-rotate_body_l_;
-	
-
-
-	// if(parameterinfo->LCBalanceOn)
-	// {
-	// 	balance.control_after_ik_calculation();
-	// 	balance.saveData();
-	// }
-
-	if(kickinggait.kicking_process_flag_)
-	{
-		kickinggait.hipPostureControl();
-		kickinggait.ankleBalanceControl();
-		kickinggait.hipPitchControl();
-	}
-
-
-	if(old_walking_stop == false && parameterinfo->complan.walking_stop == true)
-	{
-		//balance.saveData();
-		//saveData();
-	}
-	old_walking_stop = parameterinfo->complan.walking_stop;
-
-
-    for( i = 0; i < 21; i++)
-    {
-        if(Points.P_Table[i])
-        {
-            output_angle_[i] = (unsigned int)(Max_value - (Points.Thta[i] * PI_TO_OUTPUT + Position_Zero));
-        }
-        else
-        {
-            output_angle_[i] = (unsigned int)(Points.Thta[i] * PI_TO_OUTPUT + Position_Zero);
-        }
-        output_angle_[i] += output_base_[i];
-
-        double different_thta;
-        different_thta = fabs( past_thta_[i] - Points.Thta[i]);
-        if(different_thta > 0.0)
-        {
-        	delay_time_[i] = (unsigned int)(different_thta/(2*PI) * (1000/Motion_Delay) * 60 / 0.229);	// ((percent of circle(rad)) / ((delta t/1000)*60(min))) / 0.229(rpm/unit)
-        }
-        past_thta_[i] = Points.Thta[i];
-        output_speed_[i] = delay_time_[i]  * SPEED_TRANS;
-        output_speed_[i] = output_speed_[i] * speed_gain_[i];
-		//----------------------printf-----------------------------
-        #ifdef Auto_Stand
-            if(i == 10 || i == 11 || i == 12 || i == 13 || i == 14   || i == 16 || i == 17 || i == 18 || i == 19)
-                printf("%d:%d ", i+1, output_angle_[i]);
-            else if(i == 20)
-                printf("%d:%d\n", i+1, output_angle_[i]);
-        #endif
-        //---------------------------------------------------------
-        if(output_angle_[i] >Max_value)
-        {
-            output_angle_[i] = Max_value;
-        }
-        else if(output_angle_[i] <= 0)
-        {
-            output_angle_[i] = 0;
-        }
-        if (output_speed_[i] <= 0)
-        {
-            output_speed_[i] = 0;
-        }
-        else if(output_speed_[i] > 32767)
-        {
-            output_speed_[i] = 32767;
-		}
-		///////////////////儲存屈膝站姿//////////////////////////
-		if(i>8)
-		{	
-			if(walkinggait.if_finish_)
-			{
-				datamodule.Walking_standangle[i] = output_angle_[i]; // for stand
-				datamodule.totalangle_[i] 		 = output_angle_[i]; // for motion
-			}
-		}
-		///////////////////////////////////////////////////////
-    }
-}
-
-void InverseKinematic::pushData()
-{
-	map_motor.find("motor_9")->second.push_back((double)output_angle_[8]);
-	/*左腳*/
-	map_motor.find("motor_11")->second.push_back((double)output_angle_[10]);
-	map_motor.find("motor_12")->second.push_back((double)output_angle_[11]);
-	map_motor.find("motor_13")->second.push_back((double)output_angle_[12]);
-	map_motor.find("motor_14")->second.push_back((double)output_angle_[13]);
-	map_motor.find("motor_15")->second.push_back((double)output_angle_[14]);
-	/*右腳*/
-	map_motor.find("motor_17")->second.push_back((double)output_angle_[16]);
-	map_motor.find("motor_18")->second.push_back((double)output_angle_[17]);
-	map_motor.find("motor_19")->second.push_back((double)output_angle_[18]);
-	map_motor.find("motor_20")->second.push_back((double)output_angle_[19]);
-	map_motor.find("motor_21")->second.push_back((double)output_angle_[20]);
 }
 
 string InverseKinematic::DtoS(double value)

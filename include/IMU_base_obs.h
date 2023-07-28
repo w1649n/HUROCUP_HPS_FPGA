@@ -30,6 +30,26 @@ public:
 	Vector3d WpB_hat;			/* state_hat */
 	Vector3d WvB_hat;			/* state_hat */
 
+	/* Matrix of Kalman Filter */
+	Matrix<double, 3, 3> A;
+	Matrix<double, 1, 3> C;
+	Matrix<double, 3, 1> X_, X, Y_, Y;
+	Matrix<double, 3, 1> K;
+	Matrix<double, 3, 3> P_, P_x, P_y, Q;
+
+	double R, XZ, YZ, XZ_hat, YZ_hat;
+
+
+	void setPrioriEstimate(Vector3d X_p, Vector3d Y_p){
+		X_ = X_p;
+		Y_ = Y_p;
+	}
+
+	void initial_Kalmen_Filter(Matrix<double, 3, 3> A_, Matrix<double, 1, 3> C_);
+	void reset_Kalmen_Filter();
+	void Kalmen_Filter();
+
+
 	bool first_time;
 
     IMU_base_obs();

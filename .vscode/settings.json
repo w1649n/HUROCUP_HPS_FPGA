@@ -10,9 +10,11 @@
         "eigen": "cpp",
         "inverse_kinematic.h": "c",
         "zmpprocess.h": "c",
-        "datamodule.h": "c",
-        "pid_controller.h": "c",
-        "rmotor.h": "c",
-        "data_txt.h": "c"
+        "walkinggait.h": "c",
+        "matrixfunctions": "cpp",
+        "alignedvector3": "cpp",
+        "fft": "cpp",
+        "adolcforward": "c",
+        "eiquadprog.h": "c"
     }
 }

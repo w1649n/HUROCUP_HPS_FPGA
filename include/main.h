@@ -38,11 +38,9 @@
 #include "Sensor.h"
 #include "hand_kinetic_base.h"
 #include "IMU_base_obs.h"
-#include "Feedback_Motor.h"
 //#include "inc\WalkingGait.h"
 /********************************************************/
 
-Feedback_Motor feedbackmotor;
 Locus locus;
 InverseKinematic IK;
 Initial init;
@@ -51,8 +49,9 @@ Datamodule datamodule;
 SensorDataProcess sensor;
 BalanceControl balance;
 Hand_InverseKinematic HandIK;
-IMU_base_obs IB;
-WalkingGaitByLIPM walkingGaitByLIPM;
+extern IMU_base_obs IB;
+extern ModelPredictiveControl MPC;
+
 
 struct timeval tstart, tend;
 double timeuse;
