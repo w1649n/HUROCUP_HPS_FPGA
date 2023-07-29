@@ -40,11 +40,15 @@ public:
     std::string DtoS(double value);
 	std::map<std::string, std::vector<double>> map_motor;       
     void saveData();
+    void pushData();
 
     unsigned char datamodule_cmd_;
     bool motion_execute_flag_;
     int totalangle_[21];
     int totalspeed_[21];
+
+    int Calculate_standangle[12];
+    int Calculate_standspeed[12];
 
 private:
     bool update_database_flag_;

@@ -55,6 +55,9 @@ public:
     void readWalkParameter();
     void resetParameter();
     void process();
+    void LCup();
+    void LCdown();
+    void stand_point();
     void coordinate_transformation();
     void coordinate_offset();
 
@@ -93,6 +96,7 @@ public:
     int step_, left_step_, right_step_;
     double TT_, t_;
     double Tc_;
+    double rightfoot_shift_z,com_y_swing;
     double step_length_, width_size_, lift_height_, base_x, now_width_, width_x, width_y;
     double theta_, var_theta_, abs_theta_, last_theta_, last_abs_theta_;
     double last_displacement_x, now_left_x_, now_right_x_, last_base_x;

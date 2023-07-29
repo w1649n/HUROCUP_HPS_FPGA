@@ -34,32 +34,54 @@ int main()
 	int zmp_timer = 0,zmp_count = 0,use_timer = 0;
 	bool zmp_first_time = true;
 	/*-----*/
-
+	//------測試用延遲------//
+	//usleep(500 * 1000); 	//0.5s
+	//sleep(2);				//2s
 	while(1)
 	{
-    	//printf(" ");
-		// printf("rpy[0]_ = %f, rpy[1]_ = %f, rpy[2]_ = %f\n", sensor.rpy_[0],sensor.rpy_[1],sensor.rpy_[2]);
+    	/*---動作串---*/
 		datamodule.load_database();
 		if(datamodule.motion_execute_flag_)
 		{
+			if(datamodule.stand_flag)
+			{
+				walkinggait.stand_point();
+				IK.calculate_inverse_kinematic(walkinggait.motion_delay_);
+				walkinggait.if_finish_ = false;
+				datamodule.stand_flag = false;
+			}
 			balance.ZMP_process->resetSensor();
 			datamodule.motion_execute();
 		}
-		sensor.load_imu();
-		sensor.load_press_left();
+		/*-----------*/
+		sensor.load_imu(); //獲得IMU值
+		/*---壓感---*/
+		sensor.load_press_left(); 
 		sensor.load_press_right();
-		
+		/*----------*/
+		/*-----------------------------------------*/
+		/*---馬達回授---*/
+		// feedbackmotor.load_motor_data_left_foot();
+		// feedbackmotor.load_motor_data_right_foot();
+		// feedbackmotor.pushData();
+		// read_feedback = false;
+		/*-------------*/
 
 		//printf(" ");
 		// cout << MPC.A_tilde << endl << MPC.B_tilde << endl;
 		//  cout << "-------------------------- " << endl ; 
 		// usleep(500 * 1000);
 		// sleep(1);
-		sensor.load_sensor_setting();
-		sensor.sensor_package_generate();
+		/*-------------*/
+		sensor.load_sensor_setting(); //balance補償([raw,pitch,com]PID,[sup,nsup]foot_offset)
+		sensor.sensor_package_generate(); //建立感測器資料;回傳IMU值給IPC
+		/*---讀取步態資訊---*/
 		walkinggait.load_parameter();
 		walkinggait.load_walkdata();
+		/*-----------------*/
+		/*---獲取當前步態狀態(走OR停下)---*/
 		walkinggait.calculate_point_trajectory();
+		/*---------------------*/
 
 		gettimeofday(&walkinggait.timer_end_, NULL);
 		walkinggait.timer_dt_ = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
@@ -118,7 +140,7 @@ int main()
 			
 		}
 		*/
-
+		/*--------------步態------------------------*/
 		if((walkinggait.timer_dt_ >= 60000.0))// && !sensor.stop_Walk_Flag_)
 		{
 			gettimeofday(&use_start, NULL);
@@ -145,13 +167,14 @@ int main()
 
 
 			/*-----*/
-			// balance.setSupportFoot();
-			// balance.endPointControl();
+			// balance.setSupportFoot();	//確認支撐腳
+			// balance.endPointControl();	//末端點控制
 			if(walkinggait.LIPM_flag_)
 			{
-				balance.balance_control();
+				balance.balance_control(); // 平衡控制(sensor_set)
 			}
 			locus.get_cpg_with_offset();  //獲取末端點
+			// locus.control_by_robot_status(); //擺手&擺腰
 			IK.calculate_inverse_kinematic(walkinggait.motion_delay_);
 			locus.do_motion(); // 將目標刻度送給伺服馬達
 
@@ -206,10 +229,7 @@ int main()
 
 			IB_count++;
 			/*-----*/
-
-
 			walkinggait.LIPM_flag_ = false;
-
 			walkinggait.locus_flag_ = false;
 		}
 		if(parameterinfo->LCFinishFlag  && parameterinfo->LCBalanceOn)

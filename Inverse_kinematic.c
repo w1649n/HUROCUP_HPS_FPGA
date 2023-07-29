@@ -250,7 +250,7 @@ void InverseKinematic::initial_inverse_kinematic()
 	initial_parameters();
 	
 	// double Motion_Delay = Parameters.Period_T/Parameters.Sample_Time;           //600 / 24 = 25
-	double Motion_Delay = Parameters.Sample_Time;
+	double Motion_Delay = walkinggait.motion_delay_;
 	initial_points();
 	initial_points_process();
 
@@ -339,13 +339,16 @@ void InverseKinematic::initial_points()
 	Points.P_Table[5] = 0;                     //Positive
 	Points.P_Table[6] = 0;                     //Positive
 	Points.P_Table[7] = 0;                     //Positive
+	//腰
 	Points.P_Table[8] = 0;                     //Positive
+	//左腳
 	Points.P_Table[9] = 0;                     //Positive
 	Points.P_Table[10] = 0;                    //Positive
 	Points.P_Table[11] = 0;                    //Positive
 	Points.P_Table[12] = 0;                    //Positive
 	Points.P_Table[13] = 1;                    //Negitive
 	Points.P_Table[14] = 1;                    //Negitive
+	//右腳
 	Points.P_Table[15] = 0;                    //Positive
 	Points.P_Table[16] = 0;                    //Pogitive
 	Points.P_Table[17] = 1;                    //Negitive
@@ -354,10 +357,29 @@ void InverseKinematic::initial_points()
 	Points.P_Table[20] = 1;                    //Negitive
 
 #ifdef Robot1    
-	for(i = 0; i < 21; i++)
+	// for(i = 0; i < 21; i++)
+	// {
+	// 	thta_base_[i] = datamodule.totalangle_[i];
+	// }
+	//-----------------上半身角度base----------------------
+	for(i = 0; i < 9; i++)
 	{
 		thta_base_[i] = datamodule.totalangle_[i];
 	}
+	//-----------------下半身角度base----------------------
+	thta_base_[9]  = datamodule.Calculate_standangle[0];
+	thta_base_[10] = datamodule.Calculate_standangle[1];
+	thta_base_[11] = datamodule.Calculate_standangle[2];
+	thta_base_[12] = datamodule.Calculate_standangle[3];
+	thta_base_[13] = datamodule.Calculate_standangle[4];
+	thta_base_[14] = datamodule.Calculate_standangle[5];
+	thta_base_[15] = datamodule.Calculate_standangle[6];
+	thta_base_[16] = datamodule.Calculate_standangle[7];
+	thta_base_[17] = datamodule.Calculate_standangle[8];
+	thta_base_[18] = datamodule.Calculate_standangle[9];
+	thta_base_[19] = datamodule.Calculate_standangle[10];
+	thta_base_[20] = datamodule.Calculate_standangle[11];
+	//----------------------------------------------------
 #else
 	thta_base_[0] = 3044;
 	thta_base_[1] = 466;
@@ -534,13 +556,6 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
 
     for( i = 0; i < 21; i++)
     {
-		// if(i==12)
-		// 	printf("thta 13 = %f, ag 13 = %f\t", Points.Thta[i], angle_gain_[i]);
-		
-		// Points.Thta[i] = Points.Thta[i] * angle_gain_[i];
-		
-		// if(i==12)
-		// 	printf("thta 13 = %f, ag 13 = %f\n", Points.Thta[i], angle_gain_[i]);
         if(Points.P_Table[i])
         {
             output_angle_[i] = (unsigned int)(Max_value - (Points.Thta[i] * PI_TO_OUTPUT + Position_Zero));
@@ -555,11 +570,10 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
         different_thta = fabs( past_thta_[i] - Points.Thta[i]);
         if(different_thta > 0.0)
         {
-        	// delay_time_[i] = (unsigned int)(different_thta/(2*PI) * (1000/Motion_Delay) * 60 / 0.229);	// ((percent of circle(rad)) / ((delta t/1000)*60(min))) / 0.229(rpm/unit)
-			delay_time_[i] = (unsigned int)(different_thta/(2*PI) * (1000/60) * 60 / 0.229);	// ((percent of circle(rad)) / ((delta t/1000)*60(min))) / 0.229(rpm/unit)
+        	delay_time_[i] = (unsigned int)(different_thta/(2*PI) * (1000/Motion_Delay) * 60 / 0.229);	// ((percent of circle(rad)) / ((delta t/1000)*60(min))) / 0.229(rpm/unit)
+			// delay_time_[i] = (unsigned int)(different_thta/(2*PI) * (1000/60) * 60 / 0.229);	// ((percent of circle(rad)) / ((delta t/1000)*60(min))) / 0.229(rpm/unit)
         }
         past_thta_[i] = Points.Thta[i];
-        // output_speed_[i] = delay_time_[i]  * SPEED_TRANS;
 		output_speed_[i] = delay_time_[i];
         output_speed_[i] = output_speed_[i] * speed_gain_[i];
 		//----------------------printf-----------------------------
@@ -586,136 +600,147 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
         {
             output_speed_[i] = 32767;
 		}
-		// if(i>9 && i<15)
-			// printf("IK %d:\t%d\tSP %d:\t%d\n", i+1, output_angle_[i], i+1, output_speed_[i]);
+		///////////////////儲存屈膝站姿//////////////////////////
+		if(i>8)
+		{	
+			if(walkinggait.if_finish_)
+			{
+				datamodule.totalangle_[i] 		 = output_angle_[i]; // for motion
+			}
+		}
+		///////////////////////////////////////////////////////
 		*((uint32_t *)init.robot_motion_addr+(2*i+1)) = output_speed_[i];
 		*((uint32_t *)init.robot_motion_addr+(2*i)) = output_angle_[i];
-		// printf("32\n");
     }
 
+	if(!datamodule.stand_flag){
+		*((uint32_t *)init.robot_motion_addr+(42)) = Motion_Delay;
+		*((uint32_t *)init.robot_motion_addr+(43)) = 0x00000070;
+
+		unsigned short blk_size = 0;
+		// Header
+		packet_char_[0] = 0xFF;
+		packet_char_[1] = 0xFF;
+		packet_char_[2] = 0xFD;
+		// Reserved
+		packet_char_[3] = 0x00;
+		// ID
+		packet_char_[4] = 0xFE;
+		// Length      The length after the Packet Length field (Instruction, Parameter, CRC fields). Packet Length = number of Parameters + 3
+		packet_char_[5] = 0x2b;       //0x2b = 43(decimal)
+		packet_char_[6] = 0;
+		// Instruction
+		packet_char_[7] = 0x83;       //write         // 0x83 = sync write
+		// Parameter
+		packet_char_[8] = 0x70;       // addressL             // Velocity: 0x70 = 112 Position: 0x74(hex) = 116(dec)
+		packet_char_[9] = 0;
+
+		packet_char_[10] = 0x08;      // data length(byte)
+		packet_char_[11] = 0x00;
+
+		//left hand
+		for(i=0; i<4; i++)
+		{
+			packet_char_[12+i*9] = i+1;      //MotorID
+			packet_char_[13+i*9] = output_speed_[i] & 0xFF;    //Profile Velocity      //initial value = 0
+			packet_char_[14+i*9] = (output_speed_[i] >> 8) & 0xFF;
+			packet_char_[15+i*9] = (output_speed_[i] >> 16) & 0xFF;
+			packet_char_[16+i*9] = (output_speed_[i] >> 24) & 0xFF;
+			packet_char_[17+i*9] = output_angle_[i] & 0xFF;    // positionL
+			packet_char_[18+i*9] = (output_angle_[i] >> 8) & 0xFF;
+			packet_char_[19+i*9] = (output_angle_[i] >> 16) & 0xFF;
+			packet_char_[20+i*9] = (output_angle_[i] >> 24) & 0xFF;
+		}
+
+		blk_size = 5 + packet_char_[5];
+		unsigned short lh_crc_value = update_crc(0, packet_char_, blk_size);
+
+		//right hand
+		for(i=0; i<4; i++)
+		{
+			packet_char_[12+i*9] = i+5;      //MotorID
+			packet_char_[13+i*9] = output_speed_[i+4] & 0xFF;    //Profile Velocity      //initial value = 0
+			packet_char_[14+i*9] = (output_speed_[i+4] >> 8) & 0xFF;
+			packet_char_[15+i*9] = (output_speed_[i+4] >> 16) & 0xFF;
+			packet_char_[16+i*9] = (output_speed_[i+4] >> 24) & 0xFF;
+			packet_char_[17+i*9] = output_angle_[i+4] & 0xFF;    // positionL
+			packet_char_[18+i*9] = (output_angle_[i+4] >> 8) & 0xFF;
+			packet_char_[19+i*9] = (output_angle_[i+4] >> 16) & 0xFF;
+			packet_char_[20+i*9] = (output_angle_[i+4] >> 24) & 0xFF;
+		}
+
+		blk_size = 5 + packet_char_[5];
+		unsigned short rh_crc_value = update_crc(0, packet_char_, blk_size);
+
+		//foot
+		packet_char_[5] = 0x46; // 0x46 = 70  77-7
+
+		packet_char_[12] = 0x09;
+		packet_char_[13] = output_speed_[8] & 0xFF;
+		packet_char_[14] = (output_speed_[8] >> 8) & 0xFF;
+		packet_char_[15] = (output_speed_[8] >> 16) & 0xFF;
+		packet_char_[16] = (output_speed_[8] >> 24) & 0xFF;
+		packet_char_[17] = output_angle_[8] & 0xFF;
+		packet_char_[18] = (output_angle_[8] >> 8) & 0xFF;
+		packet_char_[19] = (output_angle_[8] >> 16) & 0xFF;
+		packet_char_[20] = (output_angle_[8] >> 24) & 0xFF;
+
+		//left foot
+		for(i=0; i<6; i++)
+		{
+			packet_char_[21+i*9] = i+10;      //MotorID
+			packet_char_[22+i*9] = output_speed_[i+9] & 0xFF;    //Profile Velocity      //initial value = 0
+			packet_char_[23+i*9] = (output_speed_[i+9] >> 8) & 0xFF;
+			packet_char_[24+i*9] = (output_speed_[i+9] >> 16) & 0xFF;
+			packet_char_[25+i*9] = (output_speed_[i+9] >> 24) & 0xFF;
+			packet_char_[26+i*9] = output_angle_[i+9] & 0xFF;    // positionL
+			packet_char_[27+i*9] = (output_angle_[i+9] >> 8) & 0xFF;
+			packet_char_[28+i*9] = (output_angle_[i+9] >> 16) & 0xFF;
+			packet_char_[29+i*9] = (output_angle_[i+9] >> 24) & 0xFF;
+		}
+
+		blk_size = 5 + packet_char_[5];
+		unsigned short lf_crc_value = update_crc(0, packet_char_, blk_size);
+
+		//right foot
+		for(i=0; i<6; i++)
+		{
+			packet_char_[21+i*9] = i+16;      //MotorID
+			packet_char_[22+i*9] = output_speed_[i+15] & 0xFF;    //Profile Velocity      //initial value = 0
+			packet_char_[23+i*9] = (output_speed_[i+15] >> 8) & 0xFF;
+			packet_char_[24+i*9] = (output_speed_[i+15] >> 16) & 0xFF;
+			packet_char_[25+i*9] = (output_speed_[i+15] >> 24) & 0xFF;
+			packet_char_[26+i*9] = output_angle_[i+15] & 0xFF;    // positionL
+			packet_char_[27+i*9] = (output_angle_[i+15] >> 8) & 0xFF;
+			packet_char_[28+i*9] = (output_angle_[i+15] >> 16) & 0xFF;
+			packet_char_[29+i*9] = (output_angle_[i+15] >> 24) & 0xFF;
+		}
+
+		blk_size = 5 + packet_char_[5];
+		unsigned short rf_crc_value = update_crc(0, packet_char_, blk_size);
+
+		*((uint32_t *)init.robot_motion_addr+(44)) = (lh_crc_value << 16) + rh_crc_value;
+		*((uint32_t *)init.robot_motion_addr+(45)) = (lf_crc_value << 16) + rf_crc_value;
+	}
+
+	
+}
+
+void InverseKinematic::pushData()
+{
+	map_motor.find("motor_9")->second.push_back((double)output_angle_[8]);
+	/*左腳*/
 	map_motor.find("motor_11")->second.push_back((double)output_angle_[10]);
 	map_motor.find("motor_12")->second.push_back((double)output_angle_[11]);
 	map_motor.find("motor_13")->second.push_back((double)output_angle_[12]);
 	map_motor.find("motor_14")->second.push_back((double)output_angle_[13]);
 	map_motor.find("motor_15")->second.push_back((double)output_angle_[14]);
-
+	/*右腳*/
 	map_motor.find("motor_17")->second.push_back((double)output_angle_[16]);
 	map_motor.find("motor_18")->second.push_back((double)output_angle_[17]);
 	map_motor.find("motor_19")->second.push_back((double)output_angle_[18]);
 	map_motor.find("motor_20")->second.push_back((double)output_angle_[19]);
 	map_motor.find("motor_21")->second.push_back((double)output_angle_[20]);
-	// printf("\n");
-	*((uint32_t *)init.robot_motion_addr+(42)) = Motion_Delay;
-	*((uint32_t *)init.robot_motion_addr+(43)) = 0x00000070;
-
-    unsigned short blk_size = 0;
-	// Header
-	packet_char_[0] = 0xFF;
-	packet_char_[1] = 0xFF;
-	packet_char_[2] = 0xFD;
-	// Reserved
-	packet_char_[3] = 0x00;
-	// ID
-	packet_char_[4] = 0xFE;
-	// Length      The length after the Packet Length field (Instruction, Parameter, CRC fields). Packet Length = number of Parameters + 3
-	packet_char_[5] = 0x2b;       //0x2b = 43(decimal)
-	packet_char_[6] = 0;
-	// Instruction
-	packet_char_[7] = 0x83;       //write         // 0x83 = sync write
-	// Parameter
-	packet_char_[8] = 0x70;       // addressL             // Velocity: 0x70 = 112 Position: 0x74(hex) = 116(dec)
-	packet_char_[9] = 0;
-
-	packet_char_[10] = 0x08;      // data length(byte)
-	packet_char_[11] = 0x00;
-
-	//left hand
-	for(i=0; i<4; i++)
-	{
-		packet_char_[12+i*9] = i+1;      //MotorID
-		packet_char_[13+i*9] = output_speed_[i] & 0xFF;    //Profile Velocity      //initial value = 0
-		packet_char_[14+i*9] = (output_speed_[i] >> 8) & 0xFF;
-		packet_char_[15+i*9] = (output_speed_[i] >> 16) & 0xFF;
-		packet_char_[16+i*9] = (output_speed_[i] >> 24) & 0xFF;
-		packet_char_[17+i*9] = output_angle_[i] & 0xFF;    // positionL
-		packet_char_[18+i*9] = (output_angle_[i] >> 8) & 0xFF;
-		packet_char_[19+i*9] = (output_angle_[i] >> 16) & 0xFF;
-		packet_char_[20+i*9] = (output_angle_[i] >> 24) & 0xFF;
-	}
-
-	blk_size = 5 + packet_char_[5];
-	unsigned short lh_crc_value = update_crc(0, packet_char_, blk_size);
-
-	//right hand
-	for(i=0; i<4; i++)
-	{
-		packet_char_[12+i*9] = i+5;      //MotorID
-		packet_char_[13+i*9] = output_speed_[i+4] & 0xFF;    //Profile Velocity      //initial value = 0
-		packet_char_[14+i*9] = (output_speed_[i+4] >> 8) & 0xFF;
-		packet_char_[15+i*9] = (output_speed_[i+4] >> 16) & 0xFF;
-		packet_char_[16+i*9] = (output_speed_[i+4] >> 24) & 0xFF;
-		packet_char_[17+i*9] = output_angle_[i+4] & 0xFF;    // positionL
-		packet_char_[18+i*9] = (output_angle_[i+4] >> 8) & 0xFF;
-		packet_char_[19+i*9] = (output_angle_[i+4] >> 16) & 0xFF;
-		packet_char_[20+i*9] = (output_angle_[i+4] >> 24) & 0xFF;
-	}
-
-	blk_size = 5 + packet_char_[5];
-	unsigned short rh_crc_value = update_crc(0, packet_char_, blk_size);
-
-	//foot
-	packet_char_[5] = 0x46; // 0x46 = 70  77-7
-
-	packet_char_[12] = 0x09;
-	packet_char_[13] = output_speed_[8] & 0xFF;
-	packet_char_[14] = (output_speed_[8] >> 8) & 0xFF;
-	packet_char_[15] = (output_speed_[8] >> 16) & 0xFF;
-	packet_char_[16] = (output_speed_[8] >> 24) & 0xFF;
-	packet_char_[17] = output_angle_[8] & 0xFF;
-	packet_char_[18] = (output_angle_[8] >> 8) & 0xFF;
-	packet_char_[19] = (output_angle_[8] >> 16) & 0xFF;
-	packet_char_[20] = (output_angle_[8] >> 24) & 0xFF;
-
-	//left foot
-	for(i=0; i<6; i++)
-	{
-		packet_char_[21+i*9] = i+10;      //MotorID
-		packet_char_[22+i*9] = output_speed_[i+9] & 0xFF;    //Profile Velocity      //initial value = 0
-		packet_char_[23+i*9] = (output_speed_[i+9] >> 8) & 0xFF;
-		packet_char_[24+i*9] = (output_speed_[i+9] >> 16) & 0xFF;
-		packet_char_[25+i*9] = (output_speed_[i+9] >> 24) & 0xFF;
-		packet_char_[26+i*9] = output_angle_[i+9] & 0xFF;    // positionL
-		packet_char_[27+i*9] = (output_angle_[i+9] >> 8) & 0xFF;
-		packet_char_[28+i*9] = (output_angle_[i+9] >> 16) & 0xFF;
-		packet_char_[29+i*9] = (output_angle_[i+9] >> 24) & 0xFF;
-	}
-
-	blk_size = 5 + packet_char_[5];
-	unsigned short lf_crc_value = update_crc(0, packet_char_, blk_size);
-
-	//right foot
-	for(i=0; i<6; i++)
-	{
-		packet_char_[21+i*9] = i+16;      //MotorID
-		packet_char_[22+i*9] = output_speed_[i+15] & 0xFF;    //Profile Velocity      //initial value = 0
-		packet_char_[23+i*9] = (output_speed_[i+15] >> 8) & 0xFF;
-		packet_char_[24+i*9] = (output_speed_[i+15] >> 16) & 0xFF;
-		packet_char_[25+i*9] = (output_speed_[i+15] >> 24) & 0xFF;
-		packet_char_[26+i*9] = output_angle_[i+15] & 0xFF;    // positionL
-		packet_char_[27+i*9] = (output_angle_[i+15] >> 8) & 0xFF;
-		packet_char_[28+i*9] = (output_angle_[i+15] >> 16) & 0xFF;
-		packet_char_[29+i*9] = (output_angle_[i+15] >> 24) & 0xFF;
-	}
-
-	blk_size = 5 + packet_char_[5];
-	unsigned short rf_crc_value = update_crc(0, packet_char_, blk_size);
-
-	*((uint32_t *)init.robot_motion_addr+(44)) = (lh_crc_value << 16) + rh_crc_value;
-	*((uint32_t *)init.robot_motion_addr+(45)) = (lf_crc_value << 16) + rf_crc_value;
-
-	// printf("%d",output_angle_[10]);
-
-	
 }
 
 string InverseKinematic::DtoS(double value)

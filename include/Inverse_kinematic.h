@@ -53,9 +53,9 @@
 #define SPEED_TRANS 32.0303030303030303030303030303 // (32767 / 1023)
 //#define Debug_IK
 /********************************************************/
-#define COM_HEIGHT 26//24.3//26.9 //28.8
-#define Length_Pelvis 8.7//8.7//8.7
-#define Length_Leg 20 //17 //20.4 //21
+#define COM_HEIGHT 27.5//24.3//26.9 //28.8
+#define Length_Pelvis 9//8.7//8.7
+#define Length_Leg 23.5 //17 //20.4 //21
 
 #define STAND_OFFSET_RX 0//-2.8
 #define STAND_OFFSET_RY 0//-0.3
@@ -202,6 +202,7 @@ public:
     std::string DtoS(double value);
 	std::map<std::string, std::vector<double>> map_motor;      
     void saveData();
+    void pushData();
     unsigned short update_crc(unsigned short , unsigned char *, unsigned short);
 
     unsigned char packet_char_[203];

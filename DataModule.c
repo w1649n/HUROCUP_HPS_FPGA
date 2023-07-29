@@ -91,58 +91,86 @@ void Datamodule::update_database()
 		{
 			switch(datamodule_cmd_)
 			{
-			case 2:
-				totalspeed_[20-i] = (database_[i] & 0x0000FFFF);
-				totalangle_[20-i] = ((database_[i] & 0xFFFF0000)>> 16);
+			case 2: //29儲存全直腳
+				stand_flag = true;
+				if(i<9) 
+				{
+					//將全直腳刻度存進Calculate(12~21)
+					Calculate_standspeed[11-i] = (database_[i] & 0x0000FFFF);
+					Calculate_standangle[11-i] = ((database_[i] & 0xFFFF0000)>> 16);
+					//--------------------------
+					//手部+9號馬達絕對刻度
+					totalspeed_[i] = (database_[20-i] & 0x0000FFFF);
+					totalangle_[i] = ((database_[20-i] & 0xFFFF0000)>> 16);
+				}
+				else
+				{
+					//將全直腳刻度存進Calculate(10、11)
+					if(i<12)
+					{
+						Calculate_standspeed[11-i] = (database_[i] & 0x0000FFFF);
+						Calculate_standangle[11-i] = ((database_[i] & 0xFFFF0000)>> 16);
+					}
+				}
+				IK.initial_points(); //初始化馬達角度base
 				break;
-			case 3:
+			case 3: //motion做動作
 				totalspeed_[20-i] = (database_[i] & 0x0000FFFF);
 				tmp_angle = ((database_[i] & 0xFFFF0000) >> 16);
 
 				if(tmp_angle & 0x8000)
 				{
+					if(i<12)//紀錄相對刻度用於計算
+						Calculate_standangle[11-i] -= (tmp_angle & 0x7FFF);
 					totalangle_[20-i] = totalangle_[20-i] - (tmp_angle & 0x7FFF);
 					if(totalangle_[20-i] < 0)
 						totalangle_[20-i] = 0;
 				}
 				else
 				{
+					if(i<12)//紀錄相對刻度用於計算
+						Calculate_standangle[11-i] += (tmp_angle & 0x7FFF);
 					totalangle_[20-i] = totalangle_[20-i] + (tmp_angle & 0x7fff);
 					if(totalangle_[20-i] > 4095)
 						totalangle_[20-i] = 4095;
 				}
+				break;
+			case 4:	//測試全直腳(使用motion上的Lockstand)
+				totalspeed_[20-i] = (database_[i] & 0x0000FFFF);
+				totalangle_[20-i] = ((database_[i] & 0xFFFF0000)>> 16);
 				break;
 			}
 		}
 	}
 }
 
+void Datamodule::pushData()
+{
+	map_motor.find("motor_01")->second.push_back((double)totalangle_[0]);
+	map_motor.find("motor_02")->second.push_back((double)totalangle_[1]);
+	map_motor.find("motor_03")->second.push_back((double)totalangle_[2]);
+	map_motor.find("motor_04")->second.push_back((double)totalangle_[3]);
+	map_motor.find("motor_05")->second.push_back((double)totalangle_[4]);
+	map_motor.find("motor_06")->second.push_back((double)totalangle_[5]);
+	map_motor.find("motor_07")->second.push_back((double)totalangle_[6]);
+	map_motor.find("motor_08")->second.push_back((double)totalangle_[7]);
+	map_motor.find("motor_09")->second.push_back((double)totalangle_[8]);
+	map_motor.find("motor_10")->second.push_back((double)totalangle_[9]);
+	map_motor.find("motor_11")->second.push_back((double)totalangle_[10]);
+	map_motor.find("motor_12")->second.push_back((double)totalangle_[11]);
+	map_motor.find("motor_13")->second.push_back((double)totalangle_[12]);
+	map_motor.find("motor_14")->second.push_back((double)totalangle_[13]);
+	map_motor.find("motor_15")->second.push_back((double)totalangle_[14]);
+	map_motor.find("motor_16")->second.push_back((double)totalangle_[15]);
+	map_motor.find("motor_17")->second.push_back((double)totalangle_[16]);
+	map_motor.find("motor_18")->second.push_back((double)totalangle_[17]);
+	map_motor.find("motor_19")->second.push_back((double)totalangle_[18]);
+	map_motor.find("motor_20")->second.push_back((double)totalangle_[19]);
+	map_motor.find("motor_21")->second.push_back((double)totalangle_[20]);
+}
+
 void Datamodule::motion_execute()
 {
-
-		// map_motor.find("motor_01")->second.push_back((double)totalangle_[0]);
-		// map_motor.find("motor_02")->second.push_back((double)totalangle_[1]);
-		// map_motor.find("motor_03")->second.push_back((double)totalangle_[2]);
-		// map_motor.find("motor_04")->second.push_back((double)totalangle_[3]);
-		// map_motor.find("motor_05")->second.push_back((double)totalangle_[4]);
-		// map_motor.find("motor_06")->second.push_back((double)totalangle_[5]);
-		// map_motor.find("motor_07")->second.push_back((double)totalangle_[6]);
-		// map_motor.find("motor_08")->second.push_back((double)totalangle_[7]);
-		// map_motor.find("motor_09")->second.push_back((double)totalangle_[8]);
-		// map_motor.find("motor_10")->second.push_back((double)totalangle_[9]);
-		// map_motor.find("motor_11")->second.push_back((double)totalangle_[10]);
-		// map_motor.find("motor_12")->second.push_back((double)totalangle_[11]);
-		// map_motor.find("motor_13")->second.push_back((double)totalangle_[12]);
-		// map_motor.find("motor_14")->second.push_back((double)totalangle_[13]);
-		// map_motor.find("motor_15")->second.push_back((double)totalangle_[14]);
-		// map_motor.find("motor_16")->second.push_back((double)totalangle_[15]);
-		// map_motor.find("motor_17")->second.push_back((double)totalangle_[16]);
-		// map_motor.find("motor_18")->second.push_back((double)totalangle_[17]);
-		// map_motor.find("motor_19")->second.push_back((double)totalangle_[18]);
-		// map_motor.find("motor_20")->second.push_back((double)totalangle_[19]);
-		// map_motor.find("motor_21")->second.push_back((double)totalangle_[20]);
-		// saveData();
-	// printf("motion exe\n");
 	int i=0;
 	unsigned short blk_size = 0;
 
@@ -295,7 +323,32 @@ void Datamodule::set_stand()
 	totalangle_[18] = 1337;
 	totalangle_[19] = 1674;
 	totalangle_[20] = 2047;
-
+	//-------------------------------------------------
+	//----------------站直初始值------------------------
+	for(i=0;i<12;i++)
+	{
+		if(i==2||i==8)
+		{
+			Calculate_standspeed[i] = 80;
+		}else
+		{
+			Calculate_standspeed[i] = 40;
+		}
+		
+	}
+	Calculate_standangle[0] = 2048;//10_motor
+	Calculate_standangle[1] = 2058;//11_motor
+	Calculate_standangle[2] = 1970;//12_motor
+	Calculate_standangle[3] = 2078;//13_motor
+	Calculate_standangle[4] = 2058;//14_motor
+	Calculate_standangle[5] = 2048;//15_motor
+	Calculate_standangle[6] = 2048;//16_motor
+	Calculate_standangle[7] = 2058;//17_motor
+	Calculate_standangle[8] = 2165;//18_motor
+	Calculate_standangle[9] = 2048;//19_motor
+	Calculate_standangle[10] = 2063;//20_motor
+	Calculate_standangle[11] = 2048;//21_motor
+	//-------------------------------------------------
 	motion_execute();
 }
 
