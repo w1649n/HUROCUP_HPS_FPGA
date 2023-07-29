@@ -38,6 +38,7 @@
 #include "Sensor.h"
 #include "hand_kinetic_base.h"
 #include "IMU_base_obs.h"
+#include "Feedback_Motor.h"
 //#include "inc\WalkingGait.h"
 /********************************************************/
 

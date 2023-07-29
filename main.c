@@ -34,6 +34,7 @@ int main()
 	int zmp_timer = 0,zmp_count = 0,use_timer = 0;
 	bool zmp_first_time = true;
 	/*-----*/
+	bool feedback_angle = false;
 	//------測試用延遲------//
 	//usleep(500 * 1000); 	//0.5s
 	//sleep(2);				//2s
@@ -52,6 +53,7 @@ int main()
 			}
 			balance.ZMP_process->resetSensor();
 			datamodule.motion_execute();
+			feedback_angle = true;
 		}
 		/*-----------*/
 		sensor.load_imu(); //獲得IMU值
@@ -60,12 +62,7 @@ int main()
 		sensor.load_press_right();
 		/*----------*/
 		/*-----------------------------------------*/
-		/*---馬達回授---*/
-		// feedbackmotor.load_motor_data_left_foot();
-		// feedbackmotor.load_motor_data_right_foot();
-		// feedbackmotor.pushData();
-		// read_feedback = false;
-		/*-------------*/
+		
 
 		//printf(" ");
 		// cout << MPC.A_tilde << endl << MPC.B_tilde << endl;
@@ -171,13 +168,13 @@ int main()
 			// balance.endPointControl();	//末端點控制
 			if(walkinggait.LIPM_flag_)
 			{
-				balance.balance_control(); // 平衡控制(sensor_set)
+				// balance.balance_control(); // 平衡控制(sensor_set)
 			}
 			locus.get_cpg_with_offset();  //獲取末端點
 			// locus.control_by_robot_status(); //擺手&擺腰
 			IK.calculate_inverse_kinematic(walkinggait.motion_delay_);
 			locus.do_motion(); // 將目標刻度送給伺服馬達
-
+			feedback_angle = true;
 
 			// zmp_count++;
 
@@ -217,6 +214,7 @@ int main()
 			if(walkinggait.if_finish_){
 				IB.saveData();
 				balance.ZMP_process->saveData();
+				feedbackmotor.saveData();
 				IB.first_time = 0;
 				IB.init();
 				IB.reset_Kalmen_Filter();
@@ -232,34 +230,43 @@ int main()
 			walkinggait.LIPM_flag_ = false;
 			walkinggait.locus_flag_ = false;
 		}
-		if(parameterinfo->LCFinishFlag  && parameterinfo->LCBalanceOn)
+		/*---馬達回授---*/
+		feedbackmotor.load_motor_data_left_foot();
+		feedbackmotor.load_motor_data_right_foot();
+		if(feedback_angle)
 		{
-			i++;
-			if(i>290)
-			{
-				parameterinfo->LCFinishFlag = false;
-				parameterinfo->LCBalanceFlag = false;
-				balance.saveData();
-				IK.saveData();
-				i = 0;
-			}
-			else if(i>200)
-			{
-				parameterinfo->LCBalanceFlag = true;
-			}
-			if(i>90)
-			{
-				balance.setSupportFoot();
-				balance.balance_control();
-				locus.get_cpg_with_offset();
-				IK.calculate_inverse_kinematic(30);
-				locus.do_motion();
-			}
+			feedbackmotor.pushData();
+			feedback_angle = false;
 		}
-		else
-		{
-			parameterinfo->LCFinishFlag = false;
-		}
+		/*-------------*/
+		// if(parameterinfo->LCFinishFlag  && parameterinfo->LCBalanceOn)
+		// {
+		// 	i++;
+		// 	if(i>290)
+		// 	{
+		// 		parameterinfo->LCFinishFlag = false;
+		// 		parameterinfo->LCBalanceFlag = false;
+		// 		balance.saveData();
+		// 		IK.saveData();
+		// 		i = 0;
+		// 	}
+		// 	else if(i>200)
+		// 	{
+		// 		parameterinfo->LCBalanceFlag = true;
+		// 	}
+		// 	if(i>90)
+		// 	{
+		// 		balance.setSupportFoot();
+		// 		balance.balance_control();
+		// 		locus.get_cpg_with_offset();
+		// 		IK.calculate_inverse_kinematic(30);
+		// 		locus.do_motion();
+		// 	}
+		// }
+		// else
+		// {
+		// 	parameterinfo->LCFinishFlag = false;
+		// }
 	
 	
 	
