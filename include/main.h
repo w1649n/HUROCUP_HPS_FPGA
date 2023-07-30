@@ -42,6 +42,7 @@
 //#include "inc\WalkingGait.h"
 /********************************************************/
 
+Feedback_Motor feedbackmotor;
 Locus locus;
 InverseKinematic IK;
 Initial init;

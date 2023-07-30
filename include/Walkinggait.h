@@ -14,6 +14,7 @@
 #include <fstream>
 #include <sys/time.h>
 
+#include "Feedback_Motor.h"
 #include "Initial.h"
 #include "WalkingCycle.h"
 #include "WalkingTrajectory.h"
@@ -111,6 +112,7 @@ public:
     double end_point_lz_, end_point_rz_, end_point_lthta_, end_point_rthta_;
     double vx0_, vy0_, px_, py_, pz_,py_u,px_u;
     double lpx_, rpx_, lpy_, rpy_, lpz_, rpz_, lpt_, rpt_;
+    double foot_hight, board_hight, c_hight;
     int preview_step_, pre_preview_step_;
     Matrix<double, 3, 4> cruise_command;
     MatrixXd footstep, base, constraint_y, constraint_x;

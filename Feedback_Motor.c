@@ -41,7 +41,7 @@ void Feedback_Motor::load_motor_data_left_foot()
         if(state == 0)
         {
             update_motor_data_left_foot_flag_ = false;
-            printf("%d",*(uint32_t *)init.p2h_set_hps_read_motor_data_leftfoot_addr);
+            // printf("%d",*(uint32_t *)init.p2h_set_hps_read_motor_data_leftfoot_addr);
             if(*(uint32_t *)init.p2h_set_hps_read_motor_data_leftfoot_addr)
             {
                 state = 1;
@@ -90,7 +90,7 @@ void Feedback_Motor::load_motor_data_right_foot()
         if(state == 0)
         {
             update_motor_data_right_foot_flag_ = false;
-            printf("%d",*(uint32_t *)init.p2h_set_hps_read_motor_data_rightfoot_addr);
+            // printf("%d",*(uint32_t *)init.p2h_set_hps_read_motor_data_rightfoot_addr);
             if(*(uint32_t *)init.p2h_set_hps_read_motor_data_rightfoot_addr)
             {
                 state = 1;

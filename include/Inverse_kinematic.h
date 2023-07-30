@@ -176,6 +176,7 @@ public:
 
     void do_motion();
     void set_point_by_body();
+    void set_point_by_stand();
     void get_cpg_with_offset();
     void calculate_robot_status();
     void control_by_robot_status();

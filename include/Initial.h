@@ -112,6 +112,9 @@ public:
     void *p2h_motor_data_leftfoot_addr;
     void *h2p_read_motor_data_leftfoot_pulse_addr;
 
+    void *p2h_set_hps_read_motor_data_rightfoot_addr;
+    void *p2h_motor_data_rightfoot_addr;
+    void *h2p_read_motor_data_rightfoot_pulse_addr;
 
     void *axi_virtual_base;
     void *robot_motion_addr;

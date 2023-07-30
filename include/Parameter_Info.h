@@ -42,6 +42,8 @@ public:
     int Sample_Time;
     double OSC_LockRange;
     double BASE_Default_Z;
+    double DSP,SSP;
+    bool foot_flag;
     int Ts;
     double Vmax;
     double Vmin;

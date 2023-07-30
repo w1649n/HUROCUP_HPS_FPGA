@@ -19,6 +19,7 @@ int main()
 	usleep(1000 * 1000);
 	init.initial_system();
 	usleep(1000 * 1000);
+	walkinggait.if_finish_ = false;
 	IK.initial_inverse_kinematic();
 	walkinggait.initialize();
 
@@ -39,36 +40,7 @@ int main()
 	//usleep(500 * 1000); 	//0.5s
 	//sleep(2);				//2s
 	while(1)
-	{
-    	/*---動作串---*/
-		datamodule.load_database();
-		if(datamodule.motion_execute_flag_)
-		{
-			if(datamodule.stand_flag)
-			{
-				walkinggait.stand_point();
-				IK.calculate_inverse_kinematic(walkinggait.motion_delay_);
-				walkinggait.if_finish_ = false;
-				datamodule.stand_flag = false;
-			}
-			balance.ZMP_process->resetSensor();
-			datamodule.motion_execute();
-			feedback_angle = true;
-		}
-		/*-----------*/
-		sensor.load_imu(); //獲得IMU值
-		/*---壓感---*/
-		sensor.load_press_left(); 
-		sensor.load_press_right();
-		/*----------*/
-		/*-----------------------------------------*/
-		
-
-		//printf(" ");
-		// cout << MPC.A_tilde << endl << MPC.B_tilde << endl;
-		//  cout << "-------------------------- " << endl ; 
-		// usleep(500 * 1000);
-		// sleep(1);
+	{ 
 		/*-------------*/
 		sensor.load_sensor_setting(); //balance補償([raw,pitch,com]PID,[sup,nsup]foot_offset)
 		sensor.sensor_package_generate(); //建立感測器資料;回傳IMU值給IPC
@@ -76,6 +48,38 @@ int main()
 		walkinggait.load_parameter();
 		walkinggait.load_walkdata();
 		/*-----------------*/
+		/*-----------*/
+		sensor.load_imu(); //獲得IMU值
+		/*---壓感---*/
+		sensor.load_press_left(); 
+		sensor.load_press_right();
+		/*----------*/
+    	/*---動作串---*/
+		datamodule.load_database();
+		if(datamodule.motion_execute_flag_)
+		{
+			if(datamodule.stand_flag)
+			{
+				locus.set_point_by_stand();
+				IK.calculate_inverse_kinematic(60);
+				walkinggait.if_finish_ = false;
+				datamodule.stand_flag = false;
+			}
+			balance.ZMP_process->resetSensor();
+			datamodule.motion_execute();
+			feedback_angle = true;
+			cout << "do motion"<<endl;
+		}
+		
+		/*-----------------------------------------*/
+		 
+
+		//printf(" ");
+		// cout << MPC.A_tilde << endl << MPC.B_tilde << endl;
+		//  cout << "-------------------------- " << endl ; 
+		// usleep(500 * 1000);
+		// sleep(1);
+		
 		/*---獲取當前步態狀態(走OR停下)---*/
 		walkinggait.calculate_point_trajectory();
 		/*---------------------*/
@@ -147,7 +151,7 @@ int main()
 			gettimeofday(&use_end, NULL);
 
 			use_timer = (double)(1000000.0 * (use_end.tv_sec - use_start.tv_sec) + (use_end.tv_usec - use_start.tv_usec));
-			// cout << "use_time : " << use_timer << endl;
+			cout << "use_time : " << use_timer << endl;
 
 			gettimeofday(&walkinggait.timer_start_, NULL);
 
@@ -172,7 +176,7 @@ int main()
 			}
 			locus.get_cpg_with_offset();  //獲取末端點
 			// locus.control_by_robot_status(); //擺手&擺腰
-			IK.calculate_inverse_kinematic(walkinggait.motion_delay_);
+			IK.calculate_inverse_kinematic(60);//walkinggait.motion_delay_
 			locus.do_motion(); // 將目標刻度送給伺服馬達
 			feedback_angle = true;
 

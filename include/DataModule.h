@@ -43,7 +43,7 @@ public:
     void pushData();
 
     unsigned char datamodule_cmd_;
-    bool motion_execute_flag_;
+    bool motion_execute_flag_,stand_flag;
     int totalangle_[21];
     int totalspeed_[21];
 

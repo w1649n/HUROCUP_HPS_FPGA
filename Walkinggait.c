@@ -6,8 +6,11 @@ kickgait_space::KickingGait kickinggait;
 ModelPredictiveControl MPC;
 IMU_base_obs IB;
   
+extern BalanceControl balance;
+extern InverseKinematic IK;
 extern Initial init;
 extern SensorDataProcess sensor;
+extern Feedback_Motor feedbackmotor;
 
 
 Walkinggait::Walkinggait()
@@ -18,6 +21,8 @@ Walkinggait::Walkinggait()
     get_parameter_flag_ = false;
     get_walkdata_flag_ = false;
     locus_flag_ = false;
+    // push_data_ = false;
+    // delay_push_ = false;
 }
 
 Walkinggait::~Walkinggait()
@@ -412,6 +417,7 @@ void WalkingGaitByLIPM::initialize()
         map_walk["case"] = temp;
         // map_walk["x't_"] = temp;
 	}
+    cout << "walkingait init finish"<< endl;
 }
 void WalkingGaitByLIPM::readWalkParameter()
 {
@@ -1358,13 +1364,34 @@ void WalkingGaitByLIPM::LCdown()
         end_point_lthta_ = 0;
         end_point_rthta_ = 0;
         if_finish_ = true;
-        delay_push_ = true;
+        // delay_push_ = true;
         resetParameter();
         //saveData();
     }
     else
     {
-        push_data_ = true; 
+        map_walk.find("l_foot_x")->second.push_back(lpx_);
+        map_walk.find("r_foot_x")->second.push_back(rpx_);
+        map_walk.find("l_foot_y")->second.push_back(lpy_);
+        map_walk.find("r_foot_y")->second.push_back(rpy_);
+        map_walk.find("l_foot_z")->second.push_back(lpz_);
+        map_walk.find("r_foot_z")->second.push_back(rpz_);
+
+        map_walk.find("l_foot_t")->second.push_back(step_point_lthta_);
+        map_walk.find("r_foot_t")->second.push_back(step_point_rthta_);
+        map_walk.find("com_x")->second.push_back(px_);
+        map_walk.find("com_y")->second.push_back(py_);
+        map_walk.find("now_step_")->second.push_back(now_step_);
+        // map_walk.find("ideal_zmp_x")->second.push_back(MPC.xt(2));
+        // map_walk.find("ideal_zmp_y")->second.push_back(MPC.yt(2));
+        map_walk.find("roll")->second.push_back(sensor.rpy_[0]);
+        map_walk.find("pitch")->second.push_back(sensor.rpy_[1]);
+        map_walk.find("yaw")->second.push_back(step_length_);//sensor.rpy_[2]);
+        map_walk.find("points")->second.push_back(shift_length_);
+        map_walk.find("t_")->second.push_back(t_);
+        map_walk.find("time_point_")->second.push_back(time_point_);
+        map_walk.find("case")->second.push_back(Step_Count_);
+
     }
     parameterinfo->points.IK_Point_RX = end_point_rx_;
 	parameterinfo->points.IK_Point_RY = end_point_ry_;
@@ -1376,36 +1403,6 @@ void WalkingGaitByLIPM::LCdown()
 	parameterinfo->points.IK_Point_LThta = end_point_lthta_;
 }
 
-void WalkingGaitByLIPM::stand_point()
-{
-    step_point_lx_ = 0;
-    step_point_rx_ = 0;
-    step_point_ly_ = 0;
-    step_point_ry_ = 0;
-    step_point_lz_ = COM_HEIGHT;
-    step_point_rz_ = COM_HEIGHT;
-    step_point_lthta_ = 0;
-    step_point_rthta_ = 0;
-
-    end_point_lx_ = 0;
-    end_point_rx_ = 0;
-    end_point_ly_ = width_size_ - Length_Pelvis/2;
-    end_point_ry_ = -width_size_ + Length_Pelvis/2;
-    end_point_lz_ = step_point_lz_- (COM_HEIGHT - Length_Leg);
-    end_point_rz_ = step_point_rz_- (COM_HEIGHT - Length_Leg);
-    end_point_lthta_ = 0;
-    end_point_rthta_ = 0;
-
-    Points.Inverse_PointR_X 			= walkinggait.end_point_rx_;
-	Points.Inverse_PointR_Y 			= walkinggait.end_point_ry_;
-	Points.Inverse_PointR_Z 			= walkinggait.end_point_rz_;
-	Points.Inverse_PointL_X 			= walkinggait.end_point_lx_;
-	Points.Inverse_PointL_Y 			= walkinggait.end_point_ly_;
-	Points.Inverse_PointL_Z 			= walkinggait.end_point_lz_;
-	Points.Inverse_PiontR_Thta			= walkinggait.end_point_rthta_;
-	Points.Inverse_PiontL_Thta			= walkinggait.end_point_lthta_;
-    resetParameter();
-}
 
 void WalkingGaitByLIPM::coordinate_transformation()
 {
@@ -1490,7 +1487,6 @@ double WalkingGaitByLIPM::wFootTheta(const double theta, bool reverse, const dou
     double new_T = T*(1-T_DSP);
     double new_t = t-T*T_DSP/2;
     double omega = 2*PI/new_T;
-
     if(t>0 && t<=T*T_DSP/2 && !reverse)
         return 0;
     else if(t>0 && t<=T*T_DSP/2 && reverse)
@@ -1502,7 +1498,7 @@ double WalkingGaitByLIPM::wFootTheta(const double theta, bool reverse, const dou
     else if(t>T*(1-T_DSP/2) && !reverse)
         return theta;
     else if(t>T*(1-T_DSP/2) && reverse)
-        return 0;
+        return 0;    
 }
 double WalkingGaitByLIPM::unit_step(double x)
 {

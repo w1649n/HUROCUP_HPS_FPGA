@@ -7,6 +7,7 @@ struct Parameters_Struct Parameters;
 struct Status_Struct RobotStatus;
 
 extern Initial init;
+extern Walkinggait walkinggait;
 extern Datamodule datamodule;
 extern BalanceControl balance;
 extern kickgait_space::KickingGait kickinggait;
@@ -51,6 +52,37 @@ void Locus::set_point_by_body()
 	Points.Inverse_PointL_Y = 0 - Points.Inverse_Pointbody_Y;
 	Points.Inverse_PointL_Z = COM_HEIGHT - Points.Inverse_Pointbody_Z;
 	Points.Inverse_PiontL_Thta = Points.Inverse_Piontbody_Thta;
+}
+
+void Locus::set_point_by_stand()
+{
+    walkinggait.step_point_lx_ = 0;
+    walkinggait.step_point_rx_ = 0;
+    walkinggait.step_point_ly_ = 0;
+    walkinggait.step_point_ry_ = 0;
+    walkinggait.step_point_lz_ = COM_HEIGHT;
+    walkinggait.step_point_rz_ = COM_HEIGHT;
+    walkinggait.step_point_lthta_ = 0;
+    walkinggait.step_point_rthta_ = 0;
+
+    walkinggait.end_point_lx_ = 0;
+    walkinggait.end_point_rx_ = 0;
+    walkinggait.end_point_ly_ = walkinggait.width_size_ - Length_Pelvis/2;
+    walkinggait.end_point_ry_ = -walkinggait.width_size_ + Length_Pelvis/2;
+    walkinggait.end_point_lz_ = walkinggait.step_point_lz_- (COM_HEIGHT - Length_Leg);
+    walkinggait.end_point_rz_ = walkinggait.step_point_rz_- (COM_HEIGHT - Length_Leg);
+    walkinggait.end_point_lthta_ = 0;
+    walkinggait.end_point_rthta_ = 0;
+
+    Points.Inverse_PointR_X  	  = walkinggait.end_point_rx_;
+	Points.Inverse_PointR_Y       = walkinggait.end_point_ry_;
+	Points.Inverse_PointR_Z       = walkinggait.end_point_rz_;
+	Points.Inverse_PointL_X       = walkinggait.end_point_lx_;
+	Points.Inverse_PointL_Y       = walkinggait.end_point_ly_;
+	Points.Inverse_PointL_Z       = walkinggait.end_point_lz_;
+	Points.Inverse_PiontR_Thta    = walkinggait.end_point_rthta_;
+	Points.Inverse_PiontL_Thta    = walkinggait.end_point_lthta_;
+    walkinggait.resetParameter();
 }
 
 void Locus::get_cpg_with_offset(){
@@ -265,7 +297,7 @@ void InverseKinematic::initial_inverse_kinematic()
 	Points.Inverse_PiontL_Thta = Points.Left_Thta;    
 	
 	// printf("\nR_X: %f, R_Y: %f, R_Z: %f, R_T: %f\nL_X: %f, L_Y: %f, L_Z: %f, L_T: %f\n\n",Points.Inverse_PointR_X, Points.Inverse_PointR_Y, Points.Inverse_PointR_Z, Points.Inverse_PiontR_Thta, Points.Inverse_PointL_X, Points.Inverse_PointL_Y, Points.Inverse_PointL_Z, Points.Inverse_PiontL_Thta);
-	calculate_inverse_kinematic(Motion_Delay);
+	calculate_inverse_kinematic(60);
 	int i;
 	for(i = 0; i < 21; i++)//===============================================i=0>i=9
 	{   
@@ -290,6 +322,7 @@ void InverseKinematic::initial_inverse_kinematic()
 	output_base_[10] += 0;
 	output_base_[16] -= 0;
 	Parameters.Body_Pitch_tmp = Parameters.Body_Pitch;
+	cout << "IK init finish"<< endl;
 }
 
 void InverseKinematic::initial_parameters(){
@@ -452,7 +485,7 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
         L_Lxyz = l1_l2;
     RL_2 = R_Lxyz * R_Lxyz;
     LL_2 = L_Lxyz * L_Lxyz;
-
+ 
     Points.Thta[9] = Points.Inverse_PiontL_Thta + PI_2;
     if(Points.Inverse_PointL_Y == 0)
     {

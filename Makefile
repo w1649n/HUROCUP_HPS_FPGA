@@ -8,7 +8,7 @@ HWLIBS_ROOT = $(SOCEDS_ROOT)/ip/altera/hps/altera_hps/hwlib
 ALTLIB_ROOT = C:/altera/16.0/ip/altera/sopc_builder_ip
 CROSS_COMPILE = arm-linux-gnueabihf-
 NO_WARNING_ALERT = -Wno-unused-variable -Wno-unused-but-set-variable -Wno-sign-compare -Wno-pointer-arith
-CFLAGS = -g -Wall $(NO_WARNING_ALERT) -D$(ALT_DEVICE_FAMILY) -I$(HWLIBS_ROOT)/include/$(ALT_DEVICE_FAMILY)   -I$(HWLIBS_ROOT)/include/ -I$(ALTLIB_ROOT)/altera_avalon_pio/inc -I$(ALTLIB_ROOT)/altera_mp32/HAL/inc/ -IC:/Users/ICLAB/Desktop/HUROCUP_HPS_FPGA_LED-develop/include
+CFLAGS = -g -Wall $(NO_WARNING_ALERT) -D$(ALT_DEVICE_FAMILY) -I$(HWLIBS_ROOT)/include/$(ALT_DEVICE_FAMILY)   -I$(HWLIBS_ROOT)/include/ -I$(ALTLIB_ROOT)/altera_avalon_pio/inc -I$(ALTLIB_ROOT)/altera_mp32/HAL/inc/ -IE:\git\HUROCUP_HPS_FPGA\include
 LDFLAGS =  -g -Wall $(NO_WARNING_ALERT)
 CC = $(CROSS_COMPILE)g++ -std=c++11
 ARCH= arm
