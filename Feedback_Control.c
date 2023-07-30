@@ -20,7 +20,7 @@ BalanceControl::BalanceControl()
 	name_cont_ = 0;
 
 	ZMP_process = new ZMPProcess;
-	// initialize(30);
+	// initialize(15);
 }
 
 BalanceControl::~BalanceControl()
@@ -329,6 +329,14 @@ void BalanceControl::get_sensor_value()
 		p2h_get_parameter();
 	int i;
 	double rpy_radian[3] = {0};
+	//
+	// for(int i=0; i<3; i++)
+	// 	rpy_radian[i] = sensor.rpy_[i]*DEGREE2RADIAN;
+	// roll_imu_filtered_ = rpy_radian[0];//roll_imu_lpf_.get_filtered_output(rpy_radian[0]);
+	// pitch_imu_filtered_ = rpy_radian[1];//pitch_imu_lpf_.get_filtered_output(rpy_radian[1]);
+	// roll_over_limit_ = (fabs(roll_imu_filtered_) > 7*DEGREE2RADIAN ? true : false);
+	// pitch_over_limit_ = (fabs(pitch_imu_filtered_) > 5*DEGREE2RADIAN ? true : false);
+	//
 	for(int i=0; i<3; i++)
 		rpy_radian[i] = sensor.rpy_[i] * DEGREE2RADIAN;
 	
@@ -490,7 +498,7 @@ void BalanceControl::balance_control()
     for(i=0; i<3; i++)pres_imu_value[i].pos = sensor.rpy_[i];
  
 	double Accel_limit = 1;
-	int Step_Gain = 3;
+	int Step_Gain = 1;
 	if(walkinggait.Stepout_flag_Y_)
 	{
 		walkinggait.Control_Step_length_Y_ = walkinggait.Control_Step_length_Y_;

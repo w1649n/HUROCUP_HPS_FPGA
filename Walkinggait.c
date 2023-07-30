@@ -481,8 +481,6 @@ void WalkingGaitByLIPM::readWalkData()
         {
             var_theta_ = parameterinfo->THTA;
         }
-
-        
         abs_theta_ = fabs(var_theta_);
 
 
