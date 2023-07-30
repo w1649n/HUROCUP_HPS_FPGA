@@ -666,7 +666,7 @@ void WalkingTrajectory::LC_walkfunction()
     }
     else if (parameterinfo->parameters.BASE_LIFT_Z < 0)
     {
-        parameterinfo->points.Z_Right_foot = OSC_move_z(parameterinfo->parameters.OSC_LockRange, parameterinfo->parameters.Period_T, parameterinfo->ZUpdate, PI, parameterinfo->complan.time_point_+parameterinfo->parameters.Period_T/16);
+        parameterinfo->points.Z_Right_foot = OSC_move_z(parameterinfo->parameters.OSC_LockRange, parameterinfo->parameters.Period_T, parameterinfo->ZUpdate, PI, time_shift);
         parameterinfo->points.Z_Left_foot = OSC_lifemove_DOWNz(parameterinfo->parameters.OSC_LockRange, parameterinfo->parameters.Period_T, parameterinfo->ZUpdate, PI, parameterinfo->parameters.BASE_LIFT_Z, parameterinfo->complan.time_point_+parameterinfo->parameters.Period_T/16, parameterinfo->parameters.Sample_Time);
     }
 
@@ -684,8 +684,8 @@ void WalkingTrajectory::LC_walkfunction()
         parameterinfo->points.Right_Thta = 0;//821
         parameterinfo->points.Left_Thta = 0;//821
     }else{
-        parameterinfo->points.Right_Thta += OSC_Rotate(parameterinfo->parameters.OSC_LockRange, parameterinfo->parameters.Period_T, parameterinfo->THTAUpdate, 0, time_shift);//Parameters->Str_Rfoot_Lturn
-        parameterinfo->points.Left_Thta  += OSC_Rotate(parameterinfo->parameters.OSC_LockRange, parameterinfo->parameters.Period_T, -parameterinfo->THTAUpdate, 0, parameterinfo->complan.time_point_);//-Parameters->Str_Lfoot_Rturn
+        parameterinfo->points.Right_Thta += OSC_Rotate(parameterinfo->parameters.OSC_LockRange, parameterinfo->parameters.Period_T, 0, 0, time_shift);//Parameters->Str_Rfoot_Lturn
+        parameterinfo->points.Left_Thta  += OSC_Rotate(parameterinfo->parameters.OSC_LockRange, parameterinfo->parameters.Period_T, 0, 0, parameterinfo->complan.time_point_);//-Parameters->Str_Lfoot_Rturn
     }
     
 

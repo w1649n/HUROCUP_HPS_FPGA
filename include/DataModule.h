@@ -44,14 +44,12 @@ public:
 
     unsigned char datamodule_cmd_;
     bool motion_execute_flag_;
-    bool stand_flag;
     int totalangle_[21];
     int totalspeed_[21];
+
     int Calculate_standangle[12];
     int Calculate_standspeed[12];
 
-    int Walking_standangle[21];
-    int Walking_standspeed[21];
 private:
     bool update_database_flag_;
     int database_[21];

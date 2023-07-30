@@ -18,6 +18,7 @@ public:
     void initialize();
     void setpSensorDataOffset(void *origen_sensor_data);
     void setpOrigenSensorData(void *origen_sensor_data);
+    void resetSensor();
     ZMPParam getZMPValue();
     float getForceLeft();
     float getForceRight();
@@ -27,6 +28,7 @@ public:
     int *getpOrigenSensorData();
     double sensor_force[8];
     int origen_sensor_data[8];
+    int sensor_data_offset[8];
 
     
 

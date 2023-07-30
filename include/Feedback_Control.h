@@ -34,7 +34,7 @@ using namespace std;
 
 #define GRAVITATIONAL_ACCELERATION 9.8	//9.8(m/s^2)
 #define ANKLE_HEIGHT 2.6 //2.6(cm)
-#define COM_HEIGHT_TO_GROUND (walkinggait.COM_HEIGHT + ANKLE_HEIGHT)
+#define COM_HEIGHT_TO_GROUND (COM_HEIGHT + ANKLE_HEIGHT)
 // #define IMU_HEIGHT 7.462 //7.462(cm)
 
 /////////////////////////Posture///////////////////////
@@ -121,18 +121,14 @@ public:
     // void setErrorsValue(float errors);
     // void setErrordValue(float errord);
     // float getFixValue();
-	float error;
-    float pre_error;
-    float errors;
-    float errord;
 private:
     double Kp;
     double Ki;
     double Kd;
-    // float error;
-    // float pre_error;
-    // float errors;
-    // float errord;
+    float error;
+    float pre_error;
+    float errors;
+    float errord;
     float x1c;
     float x2c;
     float x3c;
@@ -171,8 +167,8 @@ struct BalanceParameter
 typedef struct ButterWorthIMUParameter ButterWorthIMUParam;
 struct ButterWorthIMUParameter
 {
-    ButterWorthFilter pos; //座標
-    ButterWorthFilter vel; //速度
+    ButterWorthFilter pos;
+    ButterWorthFilter vel;
     void initialize()
     {
         pos.initialize(ButterWorthParam::set(1, -0.676819, 0.161590, 0.161590)); //fs = 33 , fc = 2, n = 1;
@@ -326,7 +322,7 @@ public:
 	void setSupportFoot();
 	void resetControlValue();
 	void endPointControl();
-	void InitEndPointControl();
+	void LCEndPointControl();
 	float calculateCOMPosbyLIPM(float pos_adj, float vel);
 
 	double control_cycle_sec_;
@@ -376,7 +372,6 @@ public:
 	bool roll_over_limit_;
 	bool pitch_over_limit_;
 	int landing_foot_;
-	int DSP,SSP;
 	double cog_roll_offset_;
 	double cog_pitch_offset_;
 	double foot_cog_x_;
@@ -385,24 +380,18 @@ public:
 	double y_adj_by_cog_;
 	double original_ik_point_rz_, original_ik_point_lz_;
 	double ankle_pitch_;
-	float x_offset,y_offset_l,y_offset_r;
+
 	//LIPM
 	etSupFoot sup_foot_, pre_sup_foot_;
 
-	IMUParam init_imu_value[3];				//初始IMU值
-    IMUParam pres_imu_value[3];				//當前IMU值
-    IMUParam prev_imu_value[3];				//前次IMU值
-    IMUParam ideal_imu_value[3];			//理想IMU值
-    IMUParam passfilter_pres_imu_value[3];	
+	IMUParam init_imu_value[3];
+    IMUParam pres_imu_value[3];
+    IMUParam prev_imu_value[3];
+    IMUParam ideal_imu_value[3];
+    IMUParam passfilter_pres_imu_value[3];
     IMUParam passfilter_prev_imu_value[3];
 
 	ButterWorthIMUParam butterfilter_imu[3];
-
-	BalanceParam pitch_value;
-	PID_Controller PID_pitch;
-
-	BalanceParam pitch_value_a;
-	PID_Controller PID_pitch_a;
 	//hip
 	BalanceParam leftfoot_hip_roll_value;
     BalanceParam leftfoot_hip_pitch_value;
@@ -436,7 +425,6 @@ public:
 
 	BalanceParam CoM_EPx_value;
 	PID_Controller PIDCoM_x;
-	PID_Controller PIDCoM_z;
 
 	ZMPParam pres_ZMP;
     ZMPParam prev_ZMP;
@@ -452,7 +440,6 @@ public:
     // float swingfoot_hip_pitch;
     // float swingfoot_ankle_roll;
     // float swingfoot_ankle_pitch;
-	float foot_pitch;
 	float leftfoot_hip_roll;
     float leftfoot_hip_pitch;
     float leftfoot_ankle_roll;
@@ -499,8 +486,6 @@ public:
 	float tmp;
 	float tmp_com;
 	float tmp_com_total;
-	bool support_flag_l = true,support_flag_r = true;
-	bool change_roll = false,change_pitch = false;
 	bool flag = false;
 	//LIPM end
 };

@@ -5,17 +5,17 @@
 #define min(x,y)  ( x<y?x:y )
 
 struct Points_Struct{
-    double KP;      //比例係數
-    double KI;      //積分係數
-    double KD;      //微分係數
+    double KP;
+    double KI;
+    double KD;
     
-    double error_prior; //前次誤差
-    double integral;    
+    double error_prior;
+    double integral;
     double PID_bias;
     
-    double PID_error;   //當前誤差
-    double derivative;  
-    double output;      //輸出
+    double PID_error;
+    double derivative;
+    double output;
 }PID[3],PID_motor[21];
 //-----------------Fuzzy---------------//
 double PID_control(int index, double desired_value, double actual_value, double iteration_time){

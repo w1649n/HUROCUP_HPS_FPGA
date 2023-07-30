@@ -53,9 +53,9 @@
 #define SPEED_TRANS 32.0303030303030303030303030303 // (32767 / 1023)
 //#define Debug_IK
 /********************************************************/
-#define COM_HEIGHT 27.5//28.8//24.3//26.9
+#define COM_HEIGHT 27.5//24.3//26.9 //28.8
 #define Length_Pelvis 9//8.7//8.7
-#define Length_Leg 23.5 //17 //20.4
+#define Length_Leg 23.5 //17 //20.4 //21
 
 #define STAND_OFFSET_RX 0//-2.8
 #define STAND_OFFSET_RY 0//-0.3
@@ -64,7 +64,7 @@
 #define STAND_OFFSET_LY 0//0.2
 #define STAND_OFFSET_LZ 0//-0.1
 
-#define SHOULDER_TO_COM 18.5//19.5//21
+#define SHOULDER_TO_COM 19.5//21
 
 #define MID 0
 #define STAND 0
@@ -113,9 +113,6 @@ struct Points_Struct{
     double Inverse_Pointbody_Y; //cm
     double Inverse_Pointbody_Z; //cm
     double Inverse_Piontbody_Thta;//-pi/2~pi/2
-    double waist_offset;
-    double pitch_offset;
-    double back_offset;
     
     
     //===================UNCONTROL===============================
@@ -182,10 +179,9 @@ public:
     void get_cpg_with_offset();
     void calculate_robot_status();
     void control_by_robot_status();
-    void get_first_stand();
+
     int locus_data_[8];
     int locus_time_;
-    bool get_first_stand_;
     unsigned char walking_state_;
     unsigned char sensor_mode_;
 };
@@ -203,7 +199,6 @@ public:
     void initial_parameters();
     void initial_points_process();
     void calculate_inverse_kinematic(int Motion_Delay);
-    void calculate_inverse_kinematic_forstand(int Motion_Delay);
     std::string DtoS(double value);
 	std::map<std::string, std::vector<double>> map_motor;      
     void saveData();
@@ -211,10 +206,7 @@ public:
     unsigned short update_crc(unsigned short , unsigned char *, unsigned short);
 
     unsigned char packet_char_[203];
-    int correct_angle[21];
-    int origin_angle[21];
-
-
+    
 private:
     double speed_gain_[21];
     double angle_gain_[21];

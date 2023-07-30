@@ -4,14 +4,14 @@ extern SensorDataProcess sensor;
 ZMPProcess::ZMPProcess()
 {
 	ZMP_kg_offset = new int*[8];
-	ZMP_kg_offset[0] = new int[5]{0,40,80,120,160};
-	ZMP_kg_offset[1] = new int[5]{0,155,310,465,620};
-	ZMP_kg_offset[2] = new int[5]{0,114,228,342,456};
-	ZMP_kg_offset[3] = new int[5]{0,86,172,258,344};
-	ZMP_kg_offset[4] = new int[5]{0,102,204,306,408};
-	ZMP_kg_offset[5] = new int[5]{0,132,264,396,528};
-	ZMP_kg_offset[6] = new int[5]{0,135,270,405,540};
-	ZMP_kg_offset[7] = new int[5]{0,135,270,405,540};
+	ZMP_kg_offset[0] = new int[5]{0,95,190,285,380};
+	ZMP_kg_offset[1] = new int[5]{0,80,160,240,320};
+	ZMP_kg_offset[2] = new int[5]{0,83,166,249,332};
+	ZMP_kg_offset[3] = new int[5]{0,110,220,330,440};
+	ZMP_kg_offset[4] = new int[5]{0,100,200,300,400};
+	ZMP_kg_offset[5] = new int[5]{0,102,204,306,408};
+	ZMP_kg_offset[6] = new int[5]{0,120,240,360,480};
+	ZMP_kg_offset[7] = new int[5]{0,115,230,345,460};
 	ZMP_kg_table = new int[5]{0,1,2,3,4};
 	name_cont_ = 0;
 	initialize();
@@ -56,15 +56,27 @@ void ZMPProcess::initialize()
 
 }
 
+void ZMPProcess::resetSensor()
+{
+	for(int count=0; count<4; count++)
+	{
+	sensor_data_offset[count] = sensor.press_left_[count];
+	}
+	for(int count=0; count<4; count++)
+	{
+	sensor_data_offset[count+4] = sensor.press_right_[count];
+	}	
+}
+
 void ZMPProcess::getSensorValue()
 {
 	for(int count=0; count<4; count++)
 	{
-	origen_sensor_data[count] = sensor.press_left_[count];
+	origen_sensor_data[count] = sensor.press_left_[count] - sensor_data_offset[count];
 	}
 	for(int count=0; count<4; count++)
 	{
-	origen_sensor_data[count+4] = sensor.press_right_[count];
+	origen_sensor_data[count+4] = sensor.press_right_[count] - sensor_data_offset[count+4];
 	}
 }
 

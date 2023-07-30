@@ -99,7 +99,7 @@ void Datamodule::update_database()
 					Calculate_standspeed[11-i] = (database_[i] & 0x0000FFFF);
 					Calculate_standangle[11-i] = ((database_[i] & 0xFFFF0000)>> 16);
 					//--------------------------
-					//手部絕對刻度
+					//手部+9號馬達絕對刻度
 					totalspeed_[i] = (database_[20-i] & 0x0000FFFF);
 					totalangle_[i] = ((database_[20-i] & 0xFFFF0000)>> 16);
 				}
@@ -111,10 +111,8 @@ void Datamodule::update_database()
 						Calculate_standspeed[11-i] = (database_[i] & 0x0000FFFF);
 						Calculate_standangle[11-i] = ((database_[i] & 0xFFFF0000)>> 16);
 					}
-					//IK算好的腿部刻度
-					totalspeed_[i] = Walking_standspeed[i];
-					totalangle_[i] = Walking_standangle[i];
 				}
+				IK.initial_points(); //初始化馬達角度base
 				break;
 			case 3: //motion做動作
 				totalspeed_[20-i] = (database_[i] & 0x0000FFFF);
@@ -145,6 +143,7 @@ void Datamodule::update_database()
 		}
 	}
 }
+
 void Datamodule::pushData()
 {
 	map_motor.find("motor_01")->second.push_back((double)totalangle_[0]);
@@ -169,11 +168,9 @@ void Datamodule::pushData()
 	map_motor.find("motor_20")->second.push_back((double)totalangle_[19]);
 	map_motor.find("motor_21")->second.push_back((double)totalangle_[20]);
 }
-void Datamodule::motion_execute()	//做motion動作
+
+void Datamodule::motion_execute()
 {
-	//pushData();
-	// saveData();
-	// printf("motion exe\n");
 	int i=0;
 	unsigned short blk_size = 0;
 
@@ -294,9 +291,8 @@ void Datamodule::motion_execute()	//做motion動作
 	motion_execute_flag_ = false;
 }
 
-void Datamodule::set_stand()	//設定站姿參數
+void Datamodule::set_stand()
 {
-/*開機初始站姿*/
 	int i=0;
 	for(i=0; i<21; i++)
 	{
@@ -305,6 +301,7 @@ void Datamodule::set_stand()	//設定站姿參數
 		else
 			totalspeed_[i] = 40;
 	}
+
 	totalangle_[0] = 3072;
 	totalangle_[1] = 1898;
 	totalangle_[2] = 2048;
@@ -314,7 +311,6 @@ void Datamodule::set_stand()	//設定站姿參數
 	totalangle_[6] = 2048;
 	totalangle_[7] = 2048;
 	totalangle_[8] = 2048;
-
 	totalangle_[9] = 2048;
 	totalangle_[10] = 2028;
 	totalangle_[11] = 1652;
@@ -327,37 +323,6 @@ void Datamodule::set_stand()	//設定站姿參數
 	totalangle_[18] = 1337;
 	totalangle_[19] = 1674;
 	totalangle_[20] = 2047;
-	//-------------------------------------------------
-	//---------------stand上半身初始值------------------
-	for(i=0; i<21; i++)
-	{
-		if(i==12||i==18)
-			Walking_standspeed[i] = 80;
-		else
-			Walking_standspeed[i] = 40;
-	}
-	Walking_standangle[0] = 3072;
-	Walking_standangle[1] = 1898;
-	Walking_standangle[2] = 2048;
-	Walking_standangle[3] = 2048;
-	Walking_standangle[4] = 1024;
-	Walking_standangle[5] = 2198;
-	Walking_standangle[6] = 2048;
-	Walking_standangle[7] = 2048;
-	Walking_standangle[8] = 2048;
-	//---------------stand下半身初始值------------------
-	Walking_standangle[9] = 2048;
-	Walking_standangle[10] = 2058;
-	Walking_standangle[11] = 1970;
-	Walking_standangle[12] = 2078;
-	Walking_standangle[13] = 2058;
-	Walking_standangle[14] = 2048;
-	Walking_standangle[15] = 2048;
-	Walking_standangle[16] = 2058;
-	Walking_standangle[17] = 2165;
-	Walking_standangle[18] = 2048;
-	Walking_standangle[19] = 2063;
-	Walking_standangle[20] = 2048;
 	//-------------------------------------------------
 	//----------------站直初始值------------------------
 	for(i=0;i<12;i++)
