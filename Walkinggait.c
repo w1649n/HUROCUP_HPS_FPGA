@@ -335,9 +335,9 @@ void Walkinggait::pushData()
             push_data_ = false;
             delay_push_ = false;
             cnt = 0;
-            IK.saveData();
-            // feedbackmotor.saveData();
-            saveData();
+            // IK.saveData();
+            feedbackmotor.saveData();
+            // saveData();
             balance.saveData();
         }  
     }        
@@ -545,9 +545,33 @@ void WalkingGaitByLIPM::readWalkData()
         {
             var_theta_ = parameterinfo->THTA;
         }
-
-        
         abs_theta_ = fabs(var_theta_);
+
+        if( ( Stepout_flag_X_ || Stepout_flag_Y_ ) && Step_Count_ >= 2)
+        {
+            Stepout_flag_X_ = false;
+            Stepout_flag_Y_ = false;
+            Control_Step_length_X_ = 0;
+            Control_Step_length_Y_ = 0;
+            Step_Count_ = 0;
+        }
+        else if( ( Stepout_flag_X_ || Stepout_flag_Y_ ) && (Step_Count_ <= 1))
+        {
+            if(((pre_step_%2 == 0) && (Control_Step_length_Y_ < 0))||((pre_step_%2 == 1) && (Control_Step_length_Y_ > 0)))
+            {
+
+            }
+            else
+            {
+                Step_Count_ += 1;
+                step_length_ -= Control_Step_length_X_;
+                // shift_length_ -= Control_Step_length_Y_;
+            }
+        }
+        else
+        {
+
+        }
 
         is_parameter_load_ = true;
     }

@@ -30,12 +30,17 @@ int main()
 	gettimeofday(&walkinggait.timer_start_, NULL);
 
 	int IB_count = 0; /* COM估測器 調用次數 */
-	IB.setparameter(0.03,0.05);	  /* 設定CoM估測器取樣時間與截止週期 */
-
+	IB.setparameter(0.015,0.05);	  /* 設定CoM估測器取樣時間與截止週期 */ //0.03,0.05
+ 
 	/*zmp測試*/
 	struct timeval zmp_start,zmp_end;
 	int zmp_timer = 0,zmp_count = 0;
 	bool zmp_first_time = true;
+	/*-----*/
+	/*balance測試*/
+	struct timeval balance_start,balance_end;
+	int balance_timer = 0,balancep_count = 0;
+	bool balance_first_time = true;
 	/*-----*/
 	bool read_feedback = false;
 	//------測試用延遲------//
@@ -66,12 +71,7 @@ int main()
 		sensor.load_press_right();
 		/*----------*/
 		/*-----------------------------------------*/
-		/*---馬達回授---*/
-		// feedbackmotor.load_motor_data_left_foot();
-		// feedbackmotor.load_motor_data_right_foot();
-		// feedbackmotor.pushData();
-		// read_feedback = false;
-		/*-------------*/
+		
 		sensor.load_sensor_setting(); //balance補償([raw,pitch,com]PID,[sup,nsup]foot_offset)
 		sensor.sensor_package_generate(); //建立感測器資料;回傳IMU值給IPC
 		/*---讀取步態資訊---*/
@@ -86,30 +86,33 @@ int main()
 		gettimeofday(&walkinggait.timer_end_, NULL);
 		walkinggait.timer_dt_ = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
 
+		walkinggait.balance_dt = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
+
+
 		balance.get_sensor_value();
 		/*zmp測試*/
-		// if (zmp_first_time)
-		// {
-		// 	gettimeofday(&zmp_start, NULL);
-		// 	zmp_first_time = false;
-		// }
-		// 	gettimeofday(&zmp_end, NULL);
+		if (zmp_first_time)
+		{
+			gettimeofday(&zmp_start, NULL);
+			zmp_first_time = false;
+		}
+			gettimeofday(&zmp_end, NULL);
 		
 		
-		// zmp_timer = (double)(1000000.0 * (zmp_end.tv_sec - zmp_start.tv_sec) + (zmp_end.tv_usec - zmp_start.tv_usec));
+		zmp_timer = (double)(1000000.0 * (zmp_end.tv_sec - zmp_start.tv_sec) + (zmp_end.tv_usec - zmp_start.tv_usec));
 
-		// if (zmp_timer>=1000000.0)//one second
-		// {
-		// 	balance.ZMP_process->getZMPValue();
-		// 	zmp_first_time = true;
-		// 	zmp_count++;
-		// }
+		if (zmp_timer>=1000000.0)//one second
+		{
+			balance.ZMP_process->getZMPValue();
+			zmp_first_time = true;
+			zmp_count++;
+		}
 
-		// if (zmp_count == 30)
-		// {
-		// 	//balance.ZMP_process->saveData();
-		// 	zmp_count = 0;
-		// }
+		if (zmp_count == 30)
+		{
+			//balance.ZMP_process->saveData();
+			zmp_count = 0;
+		}
 		
 		/*-----*/
 
@@ -134,7 +137,18 @@ int main()
 			walkinggait.pushData();
 
 			gettimeofday(&walkinggait.timer_start_, NULL);
+			if (balance_first_time)
+			{
+				gettimeofday(&balance_start, NULL);
+				balance_first_time = false;
+			}
 			// balance.balance_control();
+			/*---馬達回授---*/
+			feedbackmotor.load_motor_data_left_foot();
+			feedbackmotor.load_motor_data_right_foot();
+			feedbackmotor.pushData();
+			read_feedback = false;
+			/*-------------*/
 		}
 		
 
@@ -184,7 +198,14 @@ int main()
 			balance.endPointControl();	//末端點控制
 			if(walkinggait.LIPM_flag_)	
 			{
-				balance.balance_control();	// 平衡控制(sensor_set)
+				
+				gettimeofday(&balance_end, NULL);
+				balance_timer = (double)(1000000.0 * (balance_end.tv_sec - balance_start.tv_sec) + (balance_end.tv_usec - balance_start.tv_usec));
+				if (balance_timer>=30000.0)//one second
+				{
+					balance.balance_control();	// 平衡控制(sensor_set)
+					balance_first_time = true;
+				}
 			}
 			locus.get_cpg_with_offset();  //獲取末端點
 			locus.control_by_robot_status(); //擺手&擺腰

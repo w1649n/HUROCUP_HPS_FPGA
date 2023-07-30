@@ -147,8 +147,8 @@ public:
     double x_, y_, z_, thta_;
     char walking_cmd_, sensor_mode_;
     
-    struct timeval timer_start_, timer_end_;
-    double timer_dt_;
+    struct timeval timer_start_, timer_end_,balance_start_;
+    double timer_dt_,balance_dt;
     bool get_parameter_flag_;
     bool get_walkdata_flag_;
     bool locus_flag_;

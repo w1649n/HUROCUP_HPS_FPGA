@@ -400,6 +400,9 @@ public:
 
 	BalanceParam pitch_value;
 	PID_Controller PID_pitch;
+
+	BalanceParam pitch_value_a;
+	PID_Controller PID_pitch_a;
 	//hip
 	BalanceParam leftfoot_hip_roll_value;
     BalanceParam leftfoot_hip_pitch_value;
