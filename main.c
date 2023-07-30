@@ -86,10 +86,6 @@ int main()
 
 		gettimeofday(&walkinggait.timer_end_, NULL);
 		walkinggait.timer_dt_ = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
-
-		walkinggait.balance_dt = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
-
-
 		balance.get_sensor_value();
 
 		if (balance.two_feet_grounded_ && sensor.fall_Down_Flag_)
@@ -157,15 +153,6 @@ int main()
 			cout << "use_time : " << use_timer << endl;
 
 			gettimeofday(&walkinggait.timer_start_, NULL);
-
-			
-			// balance.balance_control();
-			/*---馬達回授---*/
-			feedbackmotor.load_motor_data_left_foot();
-			feedbackmotor.load_motor_data_right_foot();
-			feedbackmotor.pushData();
-			read_feedback = false;
-			/*-------------*/
 		}
 		// cout << "walk_end" << endl;
  		// printf(" ");

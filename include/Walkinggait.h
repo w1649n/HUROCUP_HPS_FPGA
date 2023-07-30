@@ -76,6 +76,11 @@ public:
     double wFootPositionZ(const double height, const double t, const double T, const double T_DSP);
     double wFootTheta(const double theta, bool reverse, const double t, const double T, const double T_DSP);
 
+    /* foot force */
+    double wForceDifferenceControl(const double t, const double T, const double T_DSP);
+    double Z_ctrl_;
+    /* --- */
+
     double unit_step(double x);
     double sinh(double x);
     double cosh(double x);

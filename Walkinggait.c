@@ -1,11 +1,14 @@
 #include "include/Walkinggait.h"
+#include "ZMP.h"
+#include "ZMPProcess.h"
 
 WalkingCycle walkingcycle;
 WalkingTrajectory walkingtrajectory;
 kickgait_space::KickingGait kickinggait;
 ModelPredictiveControl MPC;
 IMU_base_obs IB;
-  
+Force_Diff_Ctrl_base FDC;
+
 extern BalanceControl balance;
 extern InverseKinematic IK;
 extern Initial init;
@@ -1049,16 +1052,15 @@ void WalkingGaitByLIPM::process()
         break;
     }
     
-
-    py_u = py_;
+    // py_u = py_;
     px_u = px_;
-    // py_u = py_ + 0.6 * ( py_ - com_y);
+    py_u = py_ + 0.6 * ( py_ - com_y);
     // px_u = px_ + 0.4 * ( px_ - com_x);
-
 
     coordinate_transformation();
     coordinate_offset();
 
+    Z_ctrl_ = wForceDifferenceControl(t_, TT_, T_DSP_);
 
     if(now_step_ > step_)
     {
@@ -1071,6 +1073,7 @@ void WalkingGaitByLIPM::process()
         step_point_lthta_ = 0;
         step_point_rthta_ = 0;
 
+        Z_ctrl_ = 0;
         end_point_lx_ = 0;
         end_point_rx_ = 0;
         end_point_ly_ = width_size_ - Length_Pelvis/2;
@@ -1123,11 +1126,11 @@ void WalkingGaitByLIPM::process()
     }
     parameterinfo->points.IK_Point_RX = end_point_rx_;
 	parameterinfo->points.IK_Point_RY = end_point_ry_;
-	parameterinfo->points.IK_Point_RZ = end_point_rz_;
+	parameterinfo->points.IK_Point_RZ = end_point_rz_ + Z_ctrl_/2;
 	parameterinfo->points.IK_Point_RThta = end_point_rthta_;
 	parameterinfo->points.IK_Point_LX = end_point_lx_;
 	parameterinfo->points.IK_Point_LY = end_point_ly_;
-	parameterinfo->points.IK_Point_LZ = end_point_lz_;
+	parameterinfo->points.IK_Point_LZ = end_point_lz_ - Z_ctrl_/2;
 	parameterinfo->points.IK_Point_LThta = end_point_lthta_;
 }
 
@@ -1498,6 +1501,40 @@ double WalkingGaitByLIPM::wFootTheta(const double theta, bool reverse, const dou
     else if(t>T*(1-T_DSP/2) && reverse)
         return 0;    
 }
+
+double WalkingGaitByLIPM::wForceDifferenceControl(const double t, const double T, const double T_DSP)
+{
+   
+    // FF.getZMPValue();
+    double force_left_ = balance.ZMP_process->getForceLeft();
+    double force_right_ = balance.ZMP_process->getForceRight();
+    //FDC.setinputdata(lpx_,lpy_,rpx_,rpy_,zmp_x,zmp_y,lpt_,rpt_, force_left_, force_right_);// force_left_, force_right_
+    //FDC.run();
+    if (t > T * T_DSP / 2 && t < T * (1 - (T_DSP / 2))) // 單支
+        return 0;
+    else{ // 雙支
+        FDC.setinputdata(lpx_, lpy_, rpx_, rpy_, MPC.xt(2), MPC.yt(2), lpt_, rpt_, force_left_, force_right_);// force_left_, force_right_
+        FDC.run();
+
+    // //cout << "lpz_ = " << lpz_ << "  rpz_ = " << rpz_ << "\n";
+    // //cout << "lpy_ = " << lpy_ << "  rpy_ = " << rpy_ << "\n";
+    // //cout << "lpx_ = " << lpx_ << "  rpx_ = " << rpx_ << "\n";
+    // //cout << "lpt= = " << lpt_ << "  cos(lpt) = " << cos(lpt_) << "\n";
+    // cout << "zmp_x = " << px_ << "  zmp_y = " << py_ << "\n";
+    // //cout << "temp_point_x = " << FDC.temp_point_x << "  temp_point_y = " << FDC.temp_point_y << "\n";
+    // //cout << "temp_com_point_x = " << FDC.temp_com_point_x << "  temp_com_point_y = " << FDC.temp_com_point_y << "\n";
+    // //cout << "com_pos_lx = " << FDC.com_pos_lx << "  com_pos_rx = " << FDC.com_pos_rx << "\n";
+    // //cout << "com_pos_ly = " << FDC.com_pos_ly << "  com_pos_ry = " << FDC.com_pos_ry << "\n";
+    // cout << "cls_lx = " << FDC.cls_lx << "  cls_ly = " << FDC.cls_ly << "\n";
+    // cout << "cls_rx = " << FDC.cls_rx << "  cls_ry = " << FDC.cls_ry << "\n";
+    // cout << "alpha_x = " << FDC.alpha_x << "  alpha_y = " << FDC.alpha_y << "\n";
+    // cout << "alpha = " << FDC.alpha << "\n";
+    // cout << "Z_ctrl = " << FDC.Z_ctrl << "\n";
+
+        return FDC.Z_ctrl;
+    }
+}
+
 double WalkingGaitByLIPM::unit_step(double x)
 {
     if(x<0)

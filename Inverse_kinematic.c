@@ -65,6 +65,7 @@ void Locus::set_point_by_stand()
     walkinggait.step_point_lthta_ = 0;
     walkinggait.step_point_rthta_ = 0;
 
+	walkinggait.Z_ctrl_       = 0;
     walkinggait.end_point_lx_ = 0;
     walkinggait.end_point_rx_ = 0;
     walkinggait.end_point_ly_ = walkinggait.width_size_ - Length_Pelvis/2;

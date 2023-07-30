@@ -15,6 +15,7 @@
         "alignedvector3": "cpp",
         "fft": "cpp",
         "adolcforward": "c",
-        "eiquadprog.h": "c"
+        "eiquadprog.h": "c",
+        "zmp.h": "c"
     }
 }
