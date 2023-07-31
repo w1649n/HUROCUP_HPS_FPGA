@@ -1095,19 +1095,19 @@ void WalkingGaitByLIPM::process()
         // map_walk.find("l_foot_z")->second.push_back(step_point_lz_);
         // map_walk.find("r_foot_z")->second.push_back(step_point_rz_);
 
-        // map_walk.find("l_foot_x")->second.push_back(end_point_lx_);
-        // map_walk.find("r_foot_x")->second.push_back(end_point_rx_);
-        // map_walk.find("l_foot_y")->second.push_back(end_point_ly_);
-        // map_walk.find("r_foot_y")->second.push_back(end_point_ry_);
-        // map_walk.find("l_foot_z")->second.push_back(end_point_lz_);
-        // map_walk.find("r_foot_z")->second.push_back(end_point_rz_);
+        map_walk.find("l_foot_x")->second.push_back(end_point_lx_);
+        map_walk.find("r_foot_x")->second.push_back(end_point_rx_);
+        map_walk.find("l_foot_y")->second.push_back(end_point_ly_);
+        map_walk.find("r_foot_y")->second.push_back(end_point_ry_);
+        map_walk.find("l_foot_z")->second.push_back(end_point_lz_);
+        map_walk.find("r_foot_z")->second.push_back(end_point_rz_);
 
-        map_walk.find("l_foot_x")->second.push_back(lpx_);
-        map_walk.find("r_foot_x")->second.push_back(rpx_);
-        map_walk.find("l_foot_y")->second.push_back(lpy_);
-        map_walk.find("r_foot_y")->second.push_back(rpy_);
-        map_walk.find("l_foot_z")->second.push_back(lpz_);
-        map_walk.find("r_foot_z")->second.push_back(rpz_);
+        // map_walk.find("l_foot_x")->second.push_back(lpx_);
+        // map_walk.find("r_foot_x")->second.push_back(rpx_);
+        // map_walk.find("l_foot_y")->second.push_back(lpy_);
+        // map_walk.find("r_foot_y")->second.push_back(rpy_);
+        // map_walk.find("l_foot_z")->second.push_back(lpz_);
+        // map_walk.find("r_foot_z")->second.push_back(rpz_);
 
         map_walk.find("l_foot_t")->second.push_back(step_point_lthta_);
         map_walk.find("r_foot_t")->second.push_back(step_point_rthta_);
@@ -1158,11 +1158,9 @@ void WalkingGaitByLIPM::LCdown()
     }        
     else if(now_step_ > step_)
     {
-        if_finish_ = true;
         plot_once_ = true;
         parameterinfo->complan.walking_stop = true;
         parameterinfo->walking_mode = 0;
-
     }
     else if(now_step_ == 0)
     {
@@ -1364,7 +1362,6 @@ void WalkingGaitByLIPM::LCdown()
         end_point_rz_ = step_point_rz_- (COM_HEIGHT - Length_Leg);
         end_point_lthta_ = 0;
         end_point_rthta_ = 0;
-        if_finish_ = true;
         // delay_push_ = true;
         resetParameter();
         //saveData();

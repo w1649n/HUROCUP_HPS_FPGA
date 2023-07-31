@@ -60,14 +60,14 @@ int main()
 		{
 			if(datamodule.stand_flag)
 			{
-				locus.set_point_by_stand();
-				IK.calculate_inverse_kinematic(60);
+				IK.initial_inverse_kinematic();		//初始化歸點
+				locus.set_point_by_stand();			//設定基礎站立點
+				IK.calculate_inverse_kinematic(60); //計算屈膝角度
 				walkinggait.if_finish_ = false;
 				datamodule.stand_flag = false;
 			}
 			balance.ZMP_process->resetSensor();
 			datamodule.motion_execute();
-			feedback_angle = true;
 			cout << "do motion"<<endl;
 		}
 		
@@ -100,15 +100,15 @@ int main()
 		}
 
 		/*zmp測試*/
-		if (zmp_first_time)
-		{
-			gettimeofday(&zmp_start, NULL);
-			zmp_first_time = false;
-		}
-			gettimeofday(&zmp_end, NULL);
+		// if (zmp_first_time)
+		// {
+		// 	gettimeofday(&zmp_start, NULL);
+		// 	zmp_first_time = false;
+		// }
+		// 	gettimeofday(&zmp_end, NULL);
 		
 		
-		zmp_timer = (double)(1000000.0 * (zmp_end.tv_sec - zmp_start.tv_sec) + (zmp_end.tv_usec - zmp_start.tv_usec));
+		// zmp_timer = (double)(1000000.0 * (zmp_end.tv_sec - zmp_start.tv_sec) + (zmp_end.tv_usec - zmp_start.tv_usec));
 
 		// if (zmp_timer>=1000000.0)//one second
 		// {

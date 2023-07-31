@@ -77,10 +77,10 @@ void Locus::set_point_by_stand()
 
     Points.Inverse_PointR_X  	  = walkinggait.end_point_rx_;
 	Points.Inverse_PointR_Y       = walkinggait.end_point_ry_;
-	Points.Inverse_PointR_Z       = walkinggait.end_point_rz_;
+	Points.Inverse_PointR_Z       = walkinggait.end_point_rz_ + walkinggait.Z_ctrl_/2;
 	Points.Inverse_PointL_X       = walkinggait.end_point_lx_;
 	Points.Inverse_PointL_Y       = walkinggait.end_point_ly_;
-	Points.Inverse_PointL_Z       = walkinggait.end_point_lz_;
+	Points.Inverse_PointL_Z       = walkinggait.end_point_lz_ - walkinggait.Z_ctrl_/2;
 	Points.Inverse_PiontR_Thta    = walkinggait.end_point_rthta_;
 	Points.Inverse_PiontL_Thta    = walkinggait.end_point_lthta_;
     walkinggait.resetParameter();

@@ -15,7 +15,7 @@ ARCH= arm
 LINKMATH= -lm
 
 build: $(TARGET)
-$(TARGET): main.o Initial.o Inverse_kinematic.o DataModule.o Fuzzy_Controller.o kalman.o Parameter_Info.o WalkingCycle.o WalkingTrajectory.o Walkinggait.o Sensor.o Feedback_Control.o DefineDataStruct.o ZMPProcess.o B_Spline.o KickingGait.o MBK_control.o fVector.o matrix.o hand_kinetic_base.o Feedback_Motor.o IMU_base_obs.o
+$(TARGET): main.o Initial.o Inverse_kinematic.o DataModule.o Fuzzy_Controller.o kalman.o Parameter_Info.o WalkingCycle.o WalkingTrajectory.o Walkinggait.o Sensor.o Feedback_Control.o DefineDataStruct.o ZMPProcess.o ZMP.o B_Spline.o KickingGait.o MBK_control.o fVector.o matrix.o hand_kinetic_base.o Feedback_Motor.o IMU_base_obs.o
 	$(CC) $(LDFLAGS)   $^ -o $@  $(LINKMATH)
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -32,6 +32,7 @@ $(TARGET): main.o Initial.o Inverse_kinematic.o DataModule.o Fuzzy_Controller.o 
 	$(CC) $(CFLAGS) -c Feedback_Control.c
 	$(CC) $(CFLAGS) -c DefineDataStruct.c
 	$(CC) $(CFLAGS) -c ZMPProcess.c
+	$(CC) $(CFLAGS) -c ZMP.c
 	$(CC) $(CFLAGS) -c B_Spline.c
 	$(CC) $(CFLAGS) -c KickingGait.c
 	$(CC) $(CFLAGS) -c MBK_control.c

@@ -112,7 +112,6 @@ void Datamodule::update_database()
 						Calculate_standangle[11-i] = ((database_[i] & 0xFFFF0000)>> 16);
 					}
 				}
-				IK.initial_points(); //初始化馬達角度base
 				break;
 			case 3: //motion做動作
 				totalspeed_[20-i] = (database_[i] & 0x0000FFFF);
