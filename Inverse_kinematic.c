@@ -201,42 +201,7 @@ void Locus::control_by_robot_status(){
 		Points.Thta[4] = base_R;
 		Points.Thta[8] = base_Waist;
 	}
-	  							/*上板=2*/  							/*stop_step=3*/
-	if(parameterinfo->walking_mode == 2)
-	{
-		if(parameterinfo->complan.walking_state == 1)
-		{
-			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2*walkinggait.t_/walkinggait.TT_);
-			// Points.roll_offset = sensor.roll_pid_[0]*0.1*sin(PI/2*walkinggait.t_/walkinggait.TT_);
-		}
-		else
-		{
-			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2);
-			// Points.roll_offset  = sensor.pitch_pid_[0]*0.1*sin(PI/2);
-		}
-		Points.Thta[0] = base_L;
-		Points.Thta[4] = base_R;
-		Points.Thta[8] = base_Waist;
-		Points.waist_offset = 0;
-	}
-	else if(parameterinfo->walking_mode == 3)
-	{
-		if(parameterinfo->complan.walking_state == 1)
-		{
-			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2*walkinggait.t_/walkinggait.TT_);
-			// Points.roll_offset = sensor.roll_pid_[0]*0.1*sin(PI/2*walkinggait.t_/walkinggait.TT_);
-		}
-		else
-		{
-			Points.pitch_offset = parameterinfo->parameters.Z_Swing_Range*sin(PI/2);
-			// Points.roll_offset  = sensor.pitch_pid_[0]*0.1*sin(PI/2);
-		}
-		Points.Thta[0] = base_L;
-		Points.Thta[4] = base_R;
-		Points.Thta[8] = base_Waist;
-		Points.waist_offset = 0;
-	}
-
+	
 	if(!parameterinfo->LCBalanceOn)
 	{
 		// Points.Thta[0] = base_L;
@@ -332,7 +297,7 @@ void InverseKinematic::initial_speed_gain()
 	speed_gain_[6] = ALL_Speed_Gain * 1;
 	speed_gain_[7] = ALL_Speed_Gain * 1;//0.8;//2.3;//2;
 
-	speed_gain_[8] = ALL_Speed_Gain * 1;//0.8;
+	speed_gain_[8] = ALL_Speed_Gain * 0.8;//0.8;
 
 	speed_gain_[9] = ALL_Speed_Gain * 1;//2;
 	speed_gain_[10] = ALL_Speed_Gain * 2;
@@ -655,7 +620,7 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
         origin_angle[i] += output_base_[i];
 	}
 	//--------------//
-	if(parameterinfo->LCBalanceOn && !datamodule.stand_flag)
+	if(parameterinfo->LCBalanceOn && balance.balance_time)
 	{
 		balance.control_after_ik_calculation();
 		// balance.saveData();

@@ -3,6 +3,7 @@
 /////////////////////////posture///////////////////////
 FuzzyController fuzzy;
 
+// extern IMU_base_obs IB;
 extern struct Points_Struct Points;
 extern Locus locus;
 extern SensorDataProcess sensor;
@@ -689,13 +690,22 @@ void BalanceControl::balance_control()
 			flag = false;
 		}
 	}
-	pitch_value.control_value_once = PID_pitch.calculateExpValue(foot_cog_x_);//dt = 0.03 *0.015
-	pitch_value_a.control_value_once = PID_pitch_a.calculateExpValue(sensor.accel_[1])*0.03;
+	pitch_value.control_value_once = PID_pitch.calculateExpValue_roll(foot_cog_x_);//dt = 0.03 *0.015
+	pitch_value_a.control_value_once = PID_pitch_a.calculateExpValue(sensor.accel_[1])*0.03*0.03;
 
-	pitch_value.control_value_total -= pitch_value.control_value_once;
-	pitch_value_a.control_value_total -= pitch_value_a.control_value_once;
+	if(pitch_value.control_value_once == 0)
+	{
+		pitch_value.initialize();
+		pitch_value_a.initialize();
+	}
+	else
+	{
+		pitch_value.control_value_total   -= pitch_value.control_value_once;
+		pitch_value_a.control_value_total -= pitch_value_a.control_value_once;
+	}
+	
 
-	foot_pitch = (pitch_value.control_value_total+pitch_value_a.control_value_total)* DEGREE2RADIAN;
+	foot_pitch = (pitch_value.control_value_total-pitch_value_a.control_value_total)* DEGREE2RADIAN;
 	// map_roll.find("left_control_once_roll")->second.push_back(leftfoot_hip_roll_value.control_value_once);
 	// map_roll.find("left_control_total_roll")->second.push_back(leftfoot_hip_roll_value.control_value_total);
 	// map_roll.find("right_control_once_roll")->second.push_back(rightfoot_hip_roll_value.control_value_once);
@@ -704,7 +714,7 @@ void BalanceControl::balance_control()
     // map_roll.find("pres_roll_pos")->second.push_back(pres_imu_value[(int)imu::roll].pos);
     // map_roll.find("passfilter_pres_roll_pos")->second.push_back(passfilter_pres_imu_value[(int)imu::roll].pos);
     // map_roll.find("ideal_roll_vel")->second.push_back(ideal_imu_value[(int)imu::roll].vel);
-    map_roll.find("pres_roll_vel")->second.push_back(leftfoot_ankle_roll);
+    map_roll.find("pres_roll_vel")->second.push_back(foot_cog_x_);
     map_roll.find("passfilter_pres_roll_vel")->second.push_back(rightfoot_ankle_roll);
 	map_roll.find("leftfoot_hip_roll")->second.push_back(leftfoot_hip_roll);
 	map_roll.find("rightfoot_hip_roll")->second.push_back(rightfoot_hip_roll);
@@ -773,9 +783,9 @@ void BalanceControl::endPointControl()
 	// map_ZMP.find("sensor_force_0")->second.push_back(imu_desire_[0]);
 	// map_ZMP.find("sensor_force_1")->second.push_back(imu_desire_[1]);
 	// map_ZMP.find("sensor_force_2")->second.push_back(imu_desire_[2]);
-	// map_ZMP.find("sensor_force_3")->second.push_back(roll_pid_[0]);
-	// map_ZMP.find("sensor_force_4")->second.push_back(roll_pid_[1]);
-	// map_ZMP.find("sensor_force_5")->second.push_back(roll_pid_[2]);
+	map_ZMP.find("sensor_force_3")->second.push_back(balance_time);
+	map_ZMP.find("sensor_force_4")->second.push_back(PID_pitch.upper_limit);
+	map_ZMP.find("sensor_force_5")->second.push_back(PID_pitch.lower_limit);
 	map_ZMP.find("sensor_force_6")->second.push_back(pitch_pid_[0]);
 	map_ZMP.find("sensor_force_7")->second.push_back(pitch_pid_[1]);
 
@@ -867,6 +877,14 @@ void BalanceControl::control_after_ik_calculation()
 	}
 	else
 	{	
+		if(sup_foot_ == 0)
+		{
+			Points.Thta[16] += 1*DEGREE2RADIAN;
+		}//右支撐
+		else
+		{
+			 Points.Thta[10] -= 1*DEGREE2RADIAN;
+		}
 		//roll軸控制
 		if(abs(sensor.rpy_[0])>3)
 		{	//左支撐
@@ -934,22 +952,22 @@ void BalanceControl::control_after_ik_calculation()
 		if(pitch_over_limit_||change_pitch)
 		{
 			///左腳
-			Points.Thta[11] += foot_pitch-Points.back_offset;
-			Points.Thta[13] += (foot_pitch-Points.back_offset)/2;
+			// Points.Thta[11] += foot_pitch-Points.back_offset;
+			Points.Thta[13] += (foot_pitch-Points.back_offset);
 			//右腳
-			Points.Thta[17] += foot_pitch-Points.back_offset;
-			Points.Thta[19] += (foot_pitch-Points.back_offset)/2;
+			// Points.Thta[17] += foot_pitch-Points.back_offset;
+			Points.Thta[19] += (foot_pitch-Points.back_offset);
 			// x_offset += 0.1;
 			if(x_offset>2){x_offset = 2;}
 			change_pitch = true;
 		}
 		else
 		{	//左腳
-			Points.Thta[11] += foot_pitch-Points.back_offset;
-			Points.Thta[13] += (foot_pitch-Points.back_offset)/2;
+			// Points.Thta[11] += foot_pitch-Points.back_offset;
+			Points.Thta[13] += (foot_pitch-Points.back_offset);
 			//右腳
-			Points.Thta[17] += foot_pitch-Points.back_offset;
-			Points.Thta[19] += (foot_pitch-Points.back_offset)/2;
+			// Points.Thta[17] += foot_pitch-Points.back_offset;
+			Points.Thta[19] += (foot_pitch-Points.back_offset);
 			// x_offset -= 0.05;
 			if(x_offset<0){x_offset = 0;}
 		}
@@ -1036,14 +1054,14 @@ float PID_Controller::calculateExpValue(float value)//Expected value
     this->value = value;
     this->pre_error = this->error;
     this->error = this->x1c - this->value;
-    this->errors += this->error*0.015;
+    this->errors += this->error*0.1;
     if(this->pre_error == 0)
     {
         this->errord = 0;
     } 
     else
     {
-        this->errord = (this->error - this->pre_error)/0.015;
+        this->errord = (this->error - this->pre_error)/0.03;
     }
     this->exp_value = this->Kp*this->error + this->Ki*this->errors + this->Kd*this->errord;
     if(this->exp_value > this->upper_limit)
@@ -1088,7 +1106,7 @@ float PID_Controller::calculateExpValue_roll(float value)//Expected value
     this->value = value;
     this->pre_error = this->error;
     // this->error = this->x1c - this->value;
-    this->errors += this->error*0.03;
+    this->errors += this->error*0.15;
     if(this->pre_error == 0)
     {
         this->errord = 0;

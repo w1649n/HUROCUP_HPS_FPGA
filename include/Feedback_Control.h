@@ -10,6 +10,7 @@
 #include <map>
 #include <Eigen/Eigen>
 #include "Inverse_kinematic.h"
+// #include "IMU_base_obs.h"
 #include "Fuzzy_Controller.h"
 #include "Walkinggait.h"
 #include "Sensor.h"
@@ -121,18 +122,14 @@ public:
     // void setErrorsValue(float errors);
     // void setErrordValue(float errord);
     // float getFixValue();
-	float error;
-    float pre_error;
-    float errors;
-    float errord;
-private:
+// private:
     double Kp;
     double Ki;
     double Kd;
-    // float error;
-    // float pre_error;
-    // float errors;
-    // float errord;
+    float error;
+    float pre_error;
+    float errors;
+    float errord;
     float x1c;
     float x2c;
     float x3c;
@@ -501,7 +498,8 @@ public:
 	float tmp_com_total;
 	bool support_flag_l = true,support_flag_r = true;
 	bool change_roll = false,change_pitch = false;
-	bool flag = false;
+	bool flag = false , balance_time;
+
 	//LIPM end
 };
 

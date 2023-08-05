@@ -43,7 +43,7 @@
 /******************** Module **************************/
 #include "hps_0.h"
 #include "Inverse_kinematic.h"
-#include "Feedback_Control.h"
+#include "walking_balance.h"
 /********************************************************/
 
 /******************** Function **************************/

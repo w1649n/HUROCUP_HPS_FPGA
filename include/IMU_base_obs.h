@@ -119,7 +119,7 @@ public:
 	}
 
 	/* 存檔用 */
-    string DtoS(double value);
+    // string DtoS(double value);
     void saveData();
     std::map<std::string, std::vector<float>> map_com;
     int name_cont_;

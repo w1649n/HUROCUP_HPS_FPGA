@@ -18,7 +18,7 @@
 /******************* Include module**********************/
 #include "Initial.h"
 #include "Parameter_Info.h"
-#include "Feedback_Control.h"
+#include "walking_balance.h"
 #include "DataModule.h"
 #include "Rmotor.h"
 #include "PID_Controller.h"

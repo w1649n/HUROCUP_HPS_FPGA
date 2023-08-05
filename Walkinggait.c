@@ -335,15 +335,15 @@ void Walkinggait::pushData()
             push_data_ = false;
             delay_push_ = false;
             cnt = 0;
-            // IK.saveData();
-            feedbackmotor.saveData();
-            // saveData();
+            IK.saveData();
+            // feedbackmotor.saveData();
+            saveData();
             balance.saveData();
         }  
     }        
     if(push_data_)
     {
-        // IK.pushData();
+        IK.pushData();
         // map_walk.find("l_foot_x")->second.push_back(step_point_lx_);
         // map_walk.find("r_foot_x")->second.push_back(step_point_rx_);
         // map_walk.find("l_foot_y")->second.push_back(step_point_ly_);
@@ -547,31 +547,31 @@ void WalkingGaitByLIPM::readWalkData()
         }
         abs_theta_ = fabs(var_theta_);
 
-        if( ( Stepout_flag_X_ || Stepout_flag_Y_ ) && Step_Count_ >= 2)
-        {
-            Stepout_flag_X_ = false;
-            Stepout_flag_Y_ = false;
-            Control_Step_length_X_ = 0;
-            Control_Step_length_Y_ = 0;
-            Step_Count_ = 0;
-        }
-        else if( ( Stepout_flag_X_ || Stepout_flag_Y_ ) && (Step_Count_ <= 1))
-        {
-            if(((pre_step_%2 == 0) && (Control_Step_length_Y_ < 0))||((pre_step_%2 == 1) && (Control_Step_length_Y_ > 0)))
-            {
+        // if( ( Stepout_flag_X_ || Stepout_flag_Y_ ) && Step_Count_ >= 2)
+        // {
+        //     Stepout_flag_X_ = false;
+        //     Stepout_flag_Y_ = false;
+        //     Control_Step_length_X_ = 0;
+        //     Control_Step_length_Y_ = 0;
+        //     Step_Count_ = 0;
+        // }
+        // else if( ( Stepout_flag_X_ || Stepout_flag_Y_ ) && (Step_Count_ <= 1))
+        // {
+        //     if(((pre_step_%2 == 0) && (Control_Step_length_Y_ < 0))||((pre_step_%2 == 1) && (Control_Step_length_Y_ > 0)))
+        //     {
 
-            }
-            else
-            {
-                Step_Count_ += 1;
-                step_length_ -= Control_Step_length_X_;
-                // shift_length_ -= Control_Step_length_Y_;
-            }
-        }
-        else
-        {
+        //     }
+        //     else
+        //     {
+        //         Step_Count_ += 1;
+        //         step_length_ -= Control_Step_length_X_;
+        //         // shift_length_ -= Control_Step_length_Y_;
+        //     }
+        // }
+        // else
+        // {
 
-        }
+        // }
 
         is_parameter_load_ = true;
     }
@@ -1039,12 +1039,12 @@ void WalkingGaitByLIPM::process()
     //    py_u = py_  - 0.2 * ( py_ - com_y);
     // else
     //    py_u = py_;   
-    if(balance.pitch_over_limit_)
-        px_u = px_ - 0.05 * ( px_ - com_x);
-    else
-        px_u = px_;    
-    py_u = py_ + 0.6 * ( py_ - com_y);
-    // px_u = px_ - 0.1 * ( px_ - com_x);
+    // if(balance.pitch_over_limit_)
+    //     px_u = px_ - 0.05 * ( px_ - com_x);
+    // else
+    //     px_u = px_;    
+    py_u = py_ + 0.3 * ( py_ - com_y);
+    px_u = px_;
 
 
     coordinate_transformation();
@@ -1567,7 +1567,7 @@ void WalkingGaitByLIPM::LCup()
         break;
     }
 
-    if(5>fabs(com_x)/*5>fabs(com_y) && 5>fabs(com_x)*/)
+    if(fabs(com_x)>5/*5>fabs(com_y) && 5>fabs(com_x)*/)
     {
     /* 前饋控制 */
     // py_ = py_ + 0.5 * ( py_ - com_y);

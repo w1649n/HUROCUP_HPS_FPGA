@@ -17,7 +17,7 @@
 #include "math.h"
 #include "DefineDataStruct.h"
 #include "ZMPProcess.h"
-#include "Feedback_Control.h"
+#include "walking_balance.h"
 
 using namespace std;
 

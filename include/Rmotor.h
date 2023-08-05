@@ -18,7 +18,7 @@
 //#include "Fuzzy_ZMP.h"
 //#include "FlashModule.h"
 //#include "Inverse_kinematic.h"
-//#include "Feedback_Control.h"
+//#include "walking_balance.h"
 //#include "PID_Controller.h"
 
 /********************************************************/

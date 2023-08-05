@@ -31,6 +31,59 @@ Feedback_Motor::~Feedback_Motor()
 
 }
 
+void Feedback_Motor::load_motor_data_foot()
+{
+    int state = 0;
+    int count = 0;
+
+    for(;;)
+    {
+        if(state == 0)
+        {
+            update_motor_data_foot_flag_ = false;
+            if(*(uint32_t *)init.p2h_set_hps_read_motor_data_leftfoot_addr&&*(uint32_t *)init.p2h_set_hps_read_motor_data_rightfoot_addr)
+            {
+                state = 1;
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else if(state == 1)
+        {
+            if(count <= 5)
+            {
+                motor_data_left_foot_[count]  = *(uint32_t *)init.p2h_motor_data_leftfoot_addr;
+                motor_data_right_foot_[count] = *(uint32_t *)init.p2h_motor_data_rightfoot_addr;
+                count++;
+                *(uint32_t *)init.h2p_read_motor_data_rightfoot_pulse_addr = 1;
+				*(uint32_t *)init.h2p_read_motor_data_rightfoot_pulse_addr = 0;
+                *(uint32_t *)init.h2p_read_motor_data_leftfoot_pulse_addr = 1;
+				*(uint32_t *)init.h2p_read_motor_data_leftfoot_pulse_addr = 0;
+                continue;
+            }
+            else
+            {
+                update_motor_data_foot_flag_ = true;
+                state = 0;
+                break;
+            }
+        }
+    }
+    update_motor_data_foot();
+}
+
+void Feedback_Motor::update_motor_data_foot()
+{
+    if(update_motor_data_foot_flag_)
+    {
+        printf("\n data :%d , %d , %d , %d , %d \n",motor_data_left_foot_[0],motor_data_left_foot_[1],motor_data_left_foot_[2],motor_data_left_foot_[3],motor_data_left_foot_[4]);
+        printf("\n data :%d , %d , %d , %d , %d\n",motor_data_right_foot_[0],motor_data_right_foot_[1],motor_data_right_foot_[2],motor_data_right_foot_[3],motor_data_right_foot_[4]);
+    }
+}
+
 void Feedback_Motor::load_motor_data_left_foot()
 {
     int state = 0;
@@ -41,7 +94,7 @@ void Feedback_Motor::load_motor_data_left_foot()
         if(state == 0)
         {
             update_motor_data_left_foot_flag_ = false;
-            printf("%d",*(uint32_t *)init.p2h_set_hps_read_motor_data_leftfoot_addr);
+            // printf("%d",*(uint32_t *)init.p2h_set_hps_read_motor_data_leftfoot_addr);
             if(*(uint32_t *)init.p2h_set_hps_read_motor_data_leftfoot_addr)
             {
                 state = 1;
@@ -80,6 +133,7 @@ void Feedback_Motor::update_motor_data_left_foot()
         printf("\n data :%d , %d , %d , %d , %d \n",motor_data_left_foot_[0],motor_data_left_foot_[1],motor_data_left_foot_[2],motor_data_left_foot_[3],motor_data_left_foot_[4]);
     }
 }
+
 void Feedback_Motor::load_motor_data_right_foot()
 {
     int state = 0;
@@ -90,7 +144,7 @@ void Feedback_Motor::load_motor_data_right_foot()
         if(state == 0)
         {
             update_motor_data_right_foot_flag_ = false;
-            printf("%d",*(uint32_t *)init.p2h_set_hps_read_motor_data_rightfoot_addr);
+            // printf("%d",*(uint32_t *)init.p2h_set_hps_read_motor_data_rightfoot_addr);
             if(*(uint32_t *)init.p2h_set_hps_read_motor_data_rightfoot_addr)
             {
                 state = 1;
@@ -145,8 +199,8 @@ void Feedback_Motor::pushData()
     map_feedback.find("feedback_20")->second.push_back(motor_data_right_foot_[4]);
     map_feedback.find("feedback_21")->second.push_back(motor_data_right_foot_[5]);
     map_feedback.find("time_point_")->second.push_back(walkinggait.time_point_);
-    map_feedback.find("time_point_")->second.push_back(update_motor_data_left_foot_flag_);
-    map_feedback.find("time_point_")->second.push_back(update_motor_data_right_foot_flag_);
+    map_feedback.find("update_motor_data_left_foot_flag_")->second.push_back(update_motor_data_left_foot_flag_);
+    map_feedback.find("update_motor_data_right_foot_flag_")->second.push_back(update_motor_data_right_foot_flag_);
 }
 
 string Feedback_Motor::DtoS(double value)

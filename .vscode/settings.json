@@ -13,6 +13,8 @@
         "datamodule.h": "c",
         "pid_controller.h": "c",
         "rmotor.h": "c",
-        "data_txt.h": "c"
+        "data_txt.h": "c",
+        "feedback_control.h": "c",
+        "walking_balance.h": "c"
     }
 }
