@@ -14,7 +14,7 @@
 #include "Fuzzy_Controller.h"
 #include "Walkinggait.h"
 #include "Sensor.h"
-#include "kalman.h"
+// #include <kalman.h>
 #include "math.h"
 #include "DefineDataStruct.h"
 #include "ZMPProcess.h"
@@ -298,6 +298,7 @@ public:
     double pitch_pid_[3];
     double com_pid_[3];
     double foot_offset_[3];
+    double kalman_rpy_[3];
 
 	// for debug
 	int now_step_, last_step_;
@@ -311,14 +312,39 @@ public:
 	std::map<std::string, std::vector<float>> map_Accel;
 
 	int name_cont_;
+    int pitch_count_=0, roll_count_=0;
 	float tmp_total;
 	float tmp;
 	float tmp_com;
 	float tmp_com_total;
 	bool support_flag_l = true,support_flag_r = true;
-	bool change_roll = false,change_pitch = false;
+	bool set_offset_; 
 	bool flag_r = false ,flag_l = false , balance_time;
 
 	//LIPM end
+    //kalman
+    double get_angle(double, double, double, int);
+    double get_force(double, int);
+    double get_q_bias();
+    private:
+        double p_[3][2][2];
+        double k_[2];
+
+        double q_angle_;
+        double q_bias_;
+        double r_measure_;
+
+        double angle_[3];
+        double bias_[3];
+
+        double force_r_[8];
+        double force_q_;
+        double force_w_;  
+
+        double force_x_[8];
+        double force_p_[8];
+        double force_k_[8];
+    //
 };
+
 #endif

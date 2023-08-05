@@ -382,8 +382,8 @@ void Walkinggait::pushData()
         map_walk.find("foot")->second.push_back(balance.sup_foot_);   
         // map_walk.find("theta")->second.push_back(theta_);
         // map_walk.find("var_theta_")->second.push_back(var_theta_); 
-        map_walk.find("Cpz")->second.push_back(balance.change_pitch);
-        map_walk.find("Cpx")->second.push_back(balance.change_roll);          
+        // map_walk.find("Cpz")->second.push_back(balance.change_pitch);
+        // map_walk.find("Cpx")->second.push_back(balance.change_roll);         
     }
 }
 
@@ -1079,14 +1079,14 @@ void WalkingGaitByLIPM::process()
     {
         push_data_ = true; 
     }
-    parameterinfo->points.IK_Point_RX = end_point_rx_;
-	parameterinfo->points.IK_Point_RY = end_point_ry_+balance.y_offset_r;
-	parameterinfo->points.IK_Point_RZ = end_point_rz_-balance.x_offset-balance.y_offset_r;
-	parameterinfo->points.IK_Point_RThta = end_point_rthta_;
-	parameterinfo->points.IK_Point_LX = end_point_lx_;
-	parameterinfo->points.IK_Point_LY = end_point_ly_+balance.y_offset_l;
-	parameterinfo->points.IK_Point_LZ = end_point_lz_-balance.x_offset-balance.y_offset_l;
-	parameterinfo->points.IK_Point_LThta = end_point_lthta_;
+    // parameterinfo->points.IK_Point_RX = end_point_rx_;
+	// parameterinfo->points.IK_Point_RY = end_point_ry_+balance.y_offset_r;
+	// parameterinfo->points.IK_Point_RZ = end_point_rz_-balance.x_offset-balance.y_offset_r;
+	// parameterinfo->points.IK_Point_RThta = end_point_rthta_;
+	// parameterinfo->points.IK_Point_LX = end_point_lx_;
+	// parameterinfo->points.IK_Point_LY = end_point_ly_+balance.y_offset_l;
+	// parameterinfo->points.IK_Point_LZ = end_point_lz_-balance.x_offset-balance.y_offset_l;
+	// parameterinfo->points.IK_Point_LThta = end_point_lthta_;
 }
 
 void WalkingGaitByLIPM::LCdown()
@@ -1353,14 +1353,14 @@ void WalkingGaitByLIPM::LCdown()
     {
         push_data_ = true; 
     }
-    parameterinfo->points.IK_Point_RX = end_point_rx_;
-	parameterinfo->points.IK_Point_RY = end_point_ry_;
-	parameterinfo->points.IK_Point_RZ = end_point_rz_;
-	parameterinfo->points.IK_Point_RThta = end_point_rthta_;
-	parameterinfo->points.IK_Point_LX = end_point_lx_;
-	parameterinfo->points.IK_Point_LY = end_point_ly_;
-	parameterinfo->points.IK_Point_LZ = end_point_lz_;
-	parameterinfo->points.IK_Point_LThta = end_point_lthta_;
+    // parameterinfo->points.IK_Point_RX = end_point_rx_;
+	// parameterinfo->points.IK_Point_RY = end_point_ry_;
+	// parameterinfo->points.IK_Point_RZ = end_point_rz_;
+	// parameterinfo->points.IK_Point_RThta = end_point_rthta_;
+	// parameterinfo->points.IK_Point_LX = end_point_lx_;
+	// parameterinfo->points.IK_Point_LY = end_point_ly_;
+	// parameterinfo->points.IK_Point_LZ = end_point_lz_;
+	// parameterinfo->points.IK_Point_LThta = end_point_lthta_;
 }
 
 void WalkingGaitByLIPM::LCup()

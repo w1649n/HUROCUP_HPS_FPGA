@@ -39,11 +39,12 @@ double KalmanFilter::get_angle(double acc_angle_tmp, double gyro_angle_tmp, doub
     p_[i][1][0] -= dt * p_[i][1][1];
     p_[i][1][1] += q_angle_ * dt;
 
-    y = acc_angle_tmp - angle_[i];
-
     s = p_[i][0][0] + r_measure_;
+
     k_[0] = p_[i][0][0] / s;  //k = K Gain;
     k_[1] = p_[i][1][0] / s;
+
+    y = acc_angle_tmp - angle_[i];
 
     angle_[i] += k_[0] * y;
     bias_[i] += k_[1] * y;

@@ -9,6 +9,7 @@
 #define KALMANFILTER_H_
 
 #include <string.h>
+#include "Initial.h"
 
 class KalmanFilter
 {

@@ -59,7 +59,7 @@ private:
     double rpy_raw_[3];
     float accel_raw_[3];
     int   gyro_raw_[3];
-    double rpy_offset_[3];
+    double rpy_offset_[3],gyro_offset_[3];
     unsigned char sensor_data_to_ipc_[22];
     // double imu_desire_[3];
     bool update_sensor_setting_flag_;

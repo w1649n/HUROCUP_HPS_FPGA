@@ -259,8 +259,10 @@ void SensorDataProcess::update_sensor_setting()
         get_sensor_setting_flag_ = true;
         if(imu_offset_reset_)
         {
-            for(count=0; count<3; count++)
+            for(count=0; count<3; count++){
                 rpy_offset_[count] = rpy_raw_[count];
+                gyro_offset_[count] = gyro_raw_[count];
+            }
             imu_offset_reset_ = false;
         }
     }
@@ -423,7 +425,7 @@ void SensorDataProcess::update_imu()
 
         for(count = 0; count <3 ;count++)
         {
-            gyro_[count] = gyro_raw_[count];
+            gyro_[count] = gyro_raw_[count] - gyro_offset_[count];
         }
         for(count = 0; count < 3 ; count++)
         {

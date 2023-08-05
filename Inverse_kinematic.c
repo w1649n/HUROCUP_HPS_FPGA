@@ -76,16 +76,17 @@ void Locus::get_cpg_with_offset()
     Points.Inverse_Uncontrol_PointL_Y	= parameterinfo->points.IK_Point_LY;
     Points.Inverse_PointL_Z				= parameterinfo->points.IK_Point_LZ;
     Points.Inverse_PiontL_Thta			= parameterinfo->points.IK_Point_LThta;
-	// if(parameterinfo->complan.walking_stop)
-	// {
-	// 	Points.Inverse_PointR_Z = COM_HEIGHT;
-	// 	Points.Inverse_PointL_Z = COM_HEIGHT;
-	// }
-	// else
-	// {
-		// Points.Inverse_PointR_Z	= parameterinfo->points.IK_Point_RZ;
-		// Points.Inverse_PointL_Z	= parameterinfo->points.IK_Point_LZ;
-	// }
+	
+	//balance
+	Points.Inverse_Uncontrol_PointR_X	= walkinggait.end_point_rx_    + parameterinfo->points.IK_Point_RX;
+    Points.Inverse_Uncontrol_PointR_Y	= walkinggait.end_point_ry_    + parameterinfo->points.IK_Point_RY;
+    Points.Inverse_PointR_Z				= walkinggait.end_point_rz_    + parameterinfo->points.IK_Point_RZ;
+    Points.Inverse_PiontR_Thta			= walkinggait.end_point_rthta_ ;//+ parameterinfo->points.IK_Point_RThta;
+    Points.Inverse_Uncontrol_PointL_X	= walkinggait.end_point_lx_    + parameterinfo->points.IK_Point_LX;
+    Points.Inverse_Uncontrol_PointL_Y	= walkinggait.end_point_ly_    + parameterinfo->points.IK_Point_LY;
+    Points.Inverse_PointL_Z				= walkinggait.end_point_lz_    + parameterinfo->points.IK_Point_LZ;
+    Points.Inverse_PiontL_Thta			= walkinggait.end_point_lthta_ ;//+ parameterinfo->points.IK_Point_LThta;
+
 	Points.Inverse_PointR_X = Points.Inverse_Uncontrol_PointR_X	+STAND_OFFSET_RX;
 	Points.Inverse_PointR_Y = Points.Inverse_Uncontrol_PointR_Y	+STAND_OFFSET_RY;
 	Points.Inverse_PointR_Z = Points.Inverse_PointR_Z			+STAND_OFFSET_RZ;
@@ -165,6 +166,8 @@ void Locus::control_by_robot_status(){
 	else if(tmp_waist < -(PI_6/2))
 		tmp_waist = -(PI_6/2);
 
+	//關掉轉腰
+	tmp_waist = 0;
 	Points.waist_offset = tmp_waist;
 	
 
@@ -209,20 +212,20 @@ void Locus::control_by_robot_status(){
 	}
 	Points.Thta[0] = base_L;
 	Points.Thta[4] = base_R;
-	if(parameterinfo->X<0)
-	{
-		Points.back_offset = 0.8*PI/180;
-		Points.Thta[8] = base_Waist;
-		Points.waist_offset = 0;
-	}
-	else if(parameterinfo->X>=2)
-	{
-		Points.back_offset = 0.5*parameterinfo->X*PI/180;
-	}
-	else
-	{
-		Points.back_offset = 0;
-	}
+	// if(parameterinfo->X<0)
+	// {
+	// 	Points.back_offset = 0.3*PI/180;
+	// 	Points.Thta[8] = base_Waist;
+	// 	Points.waist_offset = 0;
+	// }
+	// else if(parameterinfo->X>=2)
+	// {
+	// 	Points.back_offset = 0.5*parameterinfo->X*PI/180;
+	// }
+	// else
+	// {
+	// 	Points.back_offset = 0;
+	// }
 }
 
 InverseKinematic::InverseKinematic()
