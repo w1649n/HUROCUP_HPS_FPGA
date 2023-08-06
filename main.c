@@ -46,7 +46,7 @@ int main()
 	//usleep(500 * 1000); 	//0.5s
 	//sleep(2);				//2s
 	while(1)
-	{
+	{  
 		/*---動作串---*/
 		datamodule.load_database();
 		if(datamodule.motion_execute_flag_)

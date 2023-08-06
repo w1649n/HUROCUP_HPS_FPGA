@@ -68,14 +68,14 @@ void Locus::get_first_stand()
 }
 void Locus::get_cpg_with_offset()
 {
-	Points.Inverse_Uncontrol_PointR_X	= parameterinfo->points.IK_Point_RX;
-    Points.Inverse_Uncontrol_PointR_Y	= parameterinfo->points.IK_Point_RY;
-    Points.Inverse_PointR_Z				= parameterinfo->points.IK_Point_RZ;
-    Points.Inverse_PiontR_Thta			= parameterinfo->points.IK_Point_RThta;
-    Points.Inverse_Uncontrol_PointL_X	= parameterinfo->points.IK_Point_LX;
-    Points.Inverse_Uncontrol_PointL_Y	= parameterinfo->points.IK_Point_LY;
-    Points.Inverse_PointL_Z				= parameterinfo->points.IK_Point_LZ;
-    Points.Inverse_PiontL_Thta			= parameterinfo->points.IK_Point_LThta;
+	// Points.Inverse_Uncontrol_PointR_X	= parameterinfo->points.IK_Point_RX;
+    // Points.Inverse_Uncontrol_PointR_Y	= parameterinfo->points.IK_Point_RY;
+    // Points.Inverse_PointR_Z				= parameterinfo->points.IK_Point_RZ;
+    // Points.Inverse_PiontR_Thta			= parameterinfo->points.IK_Point_RThta;
+    // Points.Inverse_Uncontrol_PointL_X	= parameterinfo->points.IK_Point_LX;
+    // Points.Inverse_Uncontrol_PointL_Y	= parameterinfo->points.IK_Point_LY;
+    // Points.Inverse_PointL_Z				= parameterinfo->points.IK_Point_LZ;
+    // Points.Inverse_PiontL_Thta			= parameterinfo->points.IK_Point_LThta;
 	
 	//balance
 	Points.Inverse_Uncontrol_PointR_X	= walkinggait.end_point_rx_    + parameterinfo->points.IK_Point_RX;
