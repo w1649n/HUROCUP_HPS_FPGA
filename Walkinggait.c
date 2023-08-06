@@ -1,8 +1,11 @@
 #include "include/Walkinggait.h"
+#include "ZMP.h"
+#include "ZMPProcess.h"
 
 WalkingCycle walkingcycle;
 WalkingTrajectory walkingtrajectory;
 kickgait_space::KickingGait kickinggait;
+Force_Diff_Ctrl_base FDC;
 
 extern BalanceControl balance;
 extern InverseKinematic IK;
@@ -36,19 +39,20 @@ void Walkinggait::walking_timer()
         switch(parameterinfo->walking_mode)
 		{
         case Single:
-            parameterinfo->walking_mode = 3;
-            walkingcycle.walkingkindfunction(parameterinfo->walking_mode);
-            walkingtrajectory.walkingprocess(parameterinfo->walking_mode);
-            parameterinfo->CPGalready = true;
+            single();
+            slow_step_flag_ = false;
+            locus_flag_ = true;
+            LIPM_flag_ = true;
         	break;
         case Continuous:
             process();
+            slow_step_flag_ = false;
             locus_flag_ = true;
             LIPM_flag_ = true;
         	break;
         case LC_up:            
-            // LCup();
-            LCdown();
+            LC();
+            slow_step_flag_ = false;
             locus_flag_ = true;
             LIPM_flag_ = true;
         	break;
@@ -56,11 +60,15 @@ void Walkinggait::walking_timer()
             //walkingcycle.walkingkindfunction(parameterinfo->walking_mode);
             //walkingtrajectory.walkingprocess(parameterinfo->walking_mode);
             //parameterinfo->CPGalready = true;
-            LCdown();
+            LC();
+            slow_step_flag_ = false;
             locus_flag_ = true;
             LIPM_flag_ = true;
         	break;
         case Long_Jump:
+            slow_step_flag_ = true;
+            locus_flag_ = true;
+            LIPM_flag_ = true;
         	break;
         case RKickB:
         case LKickB:
@@ -546,7 +554,7 @@ void WalkingGaitByLIPM::readWalkData()
             var_theta_ = parameterinfo->THTA;
         }
         abs_theta_ = fabs(var_theta_);
-
+        single_var_theta_ = parameterinfo->THTA;
         // if( ( Stepout_flag_X_ || Stepout_flag_Y_ ) && Step_Count_ >= 2)
         // {
         //     Stepout_flag_X_ = false;
@@ -808,32 +816,6 @@ void WalkingGaitByLIPM::process()
 
             lpt_ = 0;
             rpt_ = 0;
-            // if(var_theta_*last_theta_ >= 0)
-            // {
-            //     if(var_theta_<0)
-            //     {
-            //         lpt_ = wFootTheta(0, 0, t_, TT_, T_DSP_);
-            //         rpt_ = wFootTheta(0, 0, t_, TT_, T_DSP_);
-            //     }
-            //     else
-            //     {
-            //         if(now_step_ == 1)
-            //         {
-            //             lpt_ = 0;
-            //             rpt_ = 0;
-            //         }
-            //         else
-            //         {
-            //             lpt_ = wFootTheta(0, 1, t_, TT_, T_DSP_);
-            //             rpt_ = wFootTheta(0, 1, t_, TT_, T_DSP_);
-            //         }
-            //     }
-            // }
-            // else
-            // {
-            //     lpt_ = 0;
-            //     rpt_ = 0;
-            // } 
         }
         else if((now_step_ % 2) == 0)
         {
@@ -847,29 +829,10 @@ void WalkingGaitByLIPM::process()
 
             lpt_ = 0;
             rpt_ = 0;
-            // if(var_theta_*last_theta_ >= 0)
-            // {
-            //     if(var_theta_<0)
-            //     {
-            //         lpt_ = wFootTheta(0, 1, t_, TT_, T_DSP_);
-            //         rpt_ = wFootTheta(0, 1, t_, TT_, T_DSP_);
-            //     }
-            //     else
-            //     {
-            //         lpt_ = wFootTheta(0, 0, t_, TT_, T_DSP_);
-            //         rpt_ = wFootTheta(0, 0, t_, TT_, T_DSP_);
-            //     }
-            // }
-            // else
-            // {
-            //     lpt_ = 0;
-            //     rpt_ = 0;
-            // }
+
         }
         break;
     case FirstStep:
-        // map_walk.find("case")->second.push_back(1);
-        
         vx0_ = wComVelocityInit(0, base_x, zmp_x, TT_, Tc_);
         px_ = wComPosition(0, vx0_, zmp_x, t_, Tc_);
         vy0_ = wComVelocityInit(0, base_y, zmp_y, TT_, Tc_);
@@ -884,19 +847,8 @@ void WalkingGaitByLIPM::process()
         lpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
         rpt_ = wFootTheta(-var_theta_, 0, t_, TT_, T_DSP_);
     
-        // if(var_theta_<0)
-        // {
-        //     lpt_ = 0;
-        //     rpt_ = 0;
-        // }
-        // else
-        // {
-        //     lpt_ = wFootTheta(abs_theta_, 0, t_, TT_, T_DSP_);
-        //     rpt_ = wFootTheta(-abs_theta_, 0, t_, TT_, T_DSP_);
-        // }
         break;
     case StopStep:
-        // map_walk.find("case")->second.push_back(4);
         vx0_ = wComVelocityInit(last_base_x, base_x, zmp_x, TT_, Tc_);
         px_ = wComPosition(last_base_x, vx0_, zmp_x, t_, Tc_);
         vy0_ = wComVelocityInit(last_base_y, base_y, zmp_y, TT_, Tc_);
@@ -913,18 +865,6 @@ void WalkingGaitByLIPM::process()
 
             lpt_ = 0;
             rpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
-            // if(var_theta_<0)
-            // {
-            //     // lpt_ = wFootTheta(abs_theta_, 0, t_, TT_, T_DSP_);
-            //     // rpt_ = wFootTheta(-abs_theta_, 1, t_, TT_, T_DSP_);
-            //     lpt_ = 0;
-            //     rpt_ = 0;
-            // }
-            // else
-            // {
-            //     lpt_ = wFootTheta(abs_theta_, 1, t_, TT_, T_DSP_);
-            //     rpt_ = wFootTheta(-abs_theta_, 1, t_, TT_, T_DSP_);
-            // }
         }
         else if((now_step_ % 2) == 0)
         {
@@ -937,23 +877,10 @@ void WalkingGaitByLIPM::process()
 
             lpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
             rpt_ = 0;
-            // if(var_theta_<0) 
-            // {
-            //     lpt_ = wFootTheta(abs_theta_, 1, t_, TT_, T_DSP_);
-            //     rpt_ = wFootTheta(-abs_theta_, 1, t_, TT_, T_DSP_);
-            // }
-            // else
-            // {
-            //     // lpt_ = wFootTheta(last_abs_theta_, 1, t_, TT_, T_DSP_);
-            //     // rpt_ = wFootTheta(-abs_theta_, 0, t_, TT_, T_DSP_);
-            //     lpt_ = 0;
-            //     rpt_ = 0;
-            // }
         }
         break;
 
     case Repeat:
-        // map_walk.find("case")->second.push_back(3);
         vx0_ = wComVelocityInit(last_base_x, base_x, zmp_x, TT_, Tc_);
         px_ = wComPosition(last_base_x, vx0_, zmp_x, t_, Tc_);
         vy0_ = wComVelocityInit(last_base_y, base_y, zmp_y, TT_, Tc_);
@@ -971,18 +898,6 @@ void WalkingGaitByLIPM::process()
             {
                 lpt_ = wFootTheta(-var_theta_, 0, t_, TT_, T_DSP_);
                 rpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
-                // if(var_theta_<0)
-                // {
-                //     lpt_ = wFootTheta(abs_theta_, 0, t_, TT_, T_DSP_);
-                //     rpt_ = wFootTheta(-abs_theta_, 0, t_, TT_, T_DSP_);
-                // }
-                // else
-                // {                    
-                //     lpt_ = wFootTheta(abs_theta_, 1, t_, TT_, T_DSP_);
-                //     rpt_ = wFootTheta(-abs_theta_, 1, t_, TT_, T_DSP_);                    
-                //     // lpt_ = wFootTheta(-abs_theta_, 0, t_, TT_, T_DSP_);
-                //     // rpt_ = wFootTheta(last_abs_theta_, 1, t_, TT_, T_DSP_);
-                // }
             }
             else
             {
@@ -1002,16 +917,6 @@ void WalkingGaitByLIPM::process()
             {
                 lpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
                 rpt_ = wFootTheta(-var_theta_, 0, t_, TT_, T_DSP_);
-                // if(var_theta_<0)
-                // {
-                //     lpt_ = wFootTheta(abs_theta_, 1, t_, TT_, T_DSP_);
-                //     rpt_ = wFootTheta(-abs_theta_, 1, t_, TT_, T_DSP_);
-                // }
-                // else
-                // {
-                //     lpt_ = wFootTheta(abs_theta_, 0, t_, TT_, T_DSP_);
-                //     rpt_ = wFootTheta(-abs_theta_, 0, t_, TT_, T_DSP_);
-                // }
             }
             else
             {
@@ -1020,9 +925,7 @@ void WalkingGaitByLIPM::process()
             }
         }
         break;
-    
     default:
-        // map_walk.find("case")->second.push_back(9);
         break;
     }
 
@@ -1046,10 +949,11 @@ void WalkingGaitByLIPM::process()
     py_u = py_ + 0.3 * ( py_ - com_y);
     px_u = px_;
 
+    Z_ctrl_ = wForceDifferenceControl(t_, TT_, T_DSP_);
 
     coordinate_transformation();
     coordinate_offset();
-
+    
 
     if(now_step_ > step_)
     {
@@ -1062,6 +966,7 @@ void WalkingGaitByLIPM::process()
         step_point_lthta_ = 0;
         step_point_rthta_ = 0;
 
+        Z_ctrl_ = 0;
         end_point_lx_ = 0;
         end_point_rx_ = 0;
         end_point_ly_ = width_size_ - Length_Pelvis/2;
@@ -1089,7 +994,7 @@ void WalkingGaitByLIPM::process()
 	// parameterinfo->points.IK_Point_LThta = end_point_lthta_;
 }
 
-void WalkingGaitByLIPM::LCdown()
+void WalkingGaitByLIPM::LC()
 {
     readWalkParameter();    /* 步週期 單位[ms] ,T_DSP 單位[s] ,抬腳高 單位[cm] */
 
@@ -1140,7 +1045,6 @@ void WalkingGaitByLIPM::LCdown()
             right_step_++;
         }
 
-        
         if((pre_step_ % 2) == 1)
         {
             now_right_x_ = footstep_x;
@@ -1160,8 +1064,7 @@ void WalkingGaitByLIPM::LCdown()
             now_left_x_ = 0;
             now_left_y_ = width_size_;
         }
-        
-
+    
         last_zmp_x = zmp_x;
         last_zmp_y = zmp_y;
         zmp_x = footstep_x;
@@ -1173,8 +1076,6 @@ void WalkingGaitByLIPM::LCdown()
         last_theta_ = var_theta_;               //前一次的Theta變化量
         last_abs_theta_ = abs_theta_;
         is_parameter_load_ = false;
-        
-        // if(( Stepout_flag_X_ || Stepout_flag_Y_ ) && Step_Count_ < 2)
 
         readWalkData();
 
@@ -1205,13 +1106,8 @@ void WalkingGaitByLIPM::LCdown()
 
         base_x = (footstep_x + zmp_x)/2;
         base_y = (footstep_y + zmp_y)/2;
-        
-
     }
     pre_step_ = now_step_;//步數儲存
-
-
-
 
     if(ready_to_stop_)
     {
@@ -1222,7 +1118,6 @@ void WalkingGaitByLIPM::LCdown()
     switch (parameterinfo->complan.walking_state)
     {
     case FirstStep:
-        // map_walk.find("case")->second.push_back(1);
         
         vx0_ = wComVelocityInit(0, base_x, zmp_x, TT_, Tc_);
         px_ = wComPosition(0, vx0_, zmp_x, t_, Tc_);
@@ -1248,16 +1143,6 @@ void WalkingGaitByLIPM::LCdown()
         lpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
         rpt_ = wFootTheta(-var_theta_, 0, t_, TT_, T_DSP_);
     
-        // if(var_theta_<0)
-        // {
-        //     lpt_ = 0;
-        //     rpt_ = 0;
-        // }
-        // else
-        // {
-        //     lpt_ = wFootTheta(abs_theta_, 0, t_, TT_, T_DSP_);
-        //     rpt_ = wFootTheta(-abs_theta_, 0, t_, TT_, T_DSP_);
-        // }
         break;
     case StopStep:
         parameterinfo->LCFinishFlag = true;
@@ -1266,7 +1151,6 @@ void WalkingGaitByLIPM::LCdown()
         vy0_ = wComVelocityInit(last_base_y+com_y_swing, base_y, zmp_y, TT_, Tc_);
         py_ = wComPosition(last_base_y+com_y_swing, vy0_, zmp_y, t_, Tc_);
 
-        
         lpx_ = lpx_;            
         lpy_ = zmp_y;
         rpx_ = wFootPosition(now_right_x_, (last_displacement_x+displacement_x), t_, TT_, T_DSP_);
@@ -1283,24 +1167,11 @@ void WalkingGaitByLIPM::LCdown()
         lpz_ = board_hight;
         rpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_)+foot_hight+ rightfoot_shift_z*sin(PI*t_/TT_);
         pz_ = COM_HEIGHT + c_hight+board_hight/2;
-        // py_=py_+com_y_swing*sin(PI*t_/TT_);
         lpt_ = 0;
         rpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
-        // if(var_theta_<0)
-        // {
-        //     // lpt_ = wFootTheta(abs_theta_, 0, t_, TT_, T_DSP_);
-        //     // rpt_ = wFootTheta(-abs_theta_, 1, t_, TT_, T_DSP_);
-        //     lpt_ = 0;
-        //     rpt_ = 0;
-        // }
-        // else
-        // {
-        //     lpt_ = wFootTheta(abs_theta_, 1, t_, TT_, T_DSP_);
-        //     rpt_ = wFootTheta(-abs_theta_, 1, t_, TT_, T_DSP_);
-        // }
         
     default:
-        // map_walk.find("case")->second.push_back(9);
+
         break;
     }
 
@@ -1320,6 +1191,7 @@ void WalkingGaitByLIPM::LCdown()
     // py_u = py_ - 0.2 * ( py_ - com_y);
     // px_u = px_ + 0.1 * ( px_ - com_x);
 
+    Z_ctrl_ = 0;
 
     coordinate_transformation();
     coordinate_offset();
@@ -1363,7 +1235,7 @@ void WalkingGaitByLIPM::LCdown()
 	// parameterinfo->points.IK_Point_LThta = end_point_lthta_;
 }
 
-void WalkingGaitByLIPM::LCup()
+void WalkingGaitByLIPM::single()
 {
     readWalkParameter();    /* 步週期 單位[ms] ,T_DSP 單位[s] ,抬腳高 單位[cm] */
 
@@ -1414,6 +1286,214 @@ void WalkingGaitByLIPM::LCup()
             right_step_++;
         }
 
+        if((pre_step_ % 2) == 1)
+        {
+            now_right_x_ = footstep_x;
+            now_right_y_ = footstep_y;
+        }
+        else if((pre_step_ % 2) == 0)
+        {
+            now_left_x_ = footstep_x;
+            now_left_y_ = footstep_y;
+        }
+        else if(pre_step_ == -1)
+        {
+            footstep_x = 0;
+            footstep_y = -width_size_;
+            now_right_x_ = footstep_x;
+            now_right_y_ = footstep_y;
+            now_left_x_ = 0;
+            now_left_y_ = width_size_;
+        }
+    
+        last_zmp_x = zmp_x;
+        last_zmp_y = zmp_y;
+        zmp_x = footstep_x;
+        zmp_y = footstep_y;
+        last_displacement_x = displacement_x;   //上次的跨幅
+        last_base_x = base_x;         //上次到達的位置
+        last_displacement_y = displacement_y; //上次的Y軸位移量
+        last_base_y = base_y;           //上次的Y軸位移位置
+        last_theta_ = 0;//var_theta_;               //前一次的Theta變化量
+        last_abs_theta_ = abs_theta_;
+        is_parameter_load_ = false;
+
+        readWalkData();
+
+        if(parameterinfo->complan.walking_state == StopStep)
+        {
+            theta_ = single_var_theta_;
+            
+            now_width_ = 2 * width_size_ * (-pow(-1, now_step_+1));
+            width_x = -sin(theta_)*now_width_;
+            width_y = cos(theta_)*now_width_;
+            displacement_x = width_x;
+            displacement_y = width_y;
+            footstep_x += width_x;
+            footstep_y += width_y;
+        }        
+        else 
+        {
+            theta_ = single_var_theta_;
+            
+            now_width_ = 2 * width_size_ * (-pow(-1, now_step_+1));
+            width_x = -sin(theta_)*now_width_;
+            width_y = cos(theta_)*now_width_;
+            displacement_x = (step_length_*cos(theta_)-shift_length_*sin(theta_))+width_x;
+            displacement_y = (step_length_*sin(theta_)+shift_length_*cos(theta_))+width_y;
+            footstep_x += displacement_x;
+            footstep_y += displacement_y;
+        }
+
+        base_x = (footstep_x + zmp_x)/2;
+        base_y = (footstep_y + zmp_y)/2;
+    }
+    pre_step_ = now_step_;//步數儲存
+
+    if(ready_to_stop_)
+    {
+        step_ = now_step_ + 1;
+        ready_to_stop_ = false;
+    }
+    
+    switch (parameterinfo->complan.walking_state)
+    {
+    case FirstStep:
+        
+        vx0_ = wComVelocityInit(0, base_x, zmp_x, TT_, Tc_);
+        px_ = wComPosition(0, vx0_, zmp_x, t_, Tc_);
+        vy0_ = wComVelocityInit(0, base_y+com_y_swing, zmp_y, TT_, Tc_);
+        py_ = wComPosition(0, vy0_, zmp_y, t_, Tc_);
+        lpx_ = wFootPosition(now_left_x_, displacement_x, t_, TT_, T_DSP_);
+        rpx_ = zmp_x;
+        lpy_ = wFootPosition(now_left_y_, displacement_y-now_width_, t_, TT_, T_DSP_);
+        rpy_ = zmp_y;       
+        lpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);       
+        rpz_ = 0;
+
+        lpt_ = 0;
+        rpt_ = wFootTheta(-single_var_theta_, 1, t_, TT_, T_DSP_);
+    
+        break;
+    case StopStep:
+        parameterinfo->LCFinishFlag = true;
+        vx0_ = wComVelocityInit(last_base_x, base_x, zmp_x, TT_, Tc_);
+        px_ = wComPosition(last_base_x, vx0_, zmp_x, t_, Tc_);
+        vy0_ = wComVelocityInit(last_base_y+com_y_swing, base_y, zmp_y, TT_, Tc_);
+        py_ = wComPosition(last_base_y+com_y_swing, vy0_, zmp_y, t_, Tc_);
+
+        lpx_ = lpx_;            
+        lpy_ = zmp_y;
+        rpx_ = wFootPosition(now_right_x_, (last_displacement_x+displacement_x), t_, TT_, T_DSP_);
+        rpy_ = wFootPosition(now_right_y_, (last_displacement_y+displacement_y), t_, TT_, T_DSP_);
+        lpz_ = 0;
+        rpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);  
+
+        lpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
+        rpt_ = 0;
+        
+    default:
+
+        break;
+    }
+    py_u = py_ + 0.6 * ( py_ - com_y);
+    px_u = px_;
+
+    Z_ctrl_ = wForceDifferenceControl(t_, TT_, T_DSP_);
+
+    coordinate_transformation();
+    coordinate_offset();
+
+
+    if(now_step_ > step_)
+    {
+        step_point_lx_ = 0;
+        step_point_rx_ = 0;
+        step_point_ly_ = 0;
+        step_point_ry_ = 0;
+        step_point_lz_ = COM_HEIGHT;
+        step_point_rz_ = COM_HEIGHT;
+        step_point_lthta_ = 0;
+        step_point_rthta_ = 0;
+
+        end_point_lx_ = 0;
+        end_point_rx_ = 0;
+        end_point_ly_ = width_size_ - Length_Pelvis/2;
+        end_point_ry_ = -width_size_ + Length_Pelvis/2;
+        end_point_lz_ = step_point_lz_- (COM_HEIGHT - Length_Leg);
+        end_point_rz_ = step_point_rz_- (COM_HEIGHT - Length_Leg);
+        end_point_lthta_ = 0;
+        end_point_rthta_ = 0;
+        if_finish_ = true;
+        delay_push_ = true;
+        resetParameter();
+        //saveData();
+    }
+    else
+    {
+        push_data_ = true; 
+    }
+    // parameterinfo->points.IK_Point_RX = end_point_rx_;
+	// parameterinfo->points.IK_Point_RY = end_point_ry_;
+	// parameterinfo->points.IK_Point_RZ = end_point_rz_;
+	// parameterinfo->points.IK_Point_RThta = end_point_rthta_;
+	// parameterinfo->points.IK_Point_LX = end_point_lx_;
+	// parameterinfo->points.IK_Point_LY = end_point_ly_;
+	// parameterinfo->points.IK_Point_LZ = end_point_lz_;
+	// parameterinfo->points.IK_Point_LThta = end_point_lthta_;
+}
+
+void WalkingGaitByLIPM::slow_step()
+{
+    readWalkParameter();    /* 步週期 單位[ms] ,T_DSP 單位[s] ,抬腳高 單位[cm] */
+
+    parameterinfo->complan.sample_point_++;
+    parameterinfo->complan.time_point_ = parameterinfo->complan.sample_point_*(parameterinfo->parameters.Period_T/parameterinfo->parameters.Sample_Time);
+    sample_point_++;
+    time_point_ = sample_point_ * sample_time_;
+    Tc_ = sqrt(COM_HEIGHT/g_);          /* 機器人的自然週期 */
+
+    TT_ = (double)period_t_ * 0.001;    /* 步週期 單位[s] */
+
+    /* 步週期內時刻 [0,TT_] 單位[s] */
+    t_ = (double)((time_point_ - (int)sample_time_) % period_t_ + sample_time_)/1000;
+
+    now_step_ = (sample_point_ - 1)/(int)(period_t_ / sample_time_);
+
+    if(now_step_ == step_)
+        parameterinfo->complan.walking_state = StopStep;
+    else if(now_step_ < STARTSTEPCOUNTER)
+        parameterinfo->complan.walking_state = StartStep;
+    else if(now_step_ > step_)
+    {
+        if_finish_ = true;
+        plot_once_ = true;
+        parameterinfo->complan.walking_stop = true;
+        parameterinfo->walking_mode = 0;
+
+    }
+    else if(now_step_ == STARTSTEPCOUNTER)
+    {
+        parameterinfo->complan.walking_state = FirstStep;
+    }
+    else
+    {
+        parameterinfo->complan.walking_state = Repeat;
+    }
+
+    if(pre_step_ != now_step_)          /* 確認是否換步 */
+    {
+        if((now_step_ % 2) == 1 && now_step_ > 1)
+        {
+            parameterinfo->parameters.foot_flag = false;
+            left_step_++;
+        }
+        else if((now_step_ % 2) == 0 && now_step_ > 1)
+        {
+            parameterinfo->parameters.foot_flag = true;
+            right_step_++;
+        }
+
         
         if((pre_step_ % 2) == 1)
         {
@@ -1452,9 +1532,22 @@ void WalkingGaitByLIPM::LCup()
 
         readWalkData();
 
-        if(parameterinfo->complan.walking_state == StopStep)
+        if(parameterinfo->complan.walking_state == StartStep)
         {
             theta_ = 0;
+            var_theta_ = 0;
+            
+            now_width_ = 2 * width_size_ * (-pow(-1, now_step_+1));
+            width_x = -sin(theta_)*now_width_;
+            width_y = cos(theta_)*now_width_;
+            displacement_x = width_x;
+            displacement_y = width_y;
+            footstep_x += width_x;
+            footstep_y += width_y;
+        }
+        else if(parameterinfo->complan.walking_state == StopStep)
+        {
+            theta_ = var_theta_;
             
             now_width_ = 2 * width_size_ * (-pow(-1, now_step_+1));
             width_x = -sin(theta_)*now_width_;
@@ -1466,7 +1559,7 @@ void WalkingGaitByLIPM::LCup()
         }        
         else 
         {
-            theta_ = 0;
+            theta_ = var_theta_;
             
             now_width_ = 2 * width_size_ * (-pow(-1, now_step_+1));
             width_x = -sin(theta_)*now_width_;
@@ -1495,98 +1588,180 @@ void WalkingGaitByLIPM::LCup()
     
     switch (parameterinfo->complan.walking_state)
     {
+    case StartStep:
+        // map_walk.find("case")->second.push_back(0);
+        /* 初始化參數 
+        base_x = 0;
+        now_right_x_ = 0;
+        now_right_y_ = 0;
+        now_left_x_ = 0;
+        now_left_y_ = 0;
+        step_length_ = 0;
+        last_displacement_x = 0;//上次的跨幅
+        last_base_x = 0;//上次到達的位置
+        last_displacement_y = 0;//上次的Y軸位移量
+        last_base_y = 0;//上次的Y軸位移位置
+        base_y = 0;//現在要到的Y軸位移位置
+        last_theta_ = 0;//前一次的Theta量
+        shift_length_ = 0;
+        */
+
+        vx0_ = wComVelocityInit(0, 0, zmp_x, TT_, Tc_);
+        px_ = wComPosition(0, vx0_, zmp_x, t_, Tc_);
+        vy0_ = wComVelocityInit(0, 0, zmp_y, TT_, Tc_);
+        // py_ = wComPosition(0, vy0_, zmp_y, t_, Tc_);
+
+        StartHeight_ = StartHeight_;
+        if((now_step_ % 2) == 1)
+        {
+            py_ = wComPosition(0, vy0_, zmp_y, t_, Tc_);
+            lpx_ = zmp_x;
+            rpx_ = wFootPositionRepeat(now_right_x_, 0, t_, TT_, T_DSP_);
+            lpy_ = zmp_y;
+            rpy_ = wFootPositionRepeat(now_right_y_, 0, t_, TT_, T_DSP_);
+            lpz_ = 0;
+            rpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
+
+            lpt_ = 0;
+            rpt_ = 0;
+        }
+        else if((now_step_ % 2) == 0)
+        {
+            py_ = wComPosition(0, vy0_, zmp_y, t_, Tc_)+com_y_swing*sin(PI*t_/TT_);
+            lpx_ = wFootPositionRepeat(now_left_x_, 0, t_, TT_, T_DSP_);
+            rpx_ = zmp_x;
+            lpy_ = wFootPositionRepeat(now_left_y_, 0, t_, TT_, T_DSP_);
+            rpy_ = zmp_y;
+            lpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
+            rpz_ = 0;
+
+            lpt_ = 0;
+            rpt_ = 0;
+
+        }
+        break;
     case FirstStep:
-        // map_walk.find("case")->second.push_back(1);
-        
         vx0_ = wComVelocityInit(0, base_x, zmp_x, TT_, Tc_);
         px_ = wComPosition(0, vx0_, zmp_x, t_, Tc_);
-        vy0_ = wComVelocityInit(0, (base_y+com_y_swing), zmp_y, TT_, Tc_);
+        vy0_ = wComVelocityInit(0, base_y, zmp_y, TT_, Tc_);
         py_ = wComPosition(0, vy0_, zmp_y, t_, Tc_);
         lpx_ = wFootPosition(now_left_x_, displacement_x, t_, TT_, T_DSP_);
         rpx_ = zmp_x;
         lpy_ = wFootPosition(now_left_y_, displacement_y-now_width_, t_, TT_, T_DSP_);
         rpy_ = zmp_y;
-        if(displacement_x == 0)
-        {
-            foot_hight = 0;
-        }
-        else
-        {
-            foot_hight = ((lpx_ - now_left_x_)/displacement_x)*board_hight;
-            c_hight = foot_hight;
-            //c_hight =  (px_/base_x)*board_hight/2;
-        }         
-        lpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_)+foot_hight;
-        pz_ = COM_HEIGHT + c_hight;        
+        lpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
         rpz_ = 0;
 
         lpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
         rpt_ = wFootTheta(-var_theta_, 0, t_, TT_, T_DSP_);
     
-        // if(var_theta_<0)
-        // {
-        //     lpt_ = 0;
-        //     rpt_ = 0;
-        // }
-        // else
-        // {
-        //     lpt_ = wFootTheta(abs_theta_, 0, t_, TT_, T_DSP_);
-        //     rpt_ = wFootTheta(-abs_theta_, 0, t_, TT_, T_DSP_);
-        // }
         break;
     case StopStep:
-        parameterinfo->LCFinishFlag = true;
         vx0_ = wComVelocityInit(last_base_x, base_x, zmp_x, TT_, Tc_);
         px_ = wComPosition(last_base_x, vx0_, zmp_x, t_, Tc_);
-        vy0_ = wComVelocityInit((last_base_y+com_y_swing), base_y, zmp_y, TT_, Tc_);
-        py_ = wComPosition((last_base_y+com_y_swing), vy0_, zmp_y, t_, Tc_);
+        vy0_ = wComVelocityInit(last_base_y, base_y, zmp_y, TT_, Tc_);
+        py_ = wComPosition(last_base_y, vy0_, zmp_y, t_, Tc_);
 
-        
-        lpx_ = lpx_;            
-        lpy_ = zmp_y;
-        rpx_ = wFootPosition(now_right_x_, (last_displacement_x+displacement_x), t_, TT_, T_DSP_);
-        rpy_ = wFootPosition(now_right_y_, (last_displacement_y+displacement_y), t_, TT_, T_DSP_);
-        if((last_displacement_x+displacement_x) == 0)
-        {       
-            foot_hight = 0;
-        }
-        else
+        if((now_step_ % 2) == 1)
         {
-            foot_hight = ((rpx_ - now_right_x_)/(last_displacement_x+displacement_x))*board_hight;  
-            c_hight = foot_hight;
-            //c_hight = ((px_ - last_base_x)/(base_x-last_base_x))*board_hight/2;
+            lpx_ = zmp_x;            
+            lpy_ = zmp_y;
+            rpx_ = wFootPosition(now_right_x_, (last_displacement_x+displacement_x), t_, TT_, T_DSP_);
+            rpy_ = wFootPosition(now_right_y_, (last_displacement_y+displacement_y), t_, TT_, T_DSP_);
+            lpz_ = 0;
+            rpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
+
+            lpt_ = 0;
+            rpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
         }
-        lpz_ = board_hight;
-        rpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_)+foot_hight+rightfoot_shift_z*sin(PI*t_/TT_);
-        //pz_ = COM_HEIGHT + c_hight+board_hight/2;
-        // py_=py_+com_y_swing*sin(PI*t_/TT_);
-        lpt_ = 0;
-        rpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);      
+        else if((now_step_ % 2) == 0)
+        {
+            lpx_ = wFootPosition(now_left_x_, (last_displacement_x+displacement_x), t_, TT_, T_DSP_);
+            rpx_ = zmp_x;
+            lpy_ = wFootPosition(now_left_y_, (last_displacement_y+displacement_y), t_, TT_, T_DSP_);
+            rpy_ = zmp_y;
+            lpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
+            rpz_ = 0;
+
+            lpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
+            rpt_ = 0;
+        }
+        break;
+
+    case Repeat:
+        vx0_ = wComVelocityInit(last_base_x, base_x, zmp_x, TT_, Tc_);
+        px_ = wComPosition(last_base_x, vx0_, zmp_x, t_, Tc_);
+        vy0_ = wComVelocityInit(last_base_y, base_y, zmp_y, TT_, Tc_);
+        py_ = wComPosition(last_base_y, vy0_, zmp_y, t_, Tc_);
+
+        if((now_step_ % 2) == 1)
+        {
+            lpx_ = zmp_x;
+            rpx_ = wFootPositionRepeat(now_right_x_, (last_displacement_x+displacement_x)/2, t_, TT_, T_DSP_);
+            lpy_ = zmp_y;
+            rpy_ = wFootPositionRepeat(now_right_y_, (last_displacement_y+displacement_y)/2, t_, TT_, T_DSP_);
+            lpz_ = 0;
+            rpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
+            if(var_theta_*last_theta_ >= 0)
+            {
+                lpt_ = wFootTheta(-var_theta_, 0, t_, TT_, T_DSP_);
+                rpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
+            }
+            else
+            {
+                lpt_ = 0;
+                rpt_ = 0;
+            } 
+        }
+        else if((now_step_ % 2) == 0)
+        {
+            lpx_ = wFootPositionRepeat(now_left_x_, (last_displacement_x+displacement_x)/2, t_, TT_, T_DSP_);
+            rpx_ = zmp_x;
+            lpy_ = wFootPositionRepeat(now_left_y_, (last_displacement_y+displacement_y)/2, t_, TT_, T_DSP_);
+            rpy_ = zmp_y;
+            lpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
+            rpz_ = 0;
+            if(var_theta_*last_theta_ >= 0)
+            {
+                lpt_ = wFootTheta(-last_theta_, 1, t_, TT_, T_DSP_);
+                rpt_ = wFootTheta(-var_theta_, 0, t_, TT_, T_DSP_);
+            }
+            else
+            {
+                lpt_ = 0;
+                rpt_ = 0;
+            }
+        }
+        break;
     default:
-        // map_walk.find("case")->second.push_back(9);
         break;
     }
 
-    if(fabs(com_x)>5/*5>fabs(com_y) && 5>fabs(com_x)*/)
-    {
-    /* 前饋控制 */
+    // if(5>fabs(com_y) && 5>fabs(com_x))
+    // {
+    // /* 前饋控制 */
     // py_ = py_ + 0.5 * ( py_ - com_y);
-        px_u = px_ + 0.7 * ( px_ - com_x);
-    /* --- */
-    }
-    else if(fabs(com_x)>2)
-        px_u = px_ + 0.3 * ( px_ - com_x);
-    else
-        px_u = px_;
-    // px_u = px_;
-    py_u = py_;
-    // py_u = py_ + 0.2 * ( py_ - com_y);
-    // px_u = px_ + 0.1 * ( px_ - com_x);
+    // //px_ = px_ + 0.5 * ( px_ - com_x);
+    // /* --- */
+    // }
+    
 
+    // if(abs(sensor.rpy_[0])>3.5)
+    //    py_u = py_  - 0.2 * ( py_ - com_y);
+    // else
+    //    py_u = py_;   
+    // if(balance.pitch_over_limit_)
+    //     px_u = px_ - 0.05 * ( px_ - com_x);
+    // else
+    //     px_u = px_;    
+    py_u = py_ + 0.3 * ( py_ - com_y);
+    px_u = px_;
+
+    Z_ctrl_ = wForceDifferenceControl(t_, TT_, T_DSP_);
 
     coordinate_transformation();
     coordinate_offset();
-
+    
 
     if(now_step_ > step_)
     {
@@ -1599,6 +1774,7 @@ void WalkingGaitByLIPM::LCup()
         step_point_lthta_ = 0;
         step_point_rthta_ = 0;
 
+        Z_ctrl_ = 0;
         end_point_lx_ = 0;
         end_point_rx_ = 0;
         end_point_ly_ = width_size_ - Length_Pelvis/2;
@@ -1616,16 +1792,15 @@ void WalkingGaitByLIPM::LCup()
     {
         push_data_ = true; 
     }
-    parameterinfo->points.IK_Point_RX = end_point_rx_;
-	parameterinfo->points.IK_Point_RY = end_point_ry_;
-	parameterinfo->points.IK_Point_RZ = end_point_rz_;
-	parameterinfo->points.IK_Point_RThta = end_point_rthta_;
-	parameterinfo->points.IK_Point_LX = end_point_lx_;
-	parameterinfo->points.IK_Point_LY = end_point_ly_;
-	parameterinfo->points.IK_Point_LZ = end_point_lz_;
-	parameterinfo->points.IK_Point_LThta = end_point_lthta_;
+    // parameterinfo->points.IK_Point_RX = end_point_rx_;
+	// parameterinfo->points.IK_Point_RY = end_point_ry_+balance.y_offset_r;
+	// parameterinfo->points.IK_Point_RZ = end_point_rz_-balance.x_offset-balance.y_offset_r;
+	// parameterinfo->points.IK_Point_RThta = end_point_rthta_;
+	// parameterinfo->points.IK_Point_LX = end_point_lx_;
+	// parameterinfo->points.IK_Point_LY = end_point_ly_+balance.y_offset_l;
+	// parameterinfo->points.IK_Point_LZ = end_point_lz_-balance.x_offset-balance.y_offset_l;
+	// parameterinfo->points.IK_Point_LThta = end_point_lthta_;
 }
-
 
 void WalkingGaitByLIPM::final_step()
 {
@@ -1670,17 +1845,19 @@ void WalkingGaitByLIPM::coordinate_transformation()
     step_point_ry_ = (step_point_rx_W_*sin(-theta_)+step_point_ry_W_*cos(-theta_));
     /* --- */    
 }
+
 void WalkingGaitByLIPM::coordinate_offset()
 {
     end_point_lx_ = step_point_lx_;
     end_point_rx_ = step_point_rx_;
     end_point_ly_ = step_point_ly_ - Length_Pelvis/2;
     end_point_ry_ = step_point_ry_ + Length_Pelvis/2;
-    end_point_lz_ = step_point_lz_ - (COM_HEIGHT - Length_Leg);
-    end_point_rz_ = step_point_rz_ - (COM_HEIGHT - Length_Leg);
+    end_point_lz_ = step_point_lz_ - (COM_HEIGHT - Length_Leg) - Z_ctrl_/2;
+    end_point_rz_ = step_point_rz_ - (COM_HEIGHT - Length_Leg) + Z_ctrl_/2;
     end_point_lthta_ = step_point_lthta_;
     end_point_rthta_ = step_point_rthta_;
 }
+
 double WalkingGaitByLIPM::wComVelocityInit(double x0, double xt, double px, double t, double T)
 {
     return (xt - x0*cosh(t/T) + px*(cosh(t/T)-1))/(T*sinh(t/T));
@@ -1804,6 +1981,41 @@ double WalkingGaitByLIPM::wFootTheta(const double theta, bool reverse, const dou
     else if(t>T*(1-T_DSP/2) && reverse)
         return 0;    
 }
+
+double WalkingGaitByLIPM::wForceDifferenceControl(const double t, const double T, const double T_DSP)
+{
+   
+    // FF.getZMPValue();
+    double force_left_ = balance.ZMP_process->getForceLeft();
+    double force_right_ = balance.ZMP_process->getForceRight();
+    //FDC.setinputdata(lpx_,lpy_,rpx_,rpy_,zmp_x,zmp_y,lpt_,rpt_, force_left_, force_right_);// force_left_, force_right_
+    //FDC.run();
+    if (t > T * T_DSP / 2 && t < T * (1 - (T_DSP / 2))) // 單支
+        return 0;
+    else{ // 雙支
+        // FDC.setinputdata(lpx_, lpy_, rpx_, rpy_, MPC.xt(2), MPC.yt(2), lpt_, rpt_, force_left_, force_right_);// force_left_, force_right_
+        FDC.setinputdata(lpx_,lpy_,rpx_,rpy_,zmp_x,zmp_y,lpt_,rpt_, force_left_, force_right_);// force_left_, force_right_
+        FDC.run();
+
+    // //cout << "lpz_ = " << lpz_ << "  rpz_ = " << rpz_ << "\n";
+    // //cout << "lpy_ = " << lpy_ << "  rpy_ = " << rpy_ << "\n";
+    // //cout << "lpx_ = " << lpx_ << "  rpx_ = " << rpx_ << "\n";
+    // //cout << "lpt= = " << lpt_ << "  cos(lpt) = " << cos(lpt_) << "\n";
+    // cout << "zmp_x = " << px_ << "  zmp_y = " << py_ << "\n";
+    // //cout << "temp_point_x = " << FDC.temp_point_x << "  temp_point_y = " << FDC.temp_point_y << "\n";
+    // //cout << "temp_com_point_x = " << FDC.temp_com_point_x << "  temp_com_point_y = " << FDC.temp_com_point_y << "\n";
+    // //cout << "com_pos_lx = " << FDC.com_pos_lx << "  com_pos_rx = " << FDC.com_pos_rx << "\n";
+    // //cout << "com_pos_ly = " << FDC.com_pos_ly << "  com_pos_ry = " << FDC.com_pos_ry << "\n";
+    // cout << "cls_lx = " << FDC.cls_lx << "  cls_ly = " << FDC.cls_ly << "\n";
+    // cout << "cls_rx = " << FDC.cls_rx << "  cls_ry = " << FDC.cls_ry << "\n";
+    // cout << "alpha_x = " << FDC.alpha_x << "  alpha_y = " << FDC.alpha_y << "\n";
+    // cout << "alpha = " << FDC.alpha << "\n";
+    // cout << "Z_ctrl = " << FDC.Z_ctrl << "\n";
+
+        return FDC.Z_ctrl;
+    }
+}
+
 double WalkingGaitByLIPM::unit_step(double x)
 {
     if(x<0)
@@ -1811,10 +2023,12 @@ double WalkingGaitByLIPM::unit_step(double x)
     else
         return 1;
 }
+
 double WalkingGaitByLIPM::sinh(double x)
 {
     return (double)(exp(x)-exp(-x))/2;
 }
+
 double WalkingGaitByLIPM::cosh(double x)
 {
     return (double)(exp(x)+exp(-x))/2;

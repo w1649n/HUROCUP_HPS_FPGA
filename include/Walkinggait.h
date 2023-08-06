@@ -53,8 +53,9 @@ public:
     void readWalkParameter();
     void resetParameter();
     void process();
-    void LCup();
-    void LCdown();
+    void slow_step();
+    void single();
+    void LC();
     void final_step();
     void coordinate_transformation();
     void coordinate_offset();
@@ -75,6 +76,11 @@ public:
     double wFootTheta(const double theta, bool reverse, const double t, const double T, const double T_DSP);
     double wFootPositionZUP(const double height, const double t, const double T, const double T_DSP, const int step, const int board_step, const double board_height);
 
+    /* foot force */
+    double wForceDifferenceControl(const double t, const double T, const double T_DSP);
+    double Z_ctrl_;
+    /* --- */
+
     double unit_step(double x);
     double sinh(double x);
     double cosh(double x);
@@ -88,6 +94,7 @@ public:
     bool ready_to_stop_;
     bool delay_push_;
     bool push_data_;
+    bool slow_step_flag_ = false;
     int count;
     double step_times,first_change_foot_time;
     float rightfoot_shift_z,com_y_swing;
@@ -102,7 +109,7 @@ public:
     double TT_, t_,Ts;
     double Tc_;
     double step_length_, width_size_, lift_height_, base_x, now_width_, width_x, width_y;
-    double theta_, var_theta_, abs_theta_, last_theta_, last_abs_theta_;
+    double theta_, var_theta_, abs_theta_, last_theta_, last_abs_theta_, single_var_theta_;
     double last_displacement_x, now_left_x_, now_right_x_, last_base_x;
     double shift_length_, last_displacement_y, base_y, now_left_y_, now_right_y_, last_base_y;
     double footstep_x, footstep_y;
