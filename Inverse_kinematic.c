@@ -64,6 +64,8 @@ void Locus::get_first_stand()
 	Points.Inverse_PointL_Z 			= walkinggait.end_point_lz_;
 	Points.Inverse_PiontR_Thta			= walkinggait.end_point_rthta_;
 	Points.Inverse_PiontL_Thta			= walkinggait.end_point_lthta_;
+	parameterinfo->points.IK_Point_LX 	= 0;
+	parameterinfo->points.IK_Point_RX 	= 0;
 	walkinggait.if_finish_				= true;
 }
 void Locus::get_cpg_with_offset()
@@ -623,7 +625,7 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
         origin_angle[i] += output_base_[i];
 	}
 	//--------------//
-	if(parameterinfo->LCBalanceOn && balance.balance_time)
+	if(parameterinfo->LCBalanceOn /*&& balance.balance_time*/)
 	{
 		balance.control_after_ik_calculation();
 		// balance.saveData();

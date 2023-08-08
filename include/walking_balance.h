@@ -274,7 +274,10 @@ public:
 	PID_Controller PIDrightfoot_zmp_y;
 
 	BalanceParam CoM_EPx_value;
+    BalanceParam CoM_EPy_value;
+
 	PID_Controller PIDCoM_x;
+    PID_Controller PIDCoM_y;
 	PID_Controller PIDCoM_z;
 
 	ZMPParam pres_ZMP;
@@ -326,6 +329,7 @@ public:
     double get_angle(double, double, double, int);
     double get_force(double, int);
     double get_q_bias();
+    struct timeval kalman_start,kalman_end;
     private:
         double p_[3][2][2];
         double k_[2];

@@ -21,7 +21,7 @@ BalanceControl::BalanceControl()
     //kalman
     q_angle_ = 0.001;
     q_bias_ = 0.003;
-    r_measure_ = 0.03;    //0.0005
+    r_measure_ = 0.03;//0.1;//0.03;    //0.0005
     
     memset(angle_, 0.0, sizeof(angle_));
     memset(bias_, 0.0, sizeof(bias_));
@@ -37,7 +37,7 @@ BalanceControl::BalanceControl()
 
 BalanceControl::~BalanceControl()
 {
-	// delete ZMP_process;
+	delete ZMP_process;
 }
 
 void BalanceControl::initialize(const int control_cycle_msec)
@@ -68,6 +68,7 @@ void BalanceControl::initialize(const int control_cycle_msec)
     rightfoot_ankle_pitch_value.initialize();
 	
 	CoM_EPx_value.initialize();
+	CoM_EPy_value.initialize();
 
     PIDleftfoot_hip_roll.initParam();
     PIDleftfoot_hip_pitch.initParam();
@@ -312,6 +313,8 @@ void BalanceControl::initialize_parameter()
 	PIDCoM_x.setKpid(com_pid_[0], com_pid_[1], com_pid_[2]);//(0.03, 0, 0.02);  //0.03, 0, 0.02
 	PIDCoM_x.setControlGoal(0);//(0);imu_desire_[2]
 
+	PIDCoM_y.setValueLimit(7, -7);
+	PIDCoM_y.setKpid(0.001, 0, 0.002);//(0.03, 0, 0.02);  //0.03, 0, 0.02
 }
 
 void BalanceControl::p2h_get_parameter()
@@ -341,13 +344,18 @@ void BalanceControl::get_sensor_value()
 	double rpy_radian[3] = {0};
     double gyro_[3] = {0};
     double acc_[3] = {0};
+	double  kalman_timer;
+
+	gettimeofday(&kalman_end, NULL);
+	kalman_timer = (double)(1000000.0 * (kalman_end.tv_sec - kalman_start.tv_sec) + (kalman_end.tv_usec - kalman_start.tv_usec));
 	for(i=0; i<3; i++)
     {
 		rpy_radian[i] = sensor.rpy_[i];
         gyro_[i]      = sensor.gyro_[i];
         acc_[i]       = sensor.accel_[i];
-        kalman_rpy_[i]= get_angle(acc_[i],gyro_[i],0.015,i);
+        kalman_rpy_[i]= get_angle(rpy_radian[i] ,gyro_[i],kalman_timer,i);
     }
+	gettimeofday(&kalman_start, NULL);
 	roll_imu_filtered_ = roll_imu_lpf_.get_filtered_output(rpy_radian[0]);
 	pitch_imu_filtered_ = pitch_imu_lpf_.get_filtered_output(rpy_radian[1]);
 	roll_over_limit_ = (fabs(roll_imu_filtered_) > 7 ? true : false);
@@ -398,6 +406,7 @@ void BalanceControl::resetControlValue()
 	rightfoot_ankle_roll_value.initialize();
 
 	CoM_EPx_value.initialize();
+	CoM_EPy_value.initialize();
 
 	leftfoot_EPx_value.initialize();
 	leftfoot_EPy_value.initialize();
@@ -410,14 +419,15 @@ void BalanceControl::endPointControl()
 	int raw_sensor_data_tmp[8];
 	for(int i=0; i<4; i++)raw_sensor_data_tmp[i] = sensor.press_left_[i];
 	for(int i=4; i<8; i++)raw_sensor_data_tmp[i] = sensor.press_right_[i-4];
-	prev_ZMP = pres_ZMP;
+	prev_ZMP.feet_pos.x += pres_ZMP.feet_pos.x;
+	prev_ZMP.feet_pos.y += pres_ZMP.feet_pos.y;
 	ZMP_process->setpOrigenSensorData(raw_sensor_data_tmp);
 	pres_ZMP = ZMP_process->getZMPValue();
 
 	map_ZMP.find("pres_ZMP_left_pos_x")->second.push_back(pres_ZMP.left_pos.x);
 	map_ZMP.find("pres_ZMP_left_pos_y")->second.push_back(pres_ZMP.left_pos.y);
-	map_ZMP.find("pres_ZMP_right_pos_x")->second.push_back(pres_ZMP.right_pos.x);
-	map_ZMP.find("pres_ZMP_right_pos_y")->second.push_back(pres_ZMP.right_pos.y);
+	map_ZMP.find("pres_ZMP_right_pos_x")->second.push_back(prev_ZMP.feet_pos.x);
+	map_ZMP.find("pres_ZMP_right_pos_y")->second.push_back(prev_ZMP.feet_pos.y);
 	map_ZMP.find("pres_ZMP_feet_pos_x")->second.push_back(pres_ZMP.feet_pos.x);
 	map_ZMP.find("pres_ZMP_feet_pos_y")->second.push_back(pres_ZMP.feet_pos.y);
 	
@@ -427,9 +437,9 @@ void BalanceControl::endPointControl()
 	double *sensor_force = ZMP_process->getpSensorForce();
 	int *raw_sensor_data = ZMP_process->getpOrigenSensorData();
 
-	map_ZMP.find("sensor_force_0")->second.push_back(imu_desire_[0]);
-	map_ZMP.find("sensor_force_1")->second.push_back(imu_desire_[1]);
-	map_ZMP.find("sensor_force_2")->second.push_back(imu_desire_[2]);
+	map_ZMP.find("sensor_force_0")->second.push_back(sensor.gyro_[0]);
+	map_ZMP.find("sensor_force_1")->second.push_back(sensor.gyro_[1]);
+	map_ZMP.find("sensor_force_2")->second.push_back(sensor.gyro_[2]);
 	map_ZMP.find("sensor_force_3")->second.push_back(roll_pid_[0]);
 	map_ZMP.find("sensor_force_4")->second.push_back(roll_pid_[1]);
 	map_ZMP.find("sensor_force_5")->second.push_back(roll_pid_[2]);
@@ -443,10 +453,10 @@ void BalanceControl::endPointControl()
 	map_ZMP.find("raw_sensor_data_4")->second.push_back(kalman_rpy_[0]);
 	map_ZMP.find("raw_sensor_data_5")->second.push_back(kalman_rpy_[1]);
 	map_ZMP.find("raw_sensor_data_6")->second.push_back(kalman_rpy_[2]);
-	map_ZMP.find("raw_sensor_data_7")->second.push_back(raw_sensor_data[7]);
+	map_ZMP.find("raw_sensor_data_7")->second.push_back(roll_imu_filtered_);
 
 
-	map_ZMP.find("leftfoot_control_once_EPx")->second.push_back(leftfoot_EPx_value.control_value_once);
+	map_ZMP.find("leftfoot_control_once_EPx")->second.push_back(pitch_imu_filtered_);
 	map_ZMP.find("leftfoot_control_total_EPx")->second.push_back(leftfoot_EPx_value.control_value_total);
 	map_ZMP.find("rightfoot_control_once_EPx")->second.push_back(rightfoot_EPx_value.control_value_once);
 	map_ZMP.find("rightfoot_control_total_EPx")->second.push_back(rightfoot_EPx_value.control_value_total);
@@ -569,15 +579,26 @@ void BalanceControl::balance_control()
 	if(walkinggait.LIPM_flag_)
 	{
 		CoM_EPx_value.control_value_once = PIDCoM_x.calculateExpValue(passfilter_pres_imu_value[(int)imu::pitch].pos);
-		parameterinfo->points.IK_Point_LX -= CoM_EPx_value.control_value_once;
-		parameterinfo->points.IK_Point_RX -= CoM_EPx_value.control_value_once;
+		CoM_EPx_value.control_value_total -= CoM_EPx_value.control_value_once;
+		if(CoM_EPx_value.control_value_total>3){CoM_EPx_value.control_value_total = 3;}else if(CoM_EPx_value.control_value_total<-3){CoM_EPx_value.control_value_total = -3;}
+		
+		PIDCoM_y.setControlGoal(walkinggait.py_u);
+		CoM_EPy_value.control_value_once = PIDCoM_y.calculateExpValue(passfilter_pres_imu_value[(int)imu::roll].pos);
+		CoM_EPy_value.control_value_total -= CoM_EPy_value.control_value_once;
+		if(CoM_EPy_value.control_value_total>1){CoM_EPy_value.control_value_total = 1;}else if(CoM_EPy_value.control_value_total<-1){CoM_EPy_value.control_value_total = -1;}
+
+		parameterinfo->points.IK_Point_LX  = CoM_EPx_value.control_value_total;
+		parameterinfo->points.IK_Point_RX  = CoM_EPx_value.control_value_total;
+		walkinggait.Control_Step_length_X_ = 0.5*CoM_EPx_value.control_value_total;
+		walkinggait.Control_Step_length_Y_ = 0.3*CoM_EPy_value.control_value_total;
+
 	}
-	else if(parameterinfo->complan.walking_stop)
+	
+	if(parameterinfo->complan.walking_stop)
 	{
 		InitEndPointControl();
 	}
-
-	if(sup_foot_ == leftfoot)
+	else if(sup_foot_ == leftfoot)
 	{
         if(flag_r)
         {
@@ -595,7 +616,7 @@ void BalanceControl::balance_control()
         }
 		// pres_ZMP.feet_pos.x pres_ZMP.feet_pos.y
 		//sup
-		PIDleftfoot_ankle_roll.setControlGoal(1); 
+		PIDleftfoot_ankle_roll.setControlGoal(2); 
 		//----------- pitch ---------------------
 		leftfoot_hip_pitch_value.control_value_once = PIDleftfoot_hip_pitch.calculateExpValue(passfilter_pres_imu_value[(int)imu::pitch].vel)*0.03;//dt = 0.03
 		leftfoot_hip_pitch_value.control_value_total -= leftfoot_hip_pitch_value.control_value_once;
@@ -650,7 +671,7 @@ void BalanceControl::balance_control()
             flag_r = true;
         }
 		//sup
-		PIDrightfoot_ankle_roll.setControlGoal(-1); 
+		PIDrightfoot_ankle_roll.setControlGoal(-2); 
 		//----------- pitch ---------------------
 		rightfoot_hip_pitch_value.control_value_once = PIDleftfoot_hip_pitch.calculateExpValue(passfilter_pres_imu_value[(int)imu::pitch].vel)*0.03 ;//dt = 0.03
 		rightfoot_hip_pitch_value.control_value_total -= rightfoot_hip_pitch_value.control_value_once;
@@ -776,25 +797,51 @@ void BalanceControl::InitEndPointControl()
 	// pitch_value_a.initialize();
 	leftfoot_hip_roll_value.initialize();
 	rightfoot_hip_roll_value.initialize();
+	leftfoot_hip_pitch_value.initialize();
+	rightfoot_hip_pitch_value.initialize();
+	leftfoot_ankle_roll_value.initialize();
+	rightfoot_ankle_roll_value.initialize();
+	leftfoot_ankle_pitch_value.initialize();
+	rightfoot_ankle_pitch_value.initialize();
 	CoM_EPx_value.initialize();
 	PIDCoM_x.initParam();
 	PIDCoM_z.initParam();
 	parameterinfo->points.IK_Point_LX = 0;
 	parameterinfo->points.IK_Point_RX = 0;
-	parameterinfo->points.IK_Point_LZ = Length_Leg;
-	parameterinfo->points.IK_Point_RZ = Length_Leg;
+	// parameterinfo->points.IK_Point_LZ = Length_Leg;
+	// parameterinfo->points.IK_Point_RZ = Length_Leg;
 	leftfoot_hip_roll = 0;
 	rightfoot_hip_roll = 0;
+	leftfoot_hip_pitch = 0;
+	rightfoot_hip_pitch = 0;
+	leftfoot_ankle_roll = 0;
+	rightfoot_ankle_roll = 0;
+	leftfoot_ankle_pitch = 0;
+	rightfoot_ankle_pitch = 0;
 
     //kalman
     memset(angle_, 0.0, sizeof(angle_));
     memset(bias_, 0.0, sizeof(bias_));
+	p_[0][0][0] = 0;
+	p_[0][0][1] = 0;
+	p_[0][1][0] = 0;
+	p_[0][1][1] = 0;
+
+	p_[1][0][0] = 0;
+	p_[1][0][1] = 0;
+	p_[1][1][0] = 0;
+	p_[1][1][1] = 0;
+
+	p_[2][0][0] = 0;
+	p_[2][0][1] = 0;
+	p_[2][1][0] = 0;
+	p_[2][1][1] = 0;
+	
 }
 
 void BalanceControl::control_after_ik_calculation()
 {
 	// compensate
-	
 	if(walkinggait.if_finish_)
 	{
 		Points.Thta[10] = Points.Thta[10];

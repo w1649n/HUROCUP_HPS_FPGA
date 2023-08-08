@@ -28,7 +28,7 @@ int main()
 	// walkinggait.if_finish_ = false;
 	/*----------------------*/
 	gettimeofday(&walkinggait.timer_start_, NULL);
-
+	gettimeofday(&balance.kalman_start, NULL);
 	int IB_count = 0; /* COM估測器 調用次數 */
 	IB.setparameter(0.03,0.05);	  /* 設定CoM估測器取樣時間與截止週期 */ //0.03,0.05
 
@@ -46,7 +46,7 @@ int main()
 	//usleep(500 * 1000); 	//0.5s
 	//sleep(2);				//2s
 	while(1)
-	{  
+	{ 
 		/*---動作串---*/
 		datamodule.load_database();
 		if(datamodule.motion_execute_flag_)
@@ -88,10 +88,10 @@ int main()
 		gettimeofday(&walkinggait.timer_end_, NULL);
 		walkinggait.timer_dt_ = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
 
-		walkinggait.balance_dt = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
+		// walkinggait.balance_dt = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
 
  
-		// balance.get_sensor_value();
+		balance.get_sensor_value();
 		/*zmp測試*/
 		// if (zmp_first_time)
 		// {
@@ -112,7 +112,7 @@ int main()
 
 		// if (zmp_count == 30)
 		// {
-		// 	//balance.ZMP_process->saveData();
+		// 	balance.ZMP_process->saveData();
 		// 	zmp_count = 0;
 		// }
 		
@@ -137,11 +137,11 @@ int main()
 			walkinggait.setcom_pos(IB.WpB(0),IB.WpB(1));
 			walkinggait.walking_timer();
 			walkinggait.pushData();
-			balance.get_sensor_value();
+			// balance.get_sensor_value();
 			gettimeofday(&walkinggait.timer_start_, NULL);
 			// balance.balance_control();
 		}
-		 
+		   
  		// printf(" ");
 		// usleep(100 * 1000); 
 		if((walkinggait.locus_flag_))
@@ -172,7 +172,7 @@ int main()
 			}
 			IB.run(); 
 			IB.map_com.find("desired_com_y")->second.push_back(walkinggait.py_);
-
+ 
 			if(walkinggait.if_finish_)
 			{
 				IB.saveData();
@@ -185,7 +185,7 @@ int main()
 			{
 				feedbackmotor.pushData();
 			}
- 
+
 			IB_count++;
 			//printf("walking ");
 			/*-----*/
@@ -195,32 +195,36 @@ int main()
 			{
 				
 				gettimeofday(&balance_end, NULL);
-				balance_timer = (double)(1000000.0 * (balance_end.tv_sec - balance_start.tv_sec) + (balance_end.tv_usec - balance_start.tv_usec));
+				// balance_timer = (double)(1000000.0 * (balance_end.tv_sec - balance_start.tv_sec) + (balance_end.tv_usec - balance_start.tv_usec));
 				locus.get_cpg_with_offset();  //獲取末端點
 				locus.control_by_robot_status(); //擺手&擺腰
 				balance.balance_control();	// 平衡控制(sensor_set)
+				
 			// IK.pushData();
-				if (balance_timer>=30000.0)//one second
-				{
-					balance.balance_time = true;
-				}
-				else
-				{
-					gettimeofday(&balance_start, NULL);
-					balance.balance_time = false;
-				}
+				// if (balance_timer>=30000.0)//one second
+				// {
+				// 	balance.balance_time = true;
+				// }
+				// else
+				// {
+				// 	gettimeofday(&balance_start, NULL);
+				// 	balance.balance_time = false;
+				// }
 				IK.calculate_inverse_kinematic(walkinggait.motion_delay_); //計算逆運動學
 				locus.do_motion();
 			}
-			
-			
+			else if(!parameterinfo->complan.walking_state == StopStep)
+			{
+				IK.calculate_inverse_kinematic(15); //計算逆運動學
+				locus.do_motion();
+			}
 			
 
 			walkinggait.LIPM_flag_ = false;
 			walkinggait.if_finish_ = false;
 			walkinggait.locus_flag_ = false;
 		}
- 		 
+	
 	}
 	// clean up our memory mapping and exit
 	init.Clear_Memory_Mapping();
