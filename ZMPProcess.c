@@ -35,6 +35,9 @@ void ZMPProcess::initialize()
 	force_right = 0;
 	torque_left_x = 0;
 	torque_left_y = 0;
+	torque_right_x = 0;
+	torque_right_y = 0;
+	
 
     std::vector<float> temp;
 	if(map_zmp.empty())
@@ -52,6 +55,11 @@ void ZMPProcess::initialize()
 		map_zmp["D_zmp_x"] = temp;
 		map_zmp["D_zmp_y"] = temp;
         map_zmp["D_force"] = temp;
+
+		map_zmp["torque_left_x"] = temp;
+		map_zmp["torque_left_y"] = temp;
+		map_zmp["torque_right_x"] = temp;
+		map_zmp["torque_right_y"] = temp;
 	}
 
 }
@@ -107,6 +115,10 @@ void ZMPProcess::digital2KGProcess()
     }
     torque_left_x = ((ZMP_S[0]+ZMP_S[1]) - (ZMP_S[2]+ZMP_S[3]))*SINGLE_FOOT_WEIGHT_X/100.0*9.8;
     torque_left_y = ((ZMP_S[0]+ZMP_S[3]) - (ZMP_S[1]+ZMP_S[2]))*SINGLE_FOOT_WEIGHT_EQUAL_Y/100.0*9.8;
+
+	torque_right_x = ((ZMP_S[5]+ZMP_S[6]) - (ZMP_S[4]+ZMP_S[7]))*SINGLE_FOOT_WEIGHT_X/100.0*9.8;
+    torque_right_y = ((ZMP_S[5]+ZMP_S[7]) - (ZMP_S[6]+ZMP_S[4]))*SINGLE_FOOT_WEIGHT_EQUAL_Y/100.0*9.8;
+
     if(sensor_digital_ > 0.2)
 	{
 		ZMP.feet_pos.y = (double)((((ZMP_S[0]+ZMP_S[3]-ZMP_S[5]-ZMP_S[6])*DOUBLE_FEET_WEIGHT_FAR_Y) + ((ZMP_S[1]+ZMP_S[2]-ZMP_S[4]-ZMP_S[7]) * DOUBLE_FEET_WEIGHT_NEAR_Y) )/(double)sensor_digital_);
@@ -152,6 +164,10 @@ void ZMPProcess::digital2KGProcess()
     map_zmp.find("D_zmp_y")->second.push_back(ZMP.feet_pos.x);
     map_zmp.find("D_force")->second.push_back(sensor_digital_);
 
+	map_zmp.find("torque_left_x")->second.push_back(torque_left_x);
+	map_zmp.find("torque_left_y")->second.push_back(torque_left_y);
+	map_zmp.find("torque_right_x")->second.push_back(torque_right_x);
+	map_zmp.find("torque_right_y")->second.push_back(torque_right_y);
 }
 
 void ZMPProcess::setpSensorDataOffset(void *origen_sensor_data)

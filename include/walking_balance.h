@@ -55,12 +55,12 @@ class ZMPProcess;
 ////////////////////////////////////////////////////////
 
 /////////////////////////Zmp Control///////////////////////
-#define DOUBLE_FEET_WEIGHT_FAR_Y	8.2	//7.6 cm
-#define DOUBLE_FEET_WEIGHT_NEAR_Y	2.7	//3.0 cm
-#define DOUBLE_FEET_WEIGHT_X		4.15	//4.4 cm
+#define DOUBLE_FEET_WEIGHT_FAR_Y	7.5	//8.2//7.6 cm
+#define DOUBLE_FEET_WEIGHT_NEAR_Y	3	//2.7//3.0 cm
+#define DOUBLE_FEET_WEIGHT_X		4.5//4.15//4.4 cm
 #define DOUBLE_FEET_BALANCE_POINT_Y	4.5	//4.5 cm
-#define SINGLE_FOOT_WEIGHT_FAR_Y	3.1	//3.1  5.5
-#define SINGLE_FOOT_WEIGHT_NEAR_Y	1.5	//1.5 cm 
+#define SINGLE_FOOT_WEIGHT_FAR_Y	3	//3.1  5.5
+#define SINGLE_FOOT_WEIGHT_NEAR_Y	2	//1.5 cm 
 #define SINGLE_FOOT_WEIGHT_X		4.15	//4.4 cm
 
 #define RIGHT_PRESS_SHIFT	4

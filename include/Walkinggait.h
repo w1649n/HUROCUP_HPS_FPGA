@@ -60,10 +60,11 @@ public:
     void coordinate_transformation();
     void coordinate_offset();
 
-    double com_x,com_y;
-    void setcom_pos(double set_com_x, double set_com_y){
+    double com_x,com_y,com_y_v;
+    void setcom_pos(double set_com_x, double set_com_y, double set_com_y_v){
         com_x = set_com_x;
         com_y = set_com_y;
+        com_y_v = set_com_y_v;
     }
 
     // double wtestComVelocity(double pre_x,double pre_v,double px,double t ,double T);
@@ -113,14 +114,14 @@ public:
     double last_displacement_x, now_left_x_, now_right_x_, last_base_x;
     double shift_length_, last_displacement_y, base_y, now_left_y_, now_right_y_, last_base_y;
     double footstep_x, footstep_y;
-    double zmp_x, zmp_y, last_zmp_x, last_zmp_y;
+    double zmp_x, zmp_y, last_zmp_x, last_zmp_y, ideal_zmp_y;
     double displacement_x, displacement_y;
     double step_point_lx_W_, step_point_rx_W_, step_point_ly_W_, step_point_ry_W_;
     double step_point_lx_, step_point_rx_, step_point_ly_, step_point_ry_;
     double step_point_lz_, step_point_rz_, step_point_lthta_, step_point_rthta_;
     double end_point_lx_, end_point_rx_, end_point_ly_, end_point_ry_;
     double end_point_lz_, end_point_rz_, end_point_lthta_, end_point_rthta_;
-    double vx0_, vy0_, px_, py_, pz_,py_u,px_u;
+    double vx0_, vy0_, px_, py_, pz_,py_u,px_u, px_error, py_error;
     double lpx_, rpx_, lpy_, rpy_, lpz_, rpz_, lpt_, rpt_;
     double foot_hight, board_hight, c_hight;
     // double COM_HEIGHT = 26.5;

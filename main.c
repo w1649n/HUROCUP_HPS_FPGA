@@ -134,14 +134,14 @@ int main()
 		/*--------------步態------------------------*/ 
 		if((walkinggait.timer_dt_ >= 15000.0))// && !sensor.stop_Walk_Flag_)
 		{
-			walkinggait.setcom_pos(IB.WpB(0),IB.WpB(1));
+			walkinggait.setcom_pos(IB.WpB(0),IB.WpB(1),IB.WvB(1));
 			walkinggait.walking_timer();
 			walkinggait.pushData();
 			// balance.get_sensor_value();
 			gettimeofday(&walkinggait.timer_start_, NULL);
 			// balance.balance_control();
 		}
-		   
+		  
  		// printf(" ");
 		// usleep(100 * 1000); 
 		if((walkinggait.locus_flag_))

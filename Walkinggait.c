@@ -67,6 +67,7 @@ void Walkinggait::walking_timer()
             LIPM_flag_ = true;
         	break;
         case Long_Jump:
+            slow_step();
             slow_step_flag_ = true;
             locus_flag_ = true;
             LIPM_flag_ = true;
@@ -379,7 +380,7 @@ void Walkinggait::pushData()
         // map_walk.find("r_foot_t")->second.push_back(step_point_rthta_);
         map_walk.find("com_x")->second.push_back(px_);
         map_walk.find("com_y")->second.push_back(py_);
-        map_walk.find("now_step_")->second.push_back(com_y);
+        map_walk.find("now_step_")->second.push_back(parameterinfo->walking_mode);
         map_walk.find("ideal_zmp_x")->second.push_back(zmp_x);
         map_walk.find("ideal_zmp_y")->second.push_back(zmp_y);        
         map_walk.find("points")->second.push_back(balance.y_offset_r);
@@ -631,6 +632,7 @@ void WalkingGaitByLIPM::resetParameter()
     Control_Step_length_Y_ = 0;
     com_x = 0;
     com_y = 0;
+    com_y_v = 0;
     foot_hight = 0;
     c_hight = 0;
     board_hight = 0;
@@ -714,6 +716,7 @@ void WalkingGaitByLIPM::process()
         last_zmp_y = zmp_y;
         zmp_x = footstep_x;
         zmp_y = footstep_y;
+        ideal_zmp_y = zmp_y;
         last_displacement_x = displacement_x;   //上次的跨幅
         last_base_x = base_x;         //上次到達的位置
         last_displacement_y = displacement_y; //上次的Y軸位移量
@@ -767,8 +770,11 @@ void WalkingGaitByLIPM::process()
         base_x = (footstep_x + zmp_x)/2;
         base_y = (footstep_y + zmp_y)/2;
         
-
+        // zmp_y = ideal_zmp_y + 0.3*(com_y - py_) + 0.03*com_y_v;
     }
+    // else{
+    //     zmp_y = ideal_zmp_y + 0.3*(com_y - py_) + 0.03*com_y_v;
+    // }
     pre_step_ = now_step_;//步數儲存
 
 
@@ -1619,6 +1625,7 @@ void WalkingGaitByLIPM::slow_step()
         last_zmp_y = zmp_y;
         zmp_x = footstep_x;
         zmp_y = footstep_y;
+        ideal_zmp_y = zmp_y;
         last_displacement_x = displacement_x;   //上次的跨幅
         last_base_x = base_x;         //上次到達的位置
         last_displacement_y = displacement_y; //上次的Y軸位移量
@@ -1672,7 +1679,10 @@ void WalkingGaitByLIPM::slow_step()
         base_x = (footstep_x + zmp_x)/2;
         base_y = (footstep_y + zmp_y)/2;
         
-
+        zmp_y = ideal_zmp_y + 0.1*(com_y - py_) + 0.01*com_y_v;
+    }
+    else{
+        zmp_y = ideal_zmp_y + 0.1*(com_y - py_) + 0.01*com_y_v;
     }
     pre_step_ = now_step_;//步數儲存
 
@@ -1716,7 +1726,7 @@ void WalkingGaitByLIPM::slow_step()
             py_ = wComPosition(0, vy0_, zmp_y, t_, Tc_);
             lpx_ = zmp_x;
             rpx_ = wFootPositionRepeat(now_right_x_, 0, t_, TT_, T_DSP_);
-            lpy_ = zmp_y;
+            lpy_ = ideal_zmp_y;
             rpy_ = wFootPositionRepeat(now_right_y_, 0, t_, TT_, T_DSP_);
             lpz_ = 0;
             rpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
@@ -1730,7 +1740,7 @@ void WalkingGaitByLIPM::slow_step()
             lpx_ = wFootPositionRepeat(now_left_x_, 0, t_, TT_, T_DSP_);
             rpx_ = zmp_x;
             lpy_ = wFootPositionRepeat(now_left_y_, 0, t_, TT_, T_DSP_);
-            rpy_ = zmp_y;
+            rpy_ = ideal_zmp_y;
             lpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
             rpz_ = 0;
 
@@ -1747,7 +1757,7 @@ void WalkingGaitByLIPM::slow_step()
         lpx_ = wFootPosition(now_left_x_, displacement_x, t_, TT_, T_DSP_);
         rpx_ = zmp_x;
         lpy_ = wFootPosition(now_left_y_, displacement_y-now_width_, t_, TT_, T_DSP_);
-        rpy_ = zmp_y;
+        rpy_ = ideal_zmp_y;
         lpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
         rpz_ = 0;
 
@@ -1764,7 +1774,7 @@ void WalkingGaitByLIPM::slow_step()
         if((now_step_ % 2) == 1)
         {
             lpx_ = zmp_x;            
-            lpy_ = zmp_y;
+            lpy_ = ideal_zmp_y;
             rpx_ = wFootPosition(now_right_x_, (last_displacement_x+displacement_x), t_, TT_, T_DSP_);
             rpy_ = wFootPosition(now_right_y_, (last_displacement_y+displacement_y), t_, TT_, T_DSP_);
             lpz_ = 0;
@@ -1778,7 +1788,7 @@ void WalkingGaitByLIPM::slow_step()
             lpx_ = wFootPosition(now_left_x_, (last_displacement_x+displacement_x), t_, TT_, T_DSP_);
             rpx_ = zmp_x;
             lpy_ = wFootPosition(now_left_y_, (last_displacement_y+displacement_y), t_, TT_, T_DSP_);
-            rpy_ = zmp_y;
+            rpy_ = ideal_zmp_y;
             lpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
             rpz_ = 0;
 
@@ -1797,7 +1807,7 @@ void WalkingGaitByLIPM::slow_step()
         {
             lpx_ = zmp_x;
             rpx_ = wFootPositionRepeat(now_right_x_, (last_displacement_x+displacement_x)/2, t_, TT_, T_DSP_);
-            lpy_ = zmp_y;
+            lpy_ = ideal_zmp_y;
             rpy_ = wFootPositionRepeat(now_right_y_, (last_displacement_y+displacement_y)/2, t_, TT_, T_DSP_);
             lpz_ = 0;
             rpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
@@ -1817,7 +1827,7 @@ void WalkingGaitByLIPM::slow_step()
             lpx_ = wFootPositionRepeat(now_left_x_, (last_displacement_x+displacement_x)/2, t_, TT_, T_DSP_);
             rpx_ = zmp_x;
             lpy_ = wFootPositionRepeat(now_left_y_, (last_displacement_y+displacement_y)/2, t_, TT_, T_DSP_);
-            rpy_ = zmp_y;
+            rpy_ = ideal_zmp_y;
             lpz_ = wFootPositionZ(lift_height_, t_, TT_, T_DSP_);
             rpz_ = 0;
             if(var_theta_*last_theta_ >= 0)

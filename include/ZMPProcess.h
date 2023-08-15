@@ -43,6 +43,8 @@ private:
     float force_right;
     float torque_left_x;
     float torque_left_y;
+    float torque_right_x;
+    float torque_right_y;
     int sensor_offset_data_sum[8];
     int sensor_offset_data_count;
     int **ZMP_kg_offset;
