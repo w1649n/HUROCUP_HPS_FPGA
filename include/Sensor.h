@@ -54,7 +54,7 @@ public:
     bool com_PID_set_;
     bool foot_offset_set_;
 
-private:
+// private:
     int rpy_from_fpga_[3];
     double rpy_raw_[3];
     float accel_raw_[3];

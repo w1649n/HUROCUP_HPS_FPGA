@@ -301,7 +301,8 @@ public:
     double pitch_pid_[3];
     double com_pid_[3];
     double foot_offset_[3];
-    double kalman_rpy_[3];
+    double kalman_rpy_[2];
+    double pre_kalman_rpy_[2];
 
 	// for debug
 	int now_step_, last_step_;
@@ -330,7 +331,7 @@ public:
     double get_force(double, int);
     double get_q_bias();
     struct timeval kalman_start,kalman_end;
-    private:
+    // private:
         double p_[3][2][2];
         double k_[2];
 

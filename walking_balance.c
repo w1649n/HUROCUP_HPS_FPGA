@@ -42,9 +42,9 @@ void BalanceControl::initialize(const int control_cycle_msec)
         passfilter_prev_imu_value[i].initialize();
 
 	//kalman
-    q_angle_ = 0.0001;
-    q_bias_ = 0.0001;
-    r_measure_ = 0.0005;//0.1;//0.03;    //0.0005
+    q_angle_ = 0.003;
+    q_bias_ = 0.005;
+    r_measure_ = 0.03;//0.1;//0.03;    //0.0005
     
 	angle_[0] = 0.0;
 	angle_[1] = 0.0;
@@ -145,7 +145,8 @@ void BalanceControl::initialize(const int control_cycle_msec)
     rightfoot_ankle_pitch = 0;
 
 	for(int i = 0; i < 3; i++)init_imu_value[i].pos = sensor.rpy_[i];
-
+	pre_kalman_rpy_[0] = 0;
+	pre_kalman_rpy_[1] = 0;
 
 	std::vector<float> temp;
 	if(map_roll.empty())
@@ -344,11 +345,15 @@ void BalanceControl::get_sensor_value()
 
 	gettimeofday(&kalman_end, NULL);
 	kalman_timer = (double)(1000000.0 * (kalman_end.tv_sec - kalman_start.tv_sec) + (kalman_end.tv_usec - kalman_start.tv_usec));
-	roll_imu_lpf_.initialize(0.008, 1);
-	pitch_imu_lpf_.initialize(0.008, 1);
-	for(i=0; i<3; i++)
+	roll_imu_lpf_.initialize(0.01, 1);
+	pitch_imu_lpf_.initialize(0.01, 1);
+	for(i=0; i<2; i++)
     {
-        kalman_rpy_[i]= get_angle(sensor.rpy_[i] ,sensor.gyro_[i],0.008,i);
+        kalman_rpy_[i]  = get_angle(sensor.rpy_[i] ,sensor.gyro_[i],0.005,i);
+		if(abs(pre_kalman_rpy_[i] - kalman_rpy_[i])<5)
+			pre_kalman_rpy_[i] =  kalman_rpy_[i];
+		else
+			kalman_rpy_[i] = pre_kalman_rpy_[i];
     }
 	gettimeofday(&kalman_start, NULL);
 	roll_imu_filtered_ = roll_imu_lpf_.get_filtered_output(sensor.rpy_[0]);
@@ -356,10 +361,10 @@ void BalanceControl::get_sensor_value()
 	roll_over_limit_ = (fabs(roll_imu_filtered_) > 7 ? true : false);
 	pitch_over_limit_ = (fabs(pitch_imu_filtered_) > 5 ? true : false);
 
-	cog_roll_offset_ = 0;//sensor.imu_desire_[0] ;
-	cog_pitch_offset_ = 0;//sensor.imu_desire_[1] ;
-	double cog_y_filtered = roll_imu_filtered_*10 + cog_roll_offset_;
-	double cog_x_filtered = pitch_imu_filtered_*10 + cog_pitch_offset_;
+	cog_roll_offset_ 	  = 0;//sensor.imu_desire_[0] ;
+	cog_pitch_offset_ 	  = 0;//sensor.imu_desire_[1] ;
+	double cog_y_filtered = kalman_rpy_[0] - roll_imu_filtered_;
+	double cog_x_filtered = kalman_rpy_[1] - pitch_imu_filtered_;
 	
 	// if(cog_x_filtered>2){foot_cog_x_ = cog_x_filtered-1.5;}
 	// else if(cog_x_filtered<-2){foot_cog_x_ = cog_x_filtered+1.5;}
@@ -447,11 +452,11 @@ void BalanceControl::endPointControl()
 	map_ZMP.find("raw_sensor_data_3")->second.push_back(sensor.rpy_[2]);
 	map_ZMP.find("raw_sensor_data_4")->second.push_back(kalman_rpy_[0]);
 	map_ZMP.find("raw_sensor_data_5")->second.push_back(kalman_rpy_[1]);
-	map_ZMP.find("raw_sensor_data_6")->second.push_back(kalman_rpy_[2]);
-	map_ZMP.find("raw_sensor_data_7")->second.push_back(roll_imu_filtered_);
+	map_ZMP.find("raw_sensor_data_6")->second.push_back(foot_cog_y_);
+	map_ZMP.find("raw_sensor_data_7")->second.push_back(foot_cog_x_);
 
 
-	map_ZMP.find("leftfoot_control_once_EPx")->second.push_back(pitch_imu_filtered_);
+	map_ZMP.find("leftfoot_control_once_EPx")->second.push_back(leftfoot_EPx_value.control_value_once);
 	map_ZMP.find("leftfoot_control_total_EPx")->second.push_back(leftfoot_EPx_value.control_value_total);
 	map_ZMP.find("rightfoot_control_once_EPx")->second.push_back(rightfoot_EPx_value.control_value_once);
 	map_ZMP.find("rightfoot_control_total_EPx")->second.push_back(rightfoot_EPx_value.control_value_total);

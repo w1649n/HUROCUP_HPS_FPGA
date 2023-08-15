@@ -42,6 +42,7 @@ int main()
 	int balance_timer = 0,balancep_count = 0;
 	balance.balance_time = true;
 	/*-----*/
+	bool first = true;
 	//------測試用延遲------//
 	//usleep(500 * 1000); 	//0.5s
 	//sleep(2);				//2s
@@ -64,12 +65,26 @@ int main()
 		}
 		/*-----------*/
 		sensor.load_imu(); //獲得IMU值
+		// cout << "roll " << sensor.rpy_[0] << " "
+		// 	 << "pitch "<< sensor.rpy_[1] << " "
+		// 	 << "yaw "  << sensor.rpy_[2] << endl;
+		// cout << "gyro_x " << sensor.gyro_[0] << " "
+		// 	 << "gyro_y "<< sensor.gyro_[1] << " "
+		// 	 << "gyro_z "  << sensor.gyro_[2] << endl;
+		// usleep(100 * 500); 	//0.5s
 		/*---壓感---*/
 		sensor.load_press_left(); 
 		sensor.load_press_right();
 		/*----------*/
 		/*-----------------------------------------*/
-		
+		if(first)
+		{
+			sensor.rpy_offset_[0] = sensor.rpy_raw_[0];
+			sensor.rpy_offset_[1] = sensor.rpy_raw_[1];
+			sensor.rpy_offset_[2] = sensor.rpy_raw_[2];
+			first = false;
+			// usleep(500 * 1000);
+		}
 		sensor.load_sensor_setting(); //balance補償([raw,pitch,com]PID,[sup,nsup]foot_offset)
 		sensor.sensor_package_generate(); //建立感測器資料;回傳IMU值給IPC
 		/*---讀取步態資訊---*/
@@ -90,8 +105,16 @@ int main()
 
 		// walkinggait.balance_dt = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
 
- 
-		balance.get_sensor_value();
+		// balance.get_sensor_value();
+
+		// cout << "q_angle_ " << balance.q_angle_ << " "
+		// 	 << "q_bias_ " << balance.q_bias_ << " "
+		// 	 << "r_measure_ " << balance.r_measure_ << endl
+		// 	 << "k_roll " << balance.kalman_rpy_[0] << " "
+		// 	 << "k_pitch "<< balance.kalman_rpy_[1] << endl
+		// 	 << "lpk_roll " << balance.foot_cog_y_ << " "
+		// 	 << "lpk_pitch "<< balance.foot_cog_x_ << endl;
+
 		/*zmp測試*/
 		// if (zmp_first_time)
 		// {
@@ -137,7 +160,7 @@ int main()
 			walkinggait.setcom_pos(IB.WpB(0),IB.WpB(1),IB.WvB(1));
 			walkinggait.walking_timer();
 			walkinggait.pushData();
-			// balance.get_sensor_value();
+			balance.get_sensor_value();
 			gettimeofday(&walkinggait.timer_start_, NULL);
 			// balance.balance_control();
 		}
