@@ -142,6 +142,7 @@ void Force_Diff_Ctrl_base::closest_point_left()  //0=left 1=right
     cls_lx = temp_lx + Lfx;
     cls_ly= temp_ly + Lfy;
 }
+
 void Force_Diff_Ctrl_base::closest_point_right()  //0=left 1=right
 {
     temp_point_rx = Zmpx - Rfx;

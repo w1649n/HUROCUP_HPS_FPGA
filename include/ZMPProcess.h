@@ -35,7 +35,7 @@ public:
     int name_cont_;
 
 
-private:
+// private:
     void getSensorValue();
     void digital2KGProcess();
     ZMPParam ZMP;

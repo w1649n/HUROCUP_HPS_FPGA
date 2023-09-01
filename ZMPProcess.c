@@ -119,7 +119,7 @@ void ZMPProcess::digital2KGProcess()
 	torque_right_x = ((ZMP_S[5]+ZMP_S[6]) - (ZMP_S[4]+ZMP_S[7]))*SINGLE_FOOT_WEIGHT_X/100.0*9.8;
     torque_right_y = ((ZMP_S[5]+ZMP_S[7]) - (ZMP_S[6]+ZMP_S[4]))*SINGLE_FOOT_WEIGHT_EQUAL_Y/100.0*9.8;
 
-    if(sensor_digital_ > 0.2)
+    if(sensor_digital_ > 8/*0.2*/)
 	{
 		ZMP.feet_pos.y = (double)((((ZMP_S[0]+ZMP_S[3]-ZMP_S[5]-ZMP_S[6])*DOUBLE_FEET_WEIGHT_FAR_Y) + ((ZMP_S[1]+ZMP_S[2]-ZMP_S[4]-ZMP_S[7]) * DOUBLE_FEET_WEIGHT_NEAR_Y) )/(double)sensor_digital_);
 		ZMP.feet_pos.x = (double)((ZMP_S[0]+ZMP_S[1]+ZMP_S[4]+ZMP_S[5]-ZMP_S[2]-ZMP_S[3]-ZMP_S[6]-ZMP_S[7]) * DOUBLE_FEET_WEIGHT_X )/(double)sensor_digital_;
@@ -129,7 +129,7 @@ void ZMPProcess::digital2KGProcess()
 		ZMP.feet_pos.y = 0;
 		ZMP.feet_pos.x = 0;
 	}
-    if(sensor_digital_left_ > 0.2)
+    if(sensor_digital_left_ > 2/*0.2*/)
 	{
 		ZMP.left_pos.y = ((ZMP_S[0]+ZMP_S[3]-ZMP_S[1]-ZMP_S[2]) * SINGLE_FOOT_WEIGHT_EQUAL_Y)/sensor_digital_left_;
 		ZMP.left_pos.x = ((ZMP_S[0]+ZMP_S[1]-ZMP_S[2]-ZMP_S[3]) * SINGLE_FOOT_WEIGHT_X)/sensor_digital_left_;
@@ -139,7 +139,7 @@ void ZMPProcess::digital2KGProcess()
 		ZMP.left_pos.y = 0;
 		ZMP.left_pos.x = 0;
 	}
-    if(sensor_digital_right_ > 0.2)
+    if(sensor_digital_right_ > 2/*0.2*/)
 	{
 		ZMP.right_pos.y = ((ZMP_S[4]+ZMP_S[7]-ZMP_S[5]-ZMP_S[6]) * SINGLE_FOOT_WEIGHT_EQUAL_Y)/sensor_digital_right_;
 		ZMP.right_pos.x = ((ZMP_S[4]+ZMP_S[5]-ZMP_S[6]-ZMP_S[7]) * SINGLE_FOOT_WEIGHT_X)/sensor_digital_right_;			
@@ -156,10 +156,10 @@ void ZMPProcess::digital2KGProcess()
 	map_zmp.find("P4")->second.push_back(origen_sensor_data[3]);
 	map_zmp.find("R_zmp_x")->second.push_back(ZMP.right_pos.y);
     map_zmp.find("R_zmp_y")->second.push_back(ZMP.right_pos.x);
-    map_zmp.find("R_force")->second.push_back(sensor_digital_left_);
+    map_zmp.find("R_force")->second.push_back(sensor_digital_right_);
 	map_zmp.find("L_zmp_x")->second.push_back(ZMP.left_pos.y);
     map_zmp.find("L_zmp_y")->second.push_back(ZMP.left_pos.x);
-    map_zmp.find("L_force")->second.push_back(sensor_digital_right_);
+    map_zmp.find("L_force")->second.push_back(sensor_digital_left_);
 	map_zmp.find("D_zmp_x")->second.push_back(ZMP.feet_pos.y);
     map_zmp.find("D_zmp_y")->second.push_back(ZMP.feet_pos.x);
     map_zmp.find("D_force")->second.push_back(sensor_digital_);

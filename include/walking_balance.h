@@ -16,6 +16,7 @@
 #include "Sensor.h"
 // #include <kalman.h>
 #include "math.h"
+#include "DataModule.h"
 #include "DefineDataStruct.h"
 #include "ZMPProcess.h"
 class ZMPProcess;
@@ -323,7 +324,7 @@ public:
 	float tmp_com_total;
 	bool support_flag_l = true,support_flag_r = true;
 	bool set_offset_; 
-	bool flag_r = false ,flag_l = false , balance_time;
+	bool flag_r = false ,flag_l = false , flag_d, balance_time;
 
 	//LIPM end
     //kalman

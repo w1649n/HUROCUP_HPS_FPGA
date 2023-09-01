@@ -378,15 +378,15 @@ void Walkinggait::pushData()
 
         // map_walk.find("l_foot_t")->second.push_back(step_point_lthta_);
         // map_walk.find("r_foot_t")->second.push_back(step_point_rthta_);
-        map_walk.find("com_x")->second.push_back(px_);
-        map_walk.find("com_y")->second.push_back(py_);
+        map_walk.find("com_x")->second.push_back(px_u);
+        map_walk.find("com_y")->second.push_back(py_u);
         map_walk.find("now_step_")->second.push_back(parameterinfo->walking_mode);
         map_walk.find("ideal_zmp_x")->second.push_back(zmp_x);
         map_walk.find("ideal_zmp_y")->second.push_back(zmp_y);        
         map_walk.find("points")->second.push_back(balance.y_offset_r);
         map_walk.find("t_")->second.push_back(balance.PIDleftfoot_hip_roll.errors);
         map_walk.find("time_point_")->second.push_back(time_point_);
-        // map_walk.find("case")->second.push_back(Step_Count_);
+        map_walk.find("case")->second.push_back(motion_delay_);
         map_walk.find("sensor_roll")->second.push_back(sensor.rpy_[0]);
         map_walk.find("sensor_pitch")->second.push_back(sensor.rpy_[1]);
         map_walk.find("sensor_yaw")->second.push_back(sensor.rpy_[2]);
@@ -458,6 +458,7 @@ WalkingGaitByLIPM::WalkingGaitByLIPM()
     com_y_swing = 0;
     rightfoot_shift_z = 0;
 }
+
 WalkingGaitByLIPM::~WalkingGaitByLIPM()
 {    }
 
@@ -486,7 +487,7 @@ void WalkingGaitByLIPM::initialize()
 		map_walk["points"] = temp;
         map_walk["t_"] = temp;
         map_walk["time_point_"] = temp;
-        // map_walk["case"] = temp;
+        map_walk["motion_delay_"] = temp;
         map_walk["foot"] = temp;
         map_walk["sensor.roll"] = temp;
 		map_walk["sensor.pitch"] = temp;
@@ -498,6 +499,7 @@ void WalkingGaitByLIPM::initialize()
         map_walk["Cpx"] = temp;
 	}
 } 
+
 void WalkingGaitByLIPM::readWalkParameter()
 {
     period_t_ = parameterinfo->parameters.Period_T;
@@ -587,6 +589,7 @@ void WalkingGaitByLIPM::readWalkData()
         is_parameter_load_ = true;
     }
 }
+
 void WalkingGaitByLIPM::resetParameter()
 {
     is_parameter_load_ = false;

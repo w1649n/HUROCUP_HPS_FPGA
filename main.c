@@ -8,8 +8,7 @@ refer to user manual chapter 7 for details about the demo
  
 
 int main()
-{
-	  
+{ 
 	int i=0;
 	bool stop_walk = false;
 	sensor.fall_Down_Flag_ = false;
@@ -30,7 +29,7 @@ int main()
 	gettimeofday(&walkinggait.timer_start_, NULL);
 	gettimeofday(&balance.kalman_start, NULL);
 	int IB_count = 0; /* COM估測器 調用次數 */
-	IB.setparameter(0.03,0.05);	  /* 設定CoM估測器取樣時間與截止週期 */ //0.03,0.05
+	IB.setparameter(0.015,0.05);	  /* 設定CoM估測器取樣時間與截止週期 */ //0.03,0.05
 
 	/*zmp測試*/
 	struct timeval zmp_start,zmp_end;
@@ -47,7 +46,7 @@ int main()
 	//usleep(500 * 1000); 	//0.5s
 	//sleep(2);				//2s
 	while(1)
-	{ 
+	{
 		/*---動作串---*/
 		datamodule.load_database();
 		if(datamodule.motion_execute_flag_)
@@ -71,20 +70,12 @@ int main()
 		// cout << "gyro_x " << sensor.gyro_[0] << " "
 		// 	 << "gyro_y "<< sensor.gyro_[1] << " "
 		// 	 << "gyro_z "  << sensor.gyro_[2] << endl;
-		// usleep(100 * 500); 	//0.5s
+		
 		/*---壓感---*/
 		sensor.load_press_left(); 
 		sensor.load_press_right();
 		/*----------*/
 		/*-----------------------------------------*/
-		if(first)
-		{
-			sensor.rpy_offset_[0] = sensor.rpy_raw_[0];
-			sensor.rpy_offset_[1] = sensor.rpy_raw_[1];
-			sensor.rpy_offset_[2] = sensor.rpy_raw_[2];
-			first = false;
-			// usleep(500 * 1000);
-		}
 		sensor.load_sensor_setting(); //balance補償([raw,pitch,com]PID,[sup,nsup]foot_offset)
 		sensor.sensor_package_generate(); //建立感測器資料;回傳IMU值給IPC
 		/*---讀取步態資訊---*/
@@ -98,13 +89,17 @@ int main()
 		// feedbackmotor.load_motor_data_left_foot();
 		// feedbackmotor.load_motor_data_right_foot();
 		feedbackmotor.load_motor_data_foot();
+		// usleep(100 * 500); 	//0.5s
+		// printf("\n data :%d , %d , %d , %d , %d \n",feedbackmotor.motor_data_left_foot_[0],feedbackmotor.motor_data_left_foot_[1],feedbackmotor.motor_data_left_foot_[2],feedbackmotor.motor_data_left_foot_[3],feedbackmotor.motor_data_left_foot_[4]);
+        // printf("\n data :%d , %d , %d , %d , %d\n",feedbackmotor.motor_data_right_foot_[0],feedbackmotor.motor_data_right_foot_[1],feedbackmotor.motor_data_right_foot_[2],feedbackmotor.motor_data_right_foot_[3],feedbackmotor.motor_data_right_foot_[4]);
 		/*-------------*/
 
 		gettimeofday(&walkinggait.timer_end_, NULL);
 		walkinggait.timer_dt_ = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
 
 		// walkinggait.balance_dt = (double)(1000000.0 * (walkinggait.timer_end_.tv_sec - walkinggait.timer_start_.tv_sec) + (walkinggait.timer_end_.tv_usec - walkinggait.timer_start_.tv_usec));
-
+		
+			
 		// balance.get_sensor_value();
 
 		// cout << "q_angle_ " << balance.q_angle_ << " "
@@ -126,8 +121,9 @@ int main()
 		
 		// zmp_timer = (double)(1000000.0 * (zmp_end.tv_sec - zmp_start.tv_sec) + (zmp_end.tv_usec - zmp_start.tv_usec));
 
-		// if (zmp_timer>=1000000.0)//one second
+		// if (zmp_timer>=500000.0)//one second
 		// {
+		// 	balance.ZMP_process->getSensorValue();
 		// 	balance.ZMP_process->getZMPValue();
 		// 	zmp_first_time = true;
 		// 	zmp_count++;
@@ -177,8 +173,8 @@ int main()
 				BpA_(0) = walkinggait.step_point_lx_;
 				BpA_(1) = walkinggait.step_point_ly_;
 				BpA_(2) = -COM_HEIGHT;
-				Theta_(0) = sensor.rpy_[0];
-				Theta_(1) = sensor.rpy_[1];
+				Theta_(0) = balance.foot_cog_y_;//sensor.rpy_[0];
+				Theta_(1) = balance.foot_cog_x_;//sensor.rpy_[1];
 				Theta_(2) = walkinggait.theta_;
 				IB.setinputdata(WpA_,BpA_,Theta_);
 			}else if((walkinggait.now_step_ % 2) == 0){
@@ -188,14 +184,14 @@ int main()
 				BpA_(0) = walkinggait.step_point_rx_;
 				BpA_(1) = walkinggait.step_point_ry_;
 				BpA_(2) = -COM_HEIGHT;
-				Theta_(0) = sensor.rpy_[0];
-				Theta_(1) = sensor.rpy_[1];
+				Theta_(0) = balance.foot_cog_y_;//sensor.rpy_[0];
+				Theta_(1) = balance.foot_cog_x_;//sensor.rpy_[1];
 				Theta_(2) = walkinggait.theta_;
 				IB.setinputdata(WpA_,BpA_,Theta_);
 			}
 			IB.run(); 
 			IB.map_com.find("desired_com_y")->second.push_back(walkinggait.py_);
- 
+
 			if(walkinggait.if_finish_)
 			{
 				IB.saveData();
@@ -203,12 +199,12 @@ int main()
 				IB.init();
 				feedbackmotor.saveData();
 				//walkinggait.if_finish_ = false;
-			}
-			else
+			} 
+			else 
 			{
 				feedbackmotor.pushData();
 			}
-
+ 
 			IB_count++;
 			//printf("walking ");
 			/*-----*/
@@ -236,18 +232,19 @@ int main()
 				IK.calculate_inverse_kinematic(walkinggait.motion_delay_); //計算逆運動學
 				locus.do_motion();
 			}
-			else if(!parameterinfo->complan.walking_state == StopStep)
-			{
-				IK.calculate_inverse_kinematic(15); //計算逆運動學
-				locus.do_motion();
-			}
-			
-
 			walkinggait.LIPM_flag_ = false;
 			walkinggait.if_finish_ = false;
 			walkinggait.locus_flag_ = false;
 		}
-	
+		if(parameterinfo->complan.walking_stop)
+		{
+			balance.InitEndPointControl();
+		}
+		// else
+		// {
+		// 	IK.calculate_inverse_kinematic(15); //計算逆運動學
+		// 	locus.do_motion();
+		// }
 	}
 	// clean up our memory mapping and exit
 	init.Clear_Memory_Mapping();

@@ -79,8 +79,8 @@ void Feedback_Motor::update_motor_data_foot()
 {
     if(update_motor_data_foot_flag_)
     {
-        printf("\n data :%d , %d , %d , %d , %d \n",motor_data_left_foot_[0],motor_data_left_foot_[1],motor_data_left_foot_[2],motor_data_left_foot_[3],motor_data_left_foot_[4]);
-        printf("\n data :%d , %d , %d , %d , %d\n",motor_data_right_foot_[0],motor_data_right_foot_[1],motor_data_right_foot_[2],motor_data_right_foot_[3],motor_data_right_foot_[4]);
+        // printf("\n data :%d , %d , %d , %d , %d \n",motor_data_left_foot_[0],motor_data_left_foot_[1],motor_data_left_foot_[2],motor_data_left_foot_[3],motor_data_left_foot_[4]);
+        // printf("\n data :%d , %d , %d , %d , %d\n",motor_data_right_foot_[0],motor_data_right_foot_[1],motor_data_right_foot_[2],motor_data_right_foot_[3],motor_data_right_foot_[4]);
     }
 }
 

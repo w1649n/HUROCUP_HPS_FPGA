@@ -240,18 +240,29 @@ InverseKinematic::InverseKinematic()
 	std::vector<double> temp;
 	// if(map_motor.empty())
 	// {
-		map_motor["motor_9"] = temp;
-		map_motor["motor_11"] = temp;
-        map_motor["motor_12"] = temp;
-        map_motor["motor_13"] = temp;
-        map_motor["motor_14"] = temp;
-		map_motor["motor_15"] = temp;
-        map_motor["motor_17"] = temp;
-        map_motor["motor_18"] = temp;
-        map_motor["motor_19"] = temp;
-		map_motor["motor_20"] = temp;
-        map_motor["motor_21"] = temp;
+	map_motor["motor_9"] = temp;
+	map_motor["motor_11"] = temp;
+	map_motor["motor_12"] = temp;
+	map_motor["motor_13"] = temp;
+	map_motor["motor_14"] = temp;
+	map_motor["motor_15"] = temp;
+	map_motor["motor_17"] = temp;
+	map_motor["motor_18"] = temp;
+	map_motor["motor_19"] = temp;
+	map_motor["motor_20"] = temp;
+	map_motor["motor_21"] = temp;
 
+	map_motor["output_speed_9"] = temp;
+	map_motor["output_speed_11"] = temp;
+	map_motor["output_speed_12"] = temp;
+	map_motor["output_speed_13"] = temp;
+	map_motor["output_speed_14"] = temp;
+	map_motor["output_speed_15"] = temp;
+	map_motor["output_speed_17"] = temp;
+	map_motor["output_speed_18"] = temp;
+	map_motor["output_speed_19"] = temp;
+	map_motor["output_speed_20"] = temp;
+	map_motor["output_speed_21"] = temp;
 	// }
 }
 
@@ -305,18 +316,18 @@ void InverseKinematic::initial_speed_gain()
 	speed_gain_[8] = ALL_Speed_Gain * 0.8;//0.8;
 
 	speed_gain_[9] = ALL_Speed_Gain * 1;//2;
-	speed_gain_[10] = ALL_Speed_Gain * 2;
-	speed_gain_[11] = ALL_Speed_Gain * 1;//2;//3;
+	speed_gain_[10] = ALL_Speed_Gain * 1.5;
+	speed_gain_[11] = ALL_Speed_Gain * 1.5;//2;//3;
 	speed_gain_[12] = ALL_Speed_Gain * 1;
 	speed_gain_[13] = ALL_Speed_Gain * 1;
-	speed_gain_[14] = ALL_Speed_Gain * 2;
+	speed_gain_[14] = ALL_Speed_Gain * 1.5;
 
 	speed_gain_[15] = ALL_Speed_Gain * 1;
-	speed_gain_[16] = ALL_Speed_Gain * 2;
-	speed_gain_[17] = ALL_Speed_Gain * 1;
+	speed_gain_[16] = ALL_Speed_Gain * 1.5;
+	speed_gain_[17] = ALL_Speed_Gain * 1.5;
 	speed_gain_[18] = ALL_Speed_Gain * 1;
 	speed_gain_[19] = ALL_Speed_Gain * 1;
-	speed_gain_[20] = ALL_Speed_Gain * 2;
+	speed_gain_[20] = ALL_Speed_Gain * 1.5;
 }
 
 void InverseKinematic::initial_inverse_kinematic()
@@ -636,25 +647,9 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
 	// 	kickinggait.ankleBalanceControl();
 	// 	kickinggait.hipPitchControl();
 	// }
-	
-
-	if(old_walking_stop == false && parameterinfo->complan.walking_stop == true)
-	{
-		//balance.saveData();
-		//saveData();
-	}
-	old_walking_stop = parameterinfo->complan.walking_stop;
-
-
     for( i = 0; i < 21; i++)
     {
-		// if(i==12)
-		// 	printf("thta 13 = %f, ag 13 = %f\t", Points.Thta[i], angle_gain_[i]);
-		
-		// Points.Thta[i] = Points.Thta[i] * angle_gain_[i];
-		
-		// if(i==12)
-		// 	printf("thta 13 = %f, ag 13 = %f\n", Points.Thta[i], angle_gain_[i]);
+
         if(Points.P_Table[i])
         {
             output_angle_[i] = (unsigned int)(Max_value - (Points.Thta[i] * PI_TO_OUTPUT + Position_Zero));
@@ -672,7 +667,7 @@ void InverseKinematic::calculate_inverse_kinematic(int Motion_Delay)
         	delay_time_[i] = (unsigned int)(different_thta/(2*PI) * (1000/Motion_Delay) * 60 / 0.229);	// ((percent of circle(rad)) / ((delta t/1000)*60(min))) / 0.229(rpm/unit)
         }
         past_thta_[i] = Points.Thta[i];
-        output_speed_[i] = delay_time_[i]  * SPEED_TRANS;
+        output_speed_[i] = delay_time_[i] * SPEED_TRANS;
         output_speed_[i] = output_speed_[i] * speed_gain_[i];
 		//----------------------printf-----------------------------
         #ifdef Auto_Stand
@@ -1040,6 +1035,20 @@ void InverseKinematic::pushData()
 	map_motor.find("motor_19")->second.push_back((double)output_angle_[18]);
 	map_motor.find("motor_20")->second.push_back((double)output_angle_[19]);
 	map_motor.find("motor_21")->second.push_back((double)output_angle_[20]);
+
+	map_motor.find("output_speed_9")->second.push_back((double)output_speed_[8]);
+	map_motor.find("output_speed_10")->second.push_back((double)output_speed_[9]);
+	map_motor.find("output_speed_11")->second.push_back((double)output_speed_[10]);
+	map_motor.find("output_speed_12")->second.push_back((double)output_speed_[11]);
+	map_motor.find("output_speed_13")->second.push_back((double)output_speed_[12]);
+	map_motor.find("output_speed_14")->second.push_back((double)output_speed_[13]);
+	map_motor.find("output_speed_15")->second.push_back((double)output_speed_[14]);
+	map_motor.find("output_speed_16")->second.push_back((double)output_speed_[15]);
+	map_motor.find("output_speed_17")->second.push_back((double)output_speed_[16]);
+	map_motor.find("output_speed_18")->second.push_back((double)output_speed_[17]);
+	map_motor.find("output_speed_19")->second.push_back((double)output_speed_[18]);
+	map_motor.find("output_speed_20")->second.push_back((double)output_speed_[19]);
+	map_motor.find("output_speed_21")->second.push_back((double)output_speed_[20]);
 }
 
 string InverseKinematic::DtoS(double value)

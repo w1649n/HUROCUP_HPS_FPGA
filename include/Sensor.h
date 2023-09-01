@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "Initial.h"
-
+#include "Feedback_Motor.h"
 class SensorDataProcess
 {
 public:
@@ -53,6 +53,7 @@ public:
     bool pitch_PID_set_;
     bool com_PID_set_;
     bool foot_offset_set_;
+    bool data_flag = false;
 
 // private:
     int rpy_from_fpga_[3];
@@ -60,7 +61,7 @@ public:
     float accel_raw_[3];
     int   gyro_raw_[3];
     double rpy_offset_[3],gyro_offset_[3];
-    unsigned char sensor_data_to_ipc_[22];
+    unsigned char sensor_data_to_ipc_[46];
     // double imu_desire_[3];
     bool update_sensor_setting_flag_;
     bool get_sensor_setting_flag_;
