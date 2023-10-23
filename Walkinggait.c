@@ -453,7 +453,7 @@ WalkingGaitByLIPM::WalkingGaitByLIPM()
     foot_hight = 0;
     c_hight = 0;
     board_hight = 0;
-    pz_ = COM_HEIGHT;
+    pz_ = COM_HEIGHT-(Lap + Calve - Length_Leg);
     com_y_swing = 0;
     rightfoot_shift_z = 0;
 }

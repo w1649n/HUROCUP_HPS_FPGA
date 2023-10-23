@@ -372,9 +372,9 @@ void InverseKinematic::initial_parameters(){
 	Parameters.X_Swing_Range = 1;     //cm
 	Parameters.Y_Swing_Range = 5.5;  //3   //cm
 	Parameters.COM_Height = COM_HEIGHT;     //cm//////	21.7
-	Parameters.l1 = 12.5;//10.2;             //cm Upper	10th: 12.5 11st: 10.2 robotcup: 14
-	Parameters.l2 = 12.5;//10.2;             //cm Down	10th: 12.5 11st: 10.4 robotcup: 14
-	//Parameters.R_X_Offset = 2.5;      //cm -5
+	Parameters.l1 = Lap;			//10.2;             //cm Upper	10th: 12.5 11st: 10.2 robotcup: 14
+	Parameters.l2 = Calve;			//10.2;             //cm Down	10th: 12.5 11st: 10.4 robotcup: 14
+	//Parameters.R_X_Offset = 2.5;  //cm -5
 	Parameters.R_X_Offset = 0;      //cm -5/////////////////////////////////////
 	Parameters.R_Y_Offset = 0;        //cm -1.5  4.3
 	Parameters.R_Z_Offset = 0;        //cm

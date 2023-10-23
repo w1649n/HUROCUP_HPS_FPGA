@@ -152,6 +152,8 @@ void ZMPProcess::digital2KGProcess()
     map_zmp.find("D_zmp_y")->second.push_back(ZMP.feet_pos.x);
     map_zmp.find("D_force")->second.push_back(sensor_digital_);
 
+	cout << "zmplx:" <<ZMP.left_pos.x <<endl
+	     << "zmply:" <<ZMP.left_pos.y <<endl;
 }
 
 void ZMPProcess::setpSensorDataOffset(void *origen_sensor_data)

@@ -63,10 +63,10 @@ using namespace std;
 #define DOUBLE_FEET_BALANCE_POINT_Y	4.5	//4.5 cm
 #define SINGLE_FOOT_WEIGHT_FAR_Y	3.1	//3.1  5.5
 #define SINGLE_FOOT_WEIGHT_NEAR_Y	1.5	//1.5 cm 
-#define SINGLE_FOOT_WEIGHT_X		4.15	//4.4 cm
+#define SINGLE_FOOT_WEIGHT_X		5.5	//4.4 cm
 
 #define RIGHT_PRESS_SHIFT	4
-#define SINGLE_FOOT_WEIGHT_EQUAL_Y	2.75
+#define SINGLE_FOOT_WEIGHT_EQUAL_Y	4.325
 ///////////////////////////////////////////////////////////
 
 //////////////////////for Fall down & Get up/////////////////////////////

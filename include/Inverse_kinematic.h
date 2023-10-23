@@ -56,6 +56,8 @@
 #define COM_HEIGHT 27.5//28.8//24.3//26.9
 #define Length_Pelvis 9//8.7//8.7
 #define Length_Leg 23.5 //17 //20.4
+#define Lap     12.5
+#define Calve   12.5
 
 #define STAND_OFFSET_RX 0//-2.8
 #define STAND_OFFSET_RY 0//-0.3
