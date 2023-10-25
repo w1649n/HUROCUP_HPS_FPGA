@@ -75,7 +75,7 @@ int main()
 		/*---讀取步態資訊---*/
 		walkinggait.load_parameter();
 		walkinggait.load_walkdata();
-		/*-----------------*/ 
+		/*-----------------*/
 		/*---獲取當前步態狀態(走OR停下)---*/
 		walkinggait.calculate_point_trajectory();
 		/*---------------------*/
@@ -93,29 +93,29 @@ int main()
  
 		balance.get_sensor_value();
 		/*zmp測試*/
-		if (zmp_first_time)
-		{
-			gettimeofday(&zmp_start, NULL);
-			zmp_first_time = false;
-		}
-			gettimeofday(&zmp_end, NULL);
+		// if (zmp_first_time)
+		// {
+		// 	gettimeofday(&zmp_start, NULL);
+		// 	zmp_first_time = false;
+		// }
+		// 	gettimeofday(&zmp_end, NULL);
 		
 		 
-		zmp_timer = (double)(1000000.0 * (zmp_end.tv_sec - zmp_start.tv_sec) + (zmp_end.tv_usec - zmp_start.tv_usec));
+		// zmp_timer = (double)(1000000.0 * (zmp_end.tv_sec - zmp_start.tv_sec) + (zmp_end.tv_usec - zmp_start.tv_usec));
 
-		if (zmp_timer>=1000000.0)//one second
-		{
-			balance.ZMP_process->getZMPValue();
-			zmp_first_time = true;
-			zmp_count++;
-		}
+		// if (zmp_timer>=1000000.0)//one second
+		// {
+		// 	balance.ZMP_process->getZMPValue();
+		// 	zmp_first_time = true;
+		// 	zmp_count++;
+		// }
 
-		if (zmp_count == 30)
-		{
-			balance.ZMP_process->saveData();
-			zmp_count = 0;
-		}
-		usleep(500 * 1000);
+		// if (zmp_count == 30)
+		// {
+		// 	balance.ZMP_process->saveData();
+		// 	zmp_count = 0;
+		// }
+		// usleep(50 * 1000);
 		/*-----*/
 
 		/*

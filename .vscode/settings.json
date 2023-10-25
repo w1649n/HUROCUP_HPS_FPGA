@@ -15,6 +15,12 @@
         "rmotor.h": "c",
         "data_txt.h": "c",
         "feedback_control.h": "c",
-        "walking_balance.h": "c"
+        "walking_balance.h": "c",
+        "ostream": "c",
+        "cmath": "c",
+        "format": "c",
+        "list": "c",
+        "vector": "c",
+        "xstring": "c"
     }
 }

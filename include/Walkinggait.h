@@ -13,12 +13,15 @@
 #include <iostream>
 #include <fstream>
 #include <sys/time.h>
+#include <Eigen/Dense>
 
 #include "Feedback_Motor.h"
 #include "Initial.h"
 #include "WalkingCycle.h"
 #include "WalkingTrajectory.h"
 #include "KickingGait.h"
+
+using namespace Eigen;
 // #include <std_msgs/String.h>
 
 #define WALKING_INTERVAL 30000.0   //30 ms
@@ -51,11 +54,13 @@ public:
     void initialize();
     void readWalkData();
     void readWalkParameter();
+    void readDSPParameter();
     void resetParameter();
     void process();
-    void slow_step();
+    void LC_walking();
     void single();
     void LC();
+    void LC_dsp();
     void final_step();
     void coordinate_transformation();
     void coordinate_offset();
@@ -76,6 +81,15 @@ public:
     double wFootTheta(const double theta, bool reverse, const double t, const double T, const double T_DSP);
     double wFootPositionZUP(const double height, const double t, const double T, const double T_DSP, const int step, const int board_step, const double board_height);
 
+    /* DSP */
+    double WLIPM_com_X1(double L1, double K1, double t, double Tc);
+    double WLIPM_com_X2(double L2,double L1, double K2, double K1, double t, double Tc, double t1);
+    double WLIPM_com_X3(double L3,double L2, double K3, double K2, double t, double Tc, double t2);
+    double DSP_X_velocity_0(double X0,double Xt, double t, double Tc, double X1T, double X2T, double X3T);
+    double DSP_X_velocity_1(double L1, double K1, double t, double Tc);
+    double DSP_X_velocity_2(double L2,double L1, double K2, double K1, double t, double Tc, double t1);
+    double DSP_X_velocity_3(double L3,double L2, double K3, double K2, double t, double Tc, double t2);
+    /* ---*/
     /* foot force */
     double wForceDifferenceControl(const double t, const double T, const double T_DSP);
     double Z_ctrl_;
@@ -90,11 +104,13 @@ public:
     void saveData();
 
 // private:
+    Matrix<double, 3, 3> cruise_command;
+    Matrix<double, 3, 2> pre_cruise_command;
+
     bool is_parameter_load_;
     bool ready_to_stop_;
     bool delay_push_;
     bool push_data_;
-    bool slow_step_flag_ = false;
     int count;
     double step_times,first_change_foot_time;
     float rightfoot_shift_z,com_y_swing;
@@ -106,7 +122,7 @@ public:
     int g_;
     double T_DSP_;
     int step_, left_step_, right_step_;
-    double TT_, t_,Ts;
+    double TT_, t_,Ts,t_now;
     double Tc_;
     double step_length_, width_size_, lift_height_, base_x, now_width_, width_x, width_y;
     double theta_, var_theta_, abs_theta_, last_theta_, last_abs_theta_, single_var_theta_;
@@ -123,13 +139,41 @@ public:
     double vx0_, vy0_, px_, py_, pz_,py_u,px_u;
     double lpx_, rpx_, lpy_, rpy_, lpz_, rpz_, lpt_, rpt_;
     double foot_hight, board_hight, c_hight;
-    // double COM_HEIGHT = 26.5;
+    double new_com;
     int cnt = 0;
     //for stepping
     double Control_Step_length_X_,Control_Step_length_Y_;
     bool Stepout_flag_X_,Stepout_flag_Y_;
     int Step_Count_;    
     // double test_v0_save;
+
+    /*DSP*/
+    double t1, t2; //DSP
+    double movingZMP = 0.2;
+    double A, B, ZMPx,ZMPy;
+    double a,aa1,aa2,d1,d2;
+
+    double X1 = 0;
+    double X2 = 0;
+    double X3 = 0;
+    double Y1 = 0;
+    double Y2 = 0;
+    double Y3 = 0;
+    double VX1 = 0;
+    double VX2 = 0;
+    double VX3 = 0;
+    double VY1 = 0;
+    double VY2 = 0;
+    double VY3 = 0;
+
+    double L1,L2,L3;
+    double K1,K2,K3; 
+
+    double Y1T,Y2T,Y3T,dY0;
+    double X1T,X2T,X3T,dX0;
+    /**/
+    double COM_rho_Z,com_z;
+    /**/
 
     bool plot_once_, if_finish_;
     
